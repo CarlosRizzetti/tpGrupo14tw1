@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:fragment="layout(content, header_left, header_center, header_right)">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>MCD Vencimientos</title>
+    <!-- Asegurate de que la consola de Tailwind esté corriendo para generar este archivo -->
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+
+<!-- Corregido: Espacio antes de 'flex' para que Tailwind reconozca las clases -->
+<body class="antialiased overflow-hidden"> <!-- Solo un body -->
+
+<div id="app" class="tema-cocina flex flex-col h-screen bg-puesto-app">
+
+    <!-- HEADER: Altura fija -->
+    <header class="h-20 bg-puesto-header text-puesto-header-text p-4 shadow-xl flex justify-between items-center z-20 shrink-0">
+        <div class="flex items-center min-w-[200px]">
+            <div th:replace="${header_left} ?: ~{::logo_default}"></div>
+        </div>
+        <div class="text-center flex-grow">
+            <div th:replace="${header_center}"></div>
+        </div>
+        <div class="flex items-center justify-end min-w-[200px]">
+            <div th:replace="${header_right}"></div>
+        </div>
+    </header>
+
+    <!-- MAIN: Ocupa el resto del espacio exacto -->
+    <main class="flex-grow overflow-y-auto">
+        <!-- Quitamos el div extra que rodeaba al replace -->
+        <div th:replace="${content}"></div>
+    </main>
+
+</div>
+    <!-- DEFINICIÓN DEL LOGO POR DEFECTO (Solo para uso interno del Layout) -->
+    <div th:fragment="logo_default" th:remove="tag">
+        <a th:href="@{/}" class="hover:opacity-90 transition-opacity flex flex-col">
+            <h1 class="text-2xl font-black tracking-tighter uppercase italic leading-none">
+                MCD <span class="text-puesto-btn">Vencimientos</span>
+            </h1>
+            <span class="text-[9px] font-medium opacity-70 uppercase tracking-[0.2em] ml-0.5">Control de Calidad</span>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

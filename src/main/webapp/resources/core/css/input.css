@@ -1,0 +1,64 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    /* Tema Cocina */
+    .tema-cocina {
+        --bg-app: #f3f4f6;
+        --bg-header: #DA291C;
+        --text-header: #ffffff;
+        --btn-bg: #FFC72C;
+        --btn-text: #27251F;
+        --btn-border: #E39F00;
+        --bg-puesto-soft: #fff1f0;
+    }
+
+    /* Tema McCafé */
+    .tema-mccafe {
+        --bg-app: #4B3621;
+        --bg-header: #1a120b;
+        --text-header: #d6c0a1;
+        --btn-bg: #F5EDCB;
+        --btn-text: #4B3621;
+        --btn-border: #C2A878;
+        --bg-puesto-soft: #fdf8f3;
+    }
+
+    /* Tema Isla/Postres */
+    .tema-isla {
+        --bg-app: #ecfeff; /* bg-cyan-50 */
+        --bg-header: #ec4899; /* bg-pink-500 */
+        --text-header: #ffffff;
+        --btn-bg: #fdf2f8;
+        --btn-text: #db2777; /* text-pink-600 */
+        --btn-border: #f9a8d4; /* border-cyan-300 */
+        --bg-puesto-soft: #f0faff;
+    }
+
+    .tema-servicio {
+        --bg-app: #e2e8f0;    /* bg-slate-200 */
+        --bg-header: #1d4ed8; /* bg-blue-700 */
+        --text-header: #ffffff;
+        --btn-bg: #f0f9ff;
+        --btn-text: #1e3a8a;  /* text-blue-900 */
+        --btn-border: #bae6fd;/* border-blue-200 */
+        --icon-color: #60a5fa;/* text-blue-400 */
+        --btn-hover: #eff6ff; /* hover:bg-blue-50 */
+    }
+
+    .bg-puesto-soft {
+        background-color: var(--bg-puesto-soft);
+    }
+}
+@layer utilities {
+    @keyframes success-flash {
+        0% { background-color: transparent; }
+        50% { background-color: #dcfce7; } /* bg-green-100 */
+        100% { background-color: transparent; }
+    }
+    .animate-success {
+        animation: success-flash 0.8s ease-in-out;
+    }
+}

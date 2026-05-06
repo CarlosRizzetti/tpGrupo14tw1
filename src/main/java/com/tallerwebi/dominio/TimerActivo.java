@@ -1,38 +1,45 @@
 package com.tallerwebi.dominio;
 
-import javax.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import javax.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 public class TimerActivo {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    private String groupId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private OffsetDateTime fechaCreacion = OffsetDateTime.now();
-    private OffsetDateTime fechaVencimiento;
-    private Boolean estaActivo;
-    private String estado;
+  private String groupId;
 
-    @ManyToOne
-    @JoinColumn(name = "id_producto")
-    private Producto producto;
+  private OffsetDateTime fechaCreacion = OffsetDateTime.now();
+  private OffsetDateTime fechaVencimiento;
+  private Boolean estaActivo;
+  private String estado;
 
-    @ManyToOne
-    @JoinColumn(name = "id_categoria")
-    private Categoria categoria;
+  @ManyToOne
+  @JoinColumn(name = "id_producto")
+  private Producto producto;
 
-    @ManyToOne
-    @JoinColumn(name = "id_regla_vencimiento")
-    private ReglaVencimiento reglaVencimiento;
+  @ManyToOne
+  @JoinColumn(name = "id_categoria")
+  private Categoria categoria;
 
-    @PrePersist
-    public void setGroupId(){
-        if(this.groupId == null || this.groupId.isEmpty()){
-            this.groupId = UUID.randomUUID().toString();
-        }
+  @ManyToOne
+  @JoinColumn(name = "id_regla_vencimiento")
+  private ReglaVencimiento reglaVencimiento;
+
+  @PrePersist
+  public void setGroupId() {
+    if (this.groupId == null || this.groupId.isEmpty()) {
+      this.groupId = UUID.randomUUID().toString();
     }
+  }
 }

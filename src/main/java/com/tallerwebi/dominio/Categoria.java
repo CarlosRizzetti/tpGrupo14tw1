@@ -1,37 +1,32 @@
 package com.tallerwebi.dominio;
 
-
-import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 public class Categoria {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String nombre;
-    @ManyToMany(mappedBy = "categorias")
-    private List<Producto> productos = new ArrayList<>();
+  private String icono;
+  private Boolean estaActiva;
+  private String nombre;
 
-    public Long getId() {
-        return id;
-    }
+  @ManyToMany(mappedBy = "categorias")
+  private List<Producto> productos = new ArrayList<>();
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-
-
+  public Categoria(String icono, Boolean estaActiva, String nombre) {
+    this.icono = icono;
+    this.nombre = nombre;
+    this.estaActiva = estaActiva;
+  }
 }
