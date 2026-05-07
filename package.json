@@ -7,6 +7,6 @@
     "postcss": "^8.4.35"
   },
   "scripts": {
-    "build-tw": "npx tailwindcss -i ./src/main/webapp/resources/css/input.css -o ./src/main/webapp/resources/css/style.css --minify"
+    "build-tw": "tailwindcss -i src/main/webapp/resources/core/css/input.css -o src/main/webapp/resources/core/css/app.css --minify"
   }
 }
