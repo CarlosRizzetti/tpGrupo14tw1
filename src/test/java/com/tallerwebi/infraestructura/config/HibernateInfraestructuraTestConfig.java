@@ -1,9 +1,12 @@
 package com.tallerwebi.infraestructura.config;
 
+import java.util.Arrays;
 import java.util.Properties;
 import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
@@ -12,6 +15,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableTransactionManagement
 public class HibernateInfraestructuraTestConfig {
+
+  @Autowired
+  private Environment env;
 
   @Bean
   public DataSource dataSource() {
@@ -43,6 +49,12 @@ public class HibernateInfraestructuraTestConfig {
     properties.setProperty("hibernate.show_sql", "true");
     properties.setProperty("hibernate.format_sql", "true");
     properties.setProperty("hibernate.hbm2ddl.auto", "create");
+
+    boolean isTestProfile = Arrays.asList(env.getActiveProfiles()).contains("test");
+    if (isTestProfile) {
+      properties.setProperty("hibernate.hbm2ddl.import_files", "no-file.sql");
+    }
+
     return properties;
   }
 }

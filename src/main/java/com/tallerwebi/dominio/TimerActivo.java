@@ -19,10 +19,29 @@ public class TimerActivo {
 
   private String groupId;
 
-  private OffsetDateTime fechaCreacion = OffsetDateTime.now();
+  private OffsetDateTime fechaCreacion;
   private OffsetDateTime fechaVencimiento;
   private Boolean estaActivo;
   private String estado;
+
+  public TimerActivo(
+    OffsetDateTime fechaCreacion,
+    OffsetDateTime fechaVencimiento,
+    String groupId
+  ) {
+    this.fechaCreacion = fechaCreacion;
+    this.fechaVencimiento = fechaVencimiento;
+    this.groupId = groupId;
+    this.estaActivo = true;
+    this.estado = "Activo";
+  }
+
+  public TimerActivo(OffsetDateTime fechaCreacion, OffsetDateTime fechaVencimiento) {
+    this.fechaCreacion = fechaCreacion;
+    this.fechaVencimiento = fechaVencimiento;
+    this.estaActivo = true;
+    this.estado = "Activo";
+  }
 
   @ManyToOne
   @JoinColumn(name = "id_producto")

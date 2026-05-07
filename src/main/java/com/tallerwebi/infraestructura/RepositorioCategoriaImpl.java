@@ -24,4 +24,8 @@ public class RepositorioCategoriaImpl implements RepositorioCategoria {
       .add(Restrictions.eq("estaActiva", true))
       .list();
   }
+
+  public void agregarNuevaCategoria(Categoria categoria) {
+    sessionFactory.getCurrentSession().save(categoria);
+  }
 }
