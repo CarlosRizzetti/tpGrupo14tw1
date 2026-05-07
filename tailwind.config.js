@@ -3,12 +3,21 @@ const defaultTheme = require('tailwindcss/defaultTheme');
 
 module.exports = {
   content: [
-    "../../../../java/com/tallerwebi/**/*.java",
+    "./src/main/java/com/tallerwebi/**/*.java",
     "./resources/**/*.blade.php",
     "./resources/**/*.js",
     "./resources/**/*.vue",
     "./app/Models/Category.php",
+    "./src/main/webapp/WEB-INF/views/jsp/**/*.jsp",
     "./src/main/webapp/WEB-INF/views/**/*.html"
+  ],
+  safelist: [
+    'tema-cocina',
+    'tema-mccafe',
+    'tema-isla',
+    'tema-servicio',
+    'bg-puesto-soft',
+    'animate-success'
   ],
   theme: {
     extend: {
