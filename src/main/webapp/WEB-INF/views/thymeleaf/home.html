@@ -36,7 +36,8 @@
 
       <!-- El contenido heredará los colores de 'categoria.tema' que pusimos arriba -->
       <div class="mb-4 text-puesto-accent">
-        <img th:src="@{/img/categorias/{file}(file=${categoria.icono})}"
+        <!-- Dejamos que Thymeleaf use directamente el valor de la BD -->
+        <img th:src="@{${categoria.icono}}"
              class="h-16 w-16 md:h-24 md:w-24 object-contain"
              alt="icono">
       </div>
