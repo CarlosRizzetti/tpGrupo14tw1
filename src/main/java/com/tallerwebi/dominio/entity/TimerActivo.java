@@ -1,4 +1,4 @@
-package com.tallerwebi.dominio;
+package com.tallerwebi.dominio.entity;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;

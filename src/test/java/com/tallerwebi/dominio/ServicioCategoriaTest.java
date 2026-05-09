@@ -6,7 +6,8 @@ import static org.mockito.Mockito.when;
 
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
-import com.tallerwebi.presentacion.DatosCategoria;
+import com.tallerwebi.dominio.services.ServicioCategoriaImpl;
+import com.tallerwebi.presentacion.dto.CategoriaDto;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,7 +30,7 @@ public class ServicioCategoriaTest {
     Categoria cocina = new Categoria("cocina.png", true, "cocina");
     List<Categoria> categorias = List.of(mccafe, servicio, cocina);
     when(this.repositorioCategoriaMock.obtenerTodasLasCategoriasActivas()).thenReturn(categorias);
-    List<DatosCategoria> categoriasActivas =
+    List<CategoriaDto> categoriasActivas =
       this.servicioCategoria.obtenerLasCategoriasParaElMenu();
     assertEquals(3, categoriasActivas.size());
   }

@@ -1,6 +1,6 @@
-package com.tallerwebi.infraestructura;
+package com.tallerwebi.repositorio;
 
-import com.tallerwebi.dominio.Categoria;
+import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import java.util.List;
 import org.hibernate.SessionFactory;

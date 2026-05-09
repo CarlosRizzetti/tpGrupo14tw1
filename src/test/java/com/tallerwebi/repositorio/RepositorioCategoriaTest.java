@@ -1,4 +1,4 @@
-package com.tallerwebi.infraestructura;
+package com.tallerwebi.repositorio;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.tallerwebi.dominio.Categoria;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
-import com.tallerwebi.infraestructura.config.HibernateInfraestructuraTestConfig;
+import com.tallerwebi.repositorio.config.HibernateInfraestructuraTestConfig;
 import java.util.List;
 import javax.transaction.Transactional;
 import org.hibernate.SessionFactory;

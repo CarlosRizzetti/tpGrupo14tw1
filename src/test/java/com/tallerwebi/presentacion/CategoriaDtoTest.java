@@ -5,31 +5,32 @@ import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.tallerwebi.dominio.Categoria;
+import com.tallerwebi.presentacion.dto.CategoriaDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class DatosCategoriaTest {
+public class CategoriaDtoTest {
 
   Categoria categoria;
-  DatosCategoria categoriaDTO;
+  CategoriaDto categoriaDTO;
 
   @BeforeEach
   public void init() {
     this.categoria = new Categoria("mccafe.png", true, "mccafe");
-    this.categoriaDTO = new DatosCategoria(categoria);
+    this.categoriaDTO = new CategoriaDto(categoria);
   }
 
   @Test
   public void queSeDefinaElTemaSegunElNombre() {
     assertThat(categoriaDTO.getTema(), equalToIgnoringCase("tema-mccafe"));
     Categoria categoriaServicio = new Categoria("servicio.png", true, "servicio");
-    DatosCategoria categoriaServicioDTO = new DatosCategoria(categoriaServicio);
+    CategoriaDto categoriaServicioDTO = new CategoriaDto(categoriaServicio);
     assertThat(categoriaServicioDTO.getTema(), equalToIgnoringCase("tema-servicio"));
     Categoria categoriaIsla = new Categoria("isla.png", true, "isla");
-    DatosCategoria categoriaIslaDTO = new DatosCategoria(categoriaIsla);
+    CategoriaDto categoriaIslaDTO = new CategoriaDto(categoriaIsla);
     assertThat(categoriaIslaDTO.getTema(), equalToIgnoringCase("tema-isla"));
     Categoria categoriaDefault = new Categoria("default.png", true, "default");
-    DatosCategoria categoriaDefaultDTO = new DatosCategoria(categoriaDefault);
+    CategoriaDto categoriaDefaultDTO = new CategoriaDto(categoriaDefault);
     assertThat(categoriaDefaultDTO.getTema(), equalToIgnoringCase("tema-cocina"));
   }
 

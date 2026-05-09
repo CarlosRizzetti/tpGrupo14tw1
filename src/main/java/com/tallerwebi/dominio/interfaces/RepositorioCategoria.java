@@ -1,6 +1,6 @@
 package com.tallerwebi.dominio.interfaces;
 
-import com.tallerwebi.dominio.Categoria;
+import com.tallerwebi.dominio.entity.Categoria;
 import java.util.List;
 
 public interface RepositorioCategoria {

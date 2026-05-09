@@ -1,4 +1,4 @@
-package com.tallerwebi.infraestructura.config;
+package com.tallerwebi.repositorio.config;
 
 import java.util.Arrays;
 import java.util.Properties;

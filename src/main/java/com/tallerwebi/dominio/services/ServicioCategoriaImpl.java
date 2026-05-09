@@ -1,8 +1,10 @@
-package com.tallerwebi.dominio;
+package com.tallerwebi.dominio.services;
 
+import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
-import com.tallerwebi.presentacion.DatosCategoria;
+import com.tallerwebi.presentacion.dto.CategoriaDto;
+
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
@@ -21,11 +23,11 @@ public class ServicioCategoriaImpl implements ServicioCategoria {
   }
 
   @Override
-  public List<DatosCategoria> obtenerLasCategoriasParaElMenu() {
+  public List<CategoriaDto> obtenerLasCategoriasParaElMenu() {
     List<Categoria> categorias = repositorioCategoria.obtenerTodasLasCategoriasActivas();
     return categorias
       .stream()
-      .map(categoria -> new DatosCategoria(categoria))
+      .map(categoria -> new CategoriaDto(categoria))
       .collect(Collectors.toList());
   }
 }

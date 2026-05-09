@@ -1,9 +1,9 @@
-package com.tallerwebi.presentacion;
+package com.tallerwebi.presentacion.dto;
 
-import com.tallerwebi.dominio.Categoria;
+import com.tallerwebi.dominio.entity.Categoria;
 import java.util.Locale;
 
-public class DatosCategoria {
+public class CategoriaDto {
 
   private Long id;
 
@@ -11,7 +11,7 @@ public class DatosCategoria {
   private String icono;
   private String tema;
 
-  public DatosCategoria(Categoria categoria) {
+  public CategoriaDto(Categoria categoria) {
     this.id = categoria.getId();
     this.nombre = categoria.getNombre();
     this.icono = categoria.getIcono();

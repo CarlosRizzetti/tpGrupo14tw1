@@ -1,7 +1,9 @@
-package com.tallerwebi.presentacion;
+package com.tallerwebi.presentacion.controller;
 
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import java.util.List;
+
+import com.tallerwebi.presentacion.dto.CategoriaDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -21,7 +23,7 @@ public class ControladorCategoria {
   @RequestMapping("/")
   public ModelAndView index() {
     ModelMap modelo = new ModelMap();
-    List<DatosCategoria> categorias = this.servicioCategoria.obtenerLasCategoriasParaElMenu();
+    List<CategoriaDto> categorias = this.servicioCategoria.obtenerLasCategoriasParaElMenu();
     modelo.put("categorias", categorias);
     return new ModelAndView("home", modelo);
   }

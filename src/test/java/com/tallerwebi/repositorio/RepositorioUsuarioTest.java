@@ -1,4 +1,4 @@
-package com.tallerwebi.infraestructura;
+package com.tallerwebi.repositorio;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.tallerwebi.dominio.Usuario;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
-import com.tallerwebi.infraestructura.config.HibernateInfraestructuraTestConfig;
+import com.tallerwebi.repositorio.config.HibernateInfraestructuraTestConfig;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
 import org.hibernate.SessionFactory;

@@ -1,9 +1,11 @@
-package com.tallerwebi.presentacion;
+package com.tallerwebi.presentacion.controller;
 
-import com.tallerwebi.dominio.Usuario;
+import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.interfaces.ServicioLogin;
 import javax.servlet.http.HttpServletRequest;
+
+import com.tallerwebi.presentacion.dto.LoginDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -25,18 +27,18 @@ public class ControladorLogin {
   @RequestMapping("/login")
   public ModelAndView irALogin() {
     ModelMap modelo = new ModelMap();
-    modelo.put("datosLogin", new DatosLogin());
+    modelo.put("datosLogin", new LoginDto());
     return new ModelAndView("login", modelo);
   }
 
   @RequestMapping(path = "/validar-login", method = RequestMethod.POST)
   public ModelAndView validarLogin(
-    @ModelAttribute("datosLogin") DatosLogin datosLogin,
+    @ModelAttribute("datosLogin") LoginDto loginDto,
     HttpServletRequest request
   ) {
     Usuario usuarioBuscado = servicioLogin.consultarUsuario(
-      datosLogin.getEmail(),
-      datosLogin.getPassword()
+      loginDto.getEmail(),
+      loginDto.getPassword()
     );
     if (usuarioBuscado != null) {
       request.getSession().setAttribute("ROL", usuarioBuscado.getRol());

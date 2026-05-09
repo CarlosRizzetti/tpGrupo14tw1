@@ -1,5 +1,6 @@
-package com.tallerwebi.dominio;
+package com.tallerwebi.dominio.services;
 
+import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import com.tallerwebi.dominio.interfaces.ServicioLogin;

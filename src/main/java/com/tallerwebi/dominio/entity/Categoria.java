@@ -1,4 +1,4 @@
-package com.tallerwebi.dominio;
+package com.tallerwebi.dominio.entity;
 
 import java.util.ArrayList;
 import java.util.List;
