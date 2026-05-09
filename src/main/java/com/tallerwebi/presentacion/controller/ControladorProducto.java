@@ -1,5 +1,6 @@
 package com.tallerwebi.presentacion.controller;
 
+import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
@@ -66,6 +68,14 @@ public class ControladorProducto {
   @RequestMapping("/producto/exito")
   public ModelAndView exito() {
     return new ModelAndView("producto/exito");
+  }
+
+  @RequestMapping("/category/{id}/products")
+  public ModelAndView mostrarProductosPorCategoria(@PathVariable Long id) {
+    List<Producto> productos = servicioProducto.obtenerProductosPorCategoria(id);
+    ModelMap modelo = new ModelMap();
+    modelo.put("productos", productos);
+    return new ModelAndView("productos", modelo);
   }
 
   // Verificar que el usuario en sesión sea Admin
