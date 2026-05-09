@@ -25,6 +25,7 @@ public class RepositorioCategoriaImpl implements RepositorioCategoria {
       .list();
   }
 
+  @Override
   public void agregarNuevaCategoria(Categoria categoria) {
     sessionFactory.getCurrentSession().save(categoria);
   }
