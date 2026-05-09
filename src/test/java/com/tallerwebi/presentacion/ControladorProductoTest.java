@@ -10,6 +10,9 @@ import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import java.util.Collections;
 import javax.servlet.http.HttpSession;
+
+import com.tallerwebi.presentacion.controller.ControladorProducto;
+import com.tallerwebi.presentacion.dto.ProductoDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.servlet.ModelAndView;
@@ -62,7 +65,7 @@ public class ControladorProductoTest {
     ModelAndView mav = controladorProducto.mostrarFormulario(sessionMock);
 
     // validacion
-    assertThat(mav.getModel().get("datosProducto"), instanceOf(DatosProducto.class));
+    assertThat(mav.getModel().get("datosProducto"), instanceOf(ProductoDto.class));
   }
 
   @Test
@@ -96,7 +99,7 @@ public class ControladorProductoTest {
   @Test
   public void crearProductoExitosoDeberiaRedirigirAExito() {
     // preparacion
-    DatosProducto datos = new DatosProducto();
+    ProductoDto datos = new ProductoDto();
 
     // ejecucion
     ModelAndView mav = controladorProducto.crearProducto(datos, sessionMock);
@@ -109,7 +112,7 @@ public class ControladorProductoTest {
   @Test
   public void crearProductoConErrorDeValidacionDeberiaVolverAlFormulario() {
     // preparacion
-    DatosProducto datos = new DatosProducto();
+    ProductoDto datos = new ProductoDto();
     doThrow(new IllegalArgumentException("El nombre del producto es obligatorio"))
       .when(servicioProductoMock)
       .crearProducto(datos);
@@ -131,7 +134,7 @@ public class ControladorProductoTest {
     when(sessionMock.getAttribute("usuario")).thenReturn(null);
 
     // ejecucion
-    ModelAndView mav = controladorProducto.crearProducto(new DatosProducto(), sessionMock);
+    ModelAndView mav = controladorProducto.crearProducto(new ProductoDto(), sessionMock);
 
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/acceso-denegado"));
