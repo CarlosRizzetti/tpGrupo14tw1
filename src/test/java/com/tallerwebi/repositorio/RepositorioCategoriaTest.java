@@ -4,7 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.tallerwebi.dominio.Categoria;
+import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.repositorio.config.HibernateInfraestructuraTestConfig;
 import java.util.List;

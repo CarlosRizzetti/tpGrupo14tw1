@@ -4,7 +4,6 @@ import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;

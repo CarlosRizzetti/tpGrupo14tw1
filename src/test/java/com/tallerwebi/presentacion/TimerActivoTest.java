@@ -2,7 +2,7 @@ package com.tallerwebi.presentacion;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.tallerwebi.dominio.TimerActivo;
+import com.tallerwebi.dominio.entity.TimerActivo;
 import com.tallerwebi.repositorio.config.HibernateInfraestructuraTestConfig;
 import java.time.OffsetDateTime;
 import javax.transaction.Transactional;

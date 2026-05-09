@@ -3,9 +3,8 @@ package com.tallerwebi.presentacion.controller;
 import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.interfaces.ServicioLogin;
-import javax.servlet.http.HttpServletRequest;
-
 import com.tallerwebi.presentacion.dto.LoginDto;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;

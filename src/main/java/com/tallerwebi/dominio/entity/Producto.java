@@ -18,8 +18,7 @@ public class Producto {
   private Long id;
 
   private String nombre;
-
-  private Boolean esta_activo;
+  private Boolean estaActivo;
 
   @ManyToMany
   @JoinTable(
@@ -28,4 +27,7 @@ public class Producto {
     inverseJoinColumns = @JoinColumn(name = "id_categoria")
   )
   private List<Categoria> categorias = new ArrayList<>();
+
+  @OneToOne(mappedBy = "producto", cascade = CascadeType.ALL)
+  private ReglaVencimiento reglaVencimiento;
 }
