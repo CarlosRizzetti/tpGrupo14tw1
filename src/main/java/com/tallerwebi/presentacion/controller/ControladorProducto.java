@@ -3,10 +3,9 @@ package com.tallerwebi.presentacion.controller;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
+import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.List;
 import javax.servlet.http.HttpSession;
-
-import com.tallerwebi.presentacion.dto.ProductoDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -46,10 +45,7 @@ public class ControladorProducto {
 
   // POST — procesar el formulario
   @RequestMapping(value = "/producto/nuevo", method = RequestMethod.POST)
-  public ModelAndView crearProducto(
-    @ModelAttribute ProductoDto productoDto,
-    HttpSession session
-  ) {
+  public ModelAndView crearProducto(@ModelAttribute ProductoDto productoDto, HttpSession session) {
     if (!esAdministrador(session)) {
       return new ModelAndView("redirect:/acceso-denegado");
     }

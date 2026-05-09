@@ -8,11 +8,10 @@ import static org.mockito.Mockito.*;
 import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
-import java.util.Collections;
-import javax.servlet.http.HttpSession;
-
 import com.tallerwebi.presentacion.controller.ControladorProducto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
+import java.util.Collections;
+import javax.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.servlet.ModelAndView;
