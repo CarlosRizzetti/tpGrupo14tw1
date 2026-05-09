@@ -1,4 +1,4 @@
-package com.tallerwebi.presentacion;
+package com.tallerwebi.presentacion.dto;
 
 import java.util.List;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class DatosProducto {
+public class ProductoDto {
 
   private String nombre;
   private List<Long> categoriasIds; // IDs de las categorías seleccionadas

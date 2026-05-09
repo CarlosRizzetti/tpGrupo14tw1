@@ -1,7 +1,7 @@
 package com.tallerwebi.dominio.interfaces;
 
-import com.tallerwebi.presentacion.DatosProducto;
+import com.tallerwebi.presentacion.dto.ProductoDto;
 
 public interface ServicioProducto {
-  void crearProducto(DatosProducto datos);
+  void crearProducto(ProductoDto datos);
 }

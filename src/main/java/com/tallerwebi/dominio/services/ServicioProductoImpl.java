@@ -1,11 +1,11 @@
-package com.tallerwebi.dominio;
+package com.tallerwebi.dominio.services;
 
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.interfaces.RepositorioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
-import com.tallerwebi.presentacion.DatosProducto;
+import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class ServicioProductoImpl implements ServicioProducto {
   }
 
   @Override
-  public void crearProducto(DatosProducto datos) {
+  public void crearProducto(ProductoDto datos) {
     validar(datos);
 
     // Traer categorías desde la BD
@@ -51,12 +51,12 @@ public class ServicioProductoImpl implements ServicioProducto {
     repositorioProducto.guardar(producto);
   }
 
-  private void validar(DatosProducto datos) {
+  private void validar(ProductoDto datos) {
     validarProducto(datos);
     validarReglaVencimiento(datos);
   }
 
-  private void validarProducto(DatosProducto datos) {
+  private void validarProducto(ProductoDto datos) {
     if (datos.getNombre() == null || datos.getNombre().isBlank()) {
       throw new IllegalArgumentException("El nombre del producto es obligatorio");
     }
@@ -65,7 +65,7 @@ public class ServicioProductoImpl implements ServicioProducto {
     }
   }
 
-  private void validarReglaVencimiento(DatosProducto datos) {
+  private void validarReglaVencimiento(ProductoDto datos) {
     if (datos.getUbicacion() == null || datos.getUbicacion().isBlank()) {
       throw new IllegalArgumentException("La ubicación es obligatoria");
     }
@@ -75,7 +75,7 @@ public class ServicioProductoImpl implements ServicioProducto {
     validarDescongelamiento(datos);
   }
 
-  private void validarDescongelamiento(DatosProducto datos) {
+  private void validarDescongelamiento(ProductoDto datos) {
     if (Boolean.TRUE.equals(datos.getTieneDescongelamiento())) {
       if (datos.getDescongelamientoMinutos() == null || datos.getDescongelamientoMinutos() <= 0) {
         throw new IllegalArgumentException("Los minutos de descongelamiento son obligatorios");

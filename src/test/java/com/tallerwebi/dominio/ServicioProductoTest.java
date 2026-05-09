@@ -9,7 +9,8 @@ import static org.mockito.Mockito.*;
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.interfaces.RepositorioProducto;
-import com.tallerwebi.presentacion.DatosProducto;
+import com.tallerwebi.dominio.services.ServicioProductoImpl;
+import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.Arrays;
 import java.util.Collections;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +32,7 @@ public class ServicioProductoTest {
   @Test
   public void crearProductoConDatosValidosDeberiaGuardarEnLaBD() {
     // preparacion
-    DatosProducto datos = datoValidos();
+    ProductoDto datos = datoValidos();
     when(repositorioProductoMock.obtenerCategoriasPorIds(datos.getCategoriasIds()))
       .thenReturn(Arrays.asList(new Categoria()));
 
@@ -45,7 +46,7 @@ public class ServicioProductoTest {
   @Test
   public void crearProductoSinDescongelamientoDeberiaGuardarCorrectamente() {
     // preparacion
-    DatosProducto datos = datoValidos();
+    ProductoDto datos = datoValidos();
     datos.setTieneDescongelamiento(false);
     datos.setDescongelamientoMinutos(null);
     when(repositorioProductoMock.obtenerCategoriasPorIds(datos.getCategoriasIds()))
@@ -63,7 +64,7 @@ public class ServicioProductoTest {
   @Test
   public void crearProductoSinNombreDeberiaLanzarExcepcion() {
     // preparacion
-    DatosProducto datos = datoValidos();
+    ProductoDto datos = datoValidos();
     datos.setNombre(null);
 
     // ejecucion y validacion
@@ -77,7 +78,7 @@ public class ServicioProductoTest {
   @Test
   public void crearProductoConNombreVacioDeberiaLanzarExcepcion() {
     // preparacion
-    DatosProducto datos = datoValidos();
+    ProductoDto datos = datoValidos();
     datos.setNombre("   ");
 
     // ejecucion y validacion
@@ -91,7 +92,7 @@ public class ServicioProductoTest {
   @Test
   public void crearProductoSinCategoriasDeberiaLanzarExcepcion() {
     // preparacion
-    DatosProducto datos = datoValidos();
+    ProductoDto datos = datoValidos();
     datos.setCategoriasIds(Collections.emptyList());
 
     // ejecucion y validacion
@@ -107,7 +108,7 @@ public class ServicioProductoTest {
   @Test
   public void crearProductoSinUbicacionDeberiaLanzarExcepcion() {
     // preparacion
-    DatosProducto datos = datoValidos();
+    ProductoDto datos = datoValidos();
     datos.setUbicacion(null);
 
     // ejecucion y validacion
@@ -121,7 +122,7 @@ public class ServicioProductoTest {
   @Test
   public void crearProductoConDuracionCeroDeberiaLanzarExcepcion() {
     // preparacion
-    DatosProducto datos = datoValidos();
+    ProductoDto datos = datoValidos();
     datos.setDuracionMinutos(0);
 
     // ejecucion y validacion
@@ -137,7 +138,7 @@ public class ServicioProductoTest {
   @Test
   public void crearProductoConDescongelamientoActivoSinMinutosDeberiaLanzarExcepcion() {
     // preparacion
-    DatosProducto datos = datoValidos();
+    ProductoDto datos = datoValidos();
     datos.setTieneDescongelamiento(true);
     datos.setDescongelamientoMinutos(null);
 
@@ -155,7 +156,7 @@ public class ServicioProductoTest {
   @Test
   public void crearProductoConDescongelamientoActivoConMinutosCeroDeberiaLanzarExcepcion() {
     // preparacion
-    DatosProducto datos = datoValidos();
+    ProductoDto datos = datoValidos();
     datos.setTieneDescongelamiento(true);
     datos.setDescongelamientoMinutos(0);
 
@@ -172,8 +173,8 @@ public class ServicioProductoTest {
 
   // --- Helper ---
 
-  private DatosProducto datoValidos() {
-    DatosProducto datos = new DatosProducto();
+  private ProductoDto datoValidos() {
+    ProductoDto datos = new ProductoDto();
     datos.setNombre("Milanesa");
     datos.setCategoriasIds(Arrays.asList(1L, 2L));
     datos.setUbicacion("Freezer A");
