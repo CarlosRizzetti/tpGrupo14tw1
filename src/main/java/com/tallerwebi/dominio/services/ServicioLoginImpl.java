@@ -2,6 +2,7 @@ package com.tallerwebi.dominio.services;
 
 import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
+import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import com.tallerwebi.dominio.interfaces.ServicioLogin;
 import javax.transaction.Transactional;
@@ -20,19 +21,22 @@ public class ServicioLoginImpl implements ServicioLogin {
   }
 
   @Override
-  public Usuario consultarUsuario(String email, String password) {
-    return repositorioUsuario.buscarUsuario(email, password);
+  public Usuario consultarUsuario(String email, String password) throws UsuarioInactivo {
+    Usuario usuario = repositorioUsuario.buscarUsuario(email, password);
+    if (usuario != null && !usuario.getActivo()) {
+      throw new UsuarioInactivo();
+    }
+    return usuario;
   }
 
   @Override
   public void registrar(Usuario usuario) throws UsuarioExistente {
-    Usuario usuarioEncontrado = repositorioUsuario.buscarUsuario(
-      usuario.getEmail(),
-      usuario.getPassword()
-    );
+    Usuario usuarioEncontrado = repositorioUsuario.buscar(usuario.getEmail());
     if (usuarioEncontrado != null) {
       throw new UsuarioExistente();
     }
+    usuario.setRol("USER");
+    usuario.setActivo(true);
     repositorioUsuario.guardar(usuario);
   }
 }

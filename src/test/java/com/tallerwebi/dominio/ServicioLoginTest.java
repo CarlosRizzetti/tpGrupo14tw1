@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
+import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import com.tallerwebi.dominio.interfaces.ServicioLogin;
 import com.tallerwebi.dominio.services.ServicioLoginImpl;
@@ -25,11 +26,12 @@ public class ServicioLoginTest {
   }
 
   @Test
-  public void consultarUsuarioDeberiaLlamarAlRepositorio() {
+  public void consultarUsuarioDeberiaLlamarAlRepositorio() throws UsuarioInactivo {
     // preparacion
     String email = "test@test.com";
     String password = "password";
     Usuario usuarioEsperado = new Usuario();
+    usuarioEsperado.setActivo(true);
     when(this.repositorioUsuarioMock.buscarUsuario(email, password)).thenReturn(usuarioEsperado);
 
     // ejecucion
@@ -41,13 +43,25 @@ public class ServicioLoginTest {
   }
 
   @Test
+  public void consultarUsuarioInactivoDeberiaLanzarExcepcion() {
+    // preparacion
+    String email = "test@test.com";
+    String password = "password";
+    Usuario usuarioEsperado = new Usuario();
+    usuarioEsperado.setActivo(false);
+    when(this.repositorioUsuarioMock.buscarUsuario(email, password)).thenReturn(usuarioEsperado);
+
+    // ejecucion y validacion
+    assertThrows(UsuarioInactivo.class, () -> this.servicioLogin.consultarUsuario(email, password));
+  }
+
+  @Test
   public void registrarUsuarioSiNoExisteDeberiaGuardarlo() throws UsuarioExistente {
     // preparacion
     Usuario usuario = new Usuario();
     usuario.setEmail("nuevo@test.com");
     usuario.setPassword("123");
-    when(this.repositorioUsuarioMock.buscarUsuario(usuario.getEmail(), usuario.getPassword()))
-      .thenReturn(null);
+    when(this.repositorioUsuarioMock.buscar(usuario.getEmail())).thenReturn(null);
 
     // ejecucion
     this.servicioLogin.registrar(usuario);
@@ -62,8 +76,7 @@ public class ServicioLoginTest {
     Usuario usuario = new Usuario();
     usuario.setEmail("existe@test.com");
     usuario.setPassword("123");
-    when(this.repositorioUsuarioMock.buscarUsuario(usuario.getEmail(), usuario.getPassword()))
-      .thenReturn(new Usuario());
+    when(this.repositorioUsuarioMock.buscar(usuario.getEmail())).thenReturn(new Usuario());
 
     // ejecucion y validacion
     assertThrows(UsuarioExistente.class, () -> this.servicioLogin.registrar(usuario));

@@ -19,7 +19,7 @@ public class ControladorCategoria {
     this.servicioCategoria = servicioCategoria;
   }
 
-  @RequestMapping("/")
+  @RequestMapping("/home")
   public ModelAndView index() {
     ModelMap modelo = new ModelMap();
     List<CategoriaDto> categorias = this.servicioCategoria.obtenerLasCategoriasParaElMenu();

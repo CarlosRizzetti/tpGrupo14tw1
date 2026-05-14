@@ -3,9 +3,19 @@ package com.tallerwebi;
 import com.tallerwebi.config.DatabaseInitializationConfig;
 import com.tallerwebi.config.HibernateConfig;
 import com.tallerwebi.config.SpringWebConfig;
+import java.util.Collections;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.SessionTrackingMode;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 public class MyServletInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+  @Override
+  public void onStartup(ServletContext servletContext) throws ServletException {
+    super.onStartup(servletContext);
+    servletContext.setSessionTrackingModes(Collections.singleton(SessionTrackingMode.COOKIE));
+  }
 
   // services and data sources
   @Override
