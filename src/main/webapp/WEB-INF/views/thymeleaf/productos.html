@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app :: layout(~{::content}, _, ~{::header_center}, ~{::header_right}, ${categoria != null ? categoria.tema : 'tema-cocina'})}">
+<head>
+    <title>Productos</title>
+</head>
+<body>
+
+<div th:fragment="header_center">
+    <span class="text-puesto-header-text font-bold uppercase tracking-widest"
+          th:text="${categoria != null ? 'Productos de ' + categoria.nombre : 'Seleccione Producto'}">
+        Seleccione Producto
+    </span>
+</div>
+
+<div th:fragment="header_right">
+    <a th:href="@{/}"
+       class="hidden md:flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg border border-white/20 transition text-xs font-bold uppercase tracking-wider">
+        Volver a Categorías
+    </a>
+    <p class="text-white">Cantidad de productos: <span th:text="${#lists.size(productos)}"></span></p>
+</div>
+
+<div th:fragment="content" class="p-6">
+
+    <div class="mb-6 md:hidden">
+        <a th:href="@{/}" class="inline-flex items-center px-4 py-2 bg-puesto-btn text-puesto-btn-text text-sm font-bold uppercase rounded-lg border border-puesto-btn-border shadow">
+            &laquo; Volver
+        </a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(productos)}" class="text-center p-10 mt-10 bg-white/5 rounded-xl border border-white/10">
+        <p class="text-xl md:text-2xl text-white font-bold opacity-70">No hay productos en esta categoría.</p>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(productos)}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pb-10">
+        <a th:each="producto : ${productos}"
+           th:href="@{/product/{id}(id=${producto.id})}"
+           class="group relative flex flex-col items-center justify-center p-6 bg-puesto-btn text-puesto-btn-text border-b-[6px] border-puesto-btn-border rounded-3xl shadow-md hover:shadow-xl transition-all duration-200 hover:-translate-y-1 min-h-[160px]">
+
+            <span class="text-2xl md:text-3xl font-bold uppercase tracking-tight text-center"
+                  th:text="${producto.nombre}">
+            </span>
+
+            <div class="w-10 h-1 md:w-16 md:h-1.5 mt-4 rounded-full opacity-50 bg-puesto-btn-border"></div>
+        </a>
+    </div>
+</div>
+</body>
+</html>

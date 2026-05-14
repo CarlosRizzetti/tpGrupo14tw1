@@ -29,4 +29,9 @@ public class RepositorioCategoriaImpl implements RepositorioCategoria {
   public void agregarNuevaCategoria(Categoria categoria) {
     sessionFactory.getCurrentSession().save(categoria);
   }
+
+  @Override
+  public Categoria buscarPorId(Long id) {
+    return sessionFactory.getCurrentSession().get(Categoria.class, id);
+  }
 }

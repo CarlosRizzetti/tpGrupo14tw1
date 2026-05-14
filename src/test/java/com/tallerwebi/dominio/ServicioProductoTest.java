@@ -13,6 +13,7 @@ import com.tallerwebi.dominio.services.ServicioProductoImpl;
 import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -169,6 +170,24 @@ public class ServicioProductoTest {
       ex.getMessage(),
       equalToIgnoringCase("Los minutos de descongelamiento son obligatorios")
     );
+  }
+
+  // --- Tests de Obtener Productos por Categoría ---
+
+  @Test
+  public void obtenerProductosPorCategoriaDeberiaDelegarAlRepositorioYRetornarLista() {
+    // preparacion
+    Long categoriaId = 1L;
+    List<Producto> productosEsperados = Arrays.asList(new Producto(), new Producto());
+    when(repositorioProductoMock.obtenerProductosPorCategoria(categoriaId))
+      .thenReturn(productosEsperados);
+
+    // ejecucion
+    List<Producto> resultado = servicioProducto.obtenerProductosPorCategoria(categoriaId);
+
+    // validacion
+    verify(repositorioProductoMock, times(1)).obtenerProductosPorCategoria(categoriaId);
+    assertThat(resultado.size(), org.hamcrest.Matchers.equalTo(2));
   }
 
   // --- Helper ---

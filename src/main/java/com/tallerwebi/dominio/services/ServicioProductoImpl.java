@@ -51,6 +51,11 @@ public class ServicioProductoImpl implements ServicioProducto {
     repositorioProducto.guardar(producto);
   }
 
+  @Override
+  public List<Producto> obtenerProductosPorCategoria(Long categoriaId) {
+    return repositorioProducto.obtenerProductosPorCategoria(categoriaId);
+  }
+
   private void validar(ProductoDto datos) {
     validarProducto(datos);
     validarReglaVencimiento(datos);
