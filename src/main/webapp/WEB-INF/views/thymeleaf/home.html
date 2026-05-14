@@ -2,7 +2,7 @@
      pero Thymeleaf solo usará los fragmentos -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/app :: layout(~{::content}, _, ~{::header_center}, ~{::header_right})}">
+      th:replace="~{layouts/app :: layout(~{::content}, _, ~{::header_center}, ~{::header_right}, 'tema-cocina')}">
 <head>
   <title>Categorías</title>
 </head>

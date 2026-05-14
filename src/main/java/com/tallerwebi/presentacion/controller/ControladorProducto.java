@@ -70,10 +70,12 @@ public class ControladorProducto {
     return new ModelAndView("producto/exito");
   }
 
-  @RequestMapping("/category/{id}/products")
+  @RequestMapping(path = "/category/{id}/products", method = RequestMethod.GET)
   public ModelAndView mostrarProductosPorCategoria(@PathVariable Long id) {
-    List<Producto> productos = servicioProducto.obtenerProductosPorCategoria(id);
     ModelMap modelo = new ModelMap();
+    CategoriaDto categoria = servicioCategoria.obtenerCategoriaPorId(id);
+    List<Producto> productos = servicioProducto.obtenerProductosPorCategoria(id);
+    modelo.put("categoria", categoria);
     modelo.put("productos", productos);
     return new ModelAndView("productos", modelo);
   }
