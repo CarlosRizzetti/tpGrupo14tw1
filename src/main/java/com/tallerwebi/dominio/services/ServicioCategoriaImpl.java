@@ -29,4 +29,13 @@ public class ServicioCategoriaImpl implements ServicioCategoria {
       .map(categoria -> new CategoriaDto(categoria))
       .collect(Collectors.toList());
   }
+
+  @Override
+  public CategoriaDto obtenerCategoriaPorId(Long id) {
+    Categoria categoria = repositorioCategoria.buscarPorId(id);
+    if (categoria == null) {
+      return null;
+    }
+    return new CategoriaDto(categoria);
+  }
 }

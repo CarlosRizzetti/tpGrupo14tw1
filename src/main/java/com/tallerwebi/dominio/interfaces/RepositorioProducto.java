@@ -7,4 +7,5 @@ import java.util.List;
 public interface RepositorioProducto {
   void guardar(Producto producto);
   List<Categoria> obtenerCategoriasPorIds(List<Long> ids);
+  List<Producto> obtenerProductosPorCategoria(Long categoriaId);
 }

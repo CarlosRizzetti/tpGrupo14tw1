@@ -11,6 +11,7 @@ import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.presentacion.controller.ControladorProducto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.Collections;
+import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -138,5 +139,26 @@ public class ControladorProductoTest {
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/acceso-denegado"));
     verify(servicioProductoMock, never()).crearProducto(any());
+  }
+
+  // --- GET /category/{id}/products ---
+
+  @Test
+  public void mostrarProductosPorCategoriaDeberiaRetornarVistaProductosConLista() {
+    // preparacion
+    Long categoriaId = 1L;
+    List<com.tallerwebi.dominio.entity.Producto> productosMock = Collections.singletonList(
+      new com.tallerwebi.dominio.entity.Producto()
+    );
+    when(servicioProductoMock.obtenerProductosPorCategoria(categoriaId)).thenReturn(productosMock);
+
+    // ejecucion
+    ModelAndView mav = controladorProducto.mostrarProductosPorCategoria(categoriaId);
+
+    // validacion
+    assertThat(mav.getViewName(), equalToIgnoringCase("productos"));
+    assertThat(mav.getModel().get("productos"), notNullValue());
+    assertThat((List<?>) mav.getModel().get("productos"), hasSize(1));
+    verify(servicioProductoMock, times(1)).obtenerProductosPorCategoria(categoriaId);
   }
 }

@@ -5,6 +5,6 @@ import java.util.List;
 
 public interface RepositorioCategoria {
   List<Categoria> obtenerTodasLasCategoriasActivas();
-
-  public void agregarNuevaCategoria(Categoria categoria);
+  void agregarNuevaCategoria(Categoria categoria);
+  Categoria buscarPorId(Long id);
 }

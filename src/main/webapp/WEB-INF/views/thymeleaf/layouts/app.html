@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:fragment="layout(content, header_left, header_center, header_right)">
+      th:fragment="layout(content, header_left, header_center, header_right, tema)">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
@@ -14,7 +14,7 @@
 <!-- Corregido: Espacio antes de 'flex' para que Tailwind reconozca las clases -->
 <body class="antialiased overflow-hidden"> <!-- Solo un body -->
 
-<div id="app" class="tema-cocina flex flex-col h-screen bg-puesto-app">
+<div id="app" th:classappend="${tema != null ? tema : 'tema-cocina'}" class="flex flex-col h-screen bg-puesto-app">
 
     <!-- HEADER: Altura fija -->
     <header class="h-20 bg-puesto-header text-puesto-header-text p-4 shadow-xl flex justify-between items-center z-20 shrink-0">

@@ -29,4 +29,16 @@ public class RepositorioProductoImpl implements RepositorioProducto {
       .setParameter("ids", ids)
       .list();
   }
+
+  @Override
+  public List<Producto> obtenerProductosPorCategoria(Long categoriaId) {
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery(
+        "SELECT p FROM Producto p JOIN p.categorias c WHERE c.id = :categoriaId AND p.estaActivo = true",
+        Producto.class
+      )
+      .setParameter("categoriaId", categoriaId)
+      .list();
+  }
 }
