@@ -34,7 +34,7 @@ body {
     align-items: center;
     justify-content: center;
     background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent),
-                radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent);
+        radial-gradient(circle at bottom left, rgba(16, 185, 129, 0.1), transparent);
     padding: 2rem;
     position: relative;
 }
@@ -65,8 +65,15 @@ body {
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .brand-section {
@@ -168,15 +175,16 @@ body {
     display: block;
     text-align: center;
     margin-top: 1.5rem;
-    color: #e2e8f0; /* Much brighter color for visibility */
+    color: #ffffff !important;
+    /* Changed to pure white as requested */
     text-decoration: underline;
     font-size: 0.9rem;
-    font-weight: 500;
+    font-weight: 600;
     transition: all 0.2s;
 }
 
 .link-secondary:hover {
-    color: var(--primary);
+    color: var(--primary) !important;
     transform: scale(1.02);
 }
 
@@ -195,4 +203,23 @@ body {
     background: rgba(15, 23, 42, 0.8) !important;
     backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--glass-border);
+}
+
+/* Simple password validation list */
+.password-hint {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0 0 0;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.req {
+    margin-bottom: 0.25rem;
+    transition: color 0.2s;
+}
+
+.req.met {
+    color: #34d399; /* Green */
+    font-weight: 600;
 }

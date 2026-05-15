@@ -1,7 +1,7 @@
 package com.tallerwebi.dominio;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -29,8 +29,10 @@ public class ServicioLoginTest {
   public void consultarUsuarioDeberiaLlamarAlRepositorio() throws UsuarioInactivo {
     // preparacion
     String email = "test@test.com";
-    String password = "password";
+    String password = "Valida123"; // Cumple con los nuevos requisitos
     Usuario usuarioEsperado = new Usuario();
+    usuarioEsperado.setEmail(email);
+    usuarioEsperado.setPassword(password);
     usuarioEsperado.setActivo(true);
     when(this.repositorioUsuarioMock.buscarUsuario(email, password)).thenReturn(usuarioEsperado);
 
@@ -40,6 +42,21 @@ public class ServicioLoginTest {
     // validacion
     assertThat(usuarioObtenido, equalTo(usuarioEsperado));
     verify(this.repositorioUsuarioMock, times(1)).buscarUsuario(email, password);
+  }
+
+  @Test
+  public void consultarUsuarioDeberiaRetornarNullSiElRepositorioNoEncuentraAlUsuario()
+    throws UsuarioInactivo {
+    // preparacion
+    String email = "noexiste@test.com";
+    String password = "Password123";
+    when(this.repositorioUsuarioMock.buscarUsuario(email, password)).thenReturn(null);
+
+    // ejecucion
+    Usuario usuarioObtenido = this.servicioLogin.consultarUsuario(email, password);
+
+    // validacion
+    assertThat(usuarioObtenido, is(org.hamcrest.Matchers.nullValue()));
   }
 
   @Test
@@ -56,11 +73,11 @@ public class ServicioLoginTest {
   }
 
   @Test
-  public void registrarUsuarioSiNoExisteDeberiaGuardarlo() throws UsuarioExistente {
+  public void registrarUsuarioSiNoExisteDeberiaGuardarlo() throws Exception {
     // preparacion
     Usuario usuario = new Usuario();
     usuario.setEmail("nuevo@test.com");
-    usuario.setPassword("123");
+    usuario.setPassword("Contra1");
     when(this.repositorioUsuarioMock.buscar(usuario.getEmail())).thenReturn(null);
 
     // ejecucion
@@ -75,7 +92,7 @@ public class ServicioLoginTest {
     // preparacion
     Usuario usuario = new Usuario();
     usuario.setEmail("existe@test.com");
-    usuario.setPassword("123");
+    usuario.setPassword("Contra1");
     when(this.repositorioUsuarioMock.buscar(usuario.getEmail())).thenReturn(new Usuario());
 
     // ejecucion y validacion

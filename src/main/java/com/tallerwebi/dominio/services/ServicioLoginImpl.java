@@ -1,10 +1,12 @@
 package com.tallerwebi.dominio.services;
 
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import com.tallerwebi.dominio.interfaces.ServicioLogin;
+import com.tallerwebi.dominio.utils.ValidadorPassword;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,7 +32,11 @@ public class ServicioLoginImpl implements ServicioLogin {
   }
 
   @Override
-  public void registrar(Usuario usuario) throws UsuarioExistente {
+  public void registrar(Usuario usuario) throws UsuarioExistente, PasswordInvalida {
+    if (!ValidadorPassword.esValida(usuario.getPassword())) {
+      throw new PasswordInvalida("La contraseña no cumple con los requisitos de seguridad.");
+    }
+
     Usuario usuarioEncontrado = repositorioUsuario.buscar(usuario.getEmail());
     if (usuarioEncontrado != null) {
       throw new UsuarioExistente();

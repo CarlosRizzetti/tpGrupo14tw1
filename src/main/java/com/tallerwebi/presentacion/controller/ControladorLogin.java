@@ -75,6 +75,9 @@ public class ControladorLogin {
     } catch (UsuarioExistente e) {
       model.put(ERROR, "El usuario ya existe");
       return new ModelAndView(VISTA_NUEVO_USUARIO, model);
+    } catch (com.tallerwebi.dominio.excepcion.PasswordInvalida e) {
+      model.put(ERROR, e.getMessage());
+      return new ModelAndView(VISTA_NUEVO_USUARIO, model);
     } catch (Exception e) {
       model.put(ERROR, "Error al registrar el nuevo usuario");
       return new ModelAndView(VISTA_NUEVO_USUARIO, model);

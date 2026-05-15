@@ -91,7 +91,7 @@ public class ControladorLoginTest {
   }
 
   @Test
-  public void registrameSiUsuarioNoExisteDeberiaCrearUsuarioYIrAlHome() throws UsuarioExistente {
+  public void registrameSiUsuarioNoExisteDeberiaCrearUsuarioYIrAlHome() throws Exception {
     // preparacion
     when(requestMock.getSession()).thenReturn(sessionMock);
 
@@ -105,8 +105,7 @@ public class ControladorLoginTest {
   }
 
   @Test
-  public void registrarmeSiUsuarioExisteDeberiaVolverAFormularioYMostrarError()
-    throws UsuarioExistente {
+  public void registrarmeSiUsuarioExisteDeberiaVolverAFormularioYMostrarError() throws Exception {
     // preparacion
     doThrow(UsuarioExistente.class).when(servicioLoginMock).registrar(usuarioMock);
 
@@ -122,7 +121,26 @@ public class ControladorLoginTest {
   }
 
   @Test
-  public void errorEnRegistrarmeDeberiaVolverAFormularioYMostrarError() throws UsuarioExistente {
+  public void registrarmeSiPasswordEsInvalidaDeberiaVolverAFormularioYMostrarError()
+    throws Exception {
+    // preparacion
+    doThrow(new com.tallerwebi.dominio.excepcion.PasswordInvalida("Password invalida"))
+      .when(servicioLoginMock)
+      .registrar(usuarioMock);
+
+    // ejecucion
+    ModelAndView modelAndView = controladorLogin.registrarme(usuarioMock, requestMock);
+
+    // validacion
+    assertThat(modelAndView.getViewName(), equalToIgnoringCase("nuevo-usuario"));
+    assertThat(
+      modelAndView.getModel().get("error").toString(),
+      equalToIgnoringCase("Password invalida")
+    );
+  }
+
+  @Test
+  public void errorEnRegistrarmeDeberiaVolverAFormularioYMostrarError() throws Exception {
     // preparacion
     doThrow(RuntimeException.class).when(servicioLoginMock).registrar(usuarioMock);
 
