@@ -1,8 +1,11 @@
-package com.tallerwebi.presentacion;
+package com.tallerwebi.dominio;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.tallerwebi.dominio.entity.TimerActivo;
+import com.tallerwebi.dominio.entity.Categoria;
+import com.tallerwebi.dominio.entity.Producto;
+import com.tallerwebi.dominio.entity.ReglaVencimiento;
+import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.repositorio.config.HibernateInfraestructuraTestConfig;
 import java.time.OffsetDateTime;
 import javax.transaction.Transactional;
@@ -28,7 +31,7 @@ public class TimerActivoTest {
     OffsetDateTime fechaCreacion = OffsetDateTime.now();
     OffsetDateTime fechaVencimiento = fechaCreacion.plusDays(3);
 
-    TimerActivo timer = new TimerActivo(fechaCreacion, fechaVencimiento);
+    Timer timer = new Timer(fechaCreacion, fechaVencimiento);
     sessionFactory.getCurrentSession().save(timer);
     assertNotNull(timer.getGroupId());
   }
@@ -38,8 +41,10 @@ public class TimerActivoTest {
   public void queAlAsignarUnGroupIdVacioSeGenereUnoAutomaticamente() {
     OffsetDateTime fechaCreacion = OffsetDateTime.now();
     OffsetDateTime fechaVencimiento = fechaCreacion.plusDays(3);
-
-    TimerActivo timer = new TimerActivo(fechaCreacion, fechaVencimiento, "");
+    Categoria categoria = new Categoria("mccafe.png", true, "mccafe");
+    Producto producto = new Producto();
+    ReglaVencimiento regla = new ReglaVencimiento();
+    Timer timer = new Timer(fechaCreacion, fechaVencimiento, "", producto, categoria, regla);
     sessionFactory.getCurrentSession().save(timer);
     assertNotNull(timer.getGroupId());
     assertNotEquals("", timer.getGroupId());
@@ -50,8 +55,10 @@ public class TimerActivoTest {
   public void queAlAsignarUnGroupIdNoSeGenereUnoAutomaticamente() {
     OffsetDateTime fechaCreacion = OffsetDateTime.now();
     OffsetDateTime fechaVencimiento = fechaCreacion.plusDays(3);
-
-    TimerActivo timer = new TimerActivo(fechaCreacion, fechaVencimiento, "1AF34");
+    Categoria categoria = new Categoria("mccafe.png", true, "mccafe");
+    Producto producto = new Producto();
+    ReglaVencimiento regla = new ReglaVencimiento();
+    Timer timer = new Timer(fechaCreacion, fechaVencimiento, "1AF34", producto, categoria, regla);
     sessionFactory.getCurrentSession().save(timer);
     assertNotNull(timer.getGroupId());
     assertEquals("1AF34", timer.getGroupId());

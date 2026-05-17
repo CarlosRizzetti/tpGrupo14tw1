@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-public class TimerActivo {
+public class Timer {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,23 +24,29 @@ public class TimerActivo {
   private Boolean estaActivo;
   private String estado;
 
-  public TimerActivo(
+  public Timer(
     OffsetDateTime fechaCreacion,
     OffsetDateTime fechaVencimiento,
-    String groupId
+    String groupId,
+    Producto producto,
+    Categoria categoria,
+    ReglaVencimiento reglaVencimiento
   ) {
     this.fechaCreacion = fechaCreacion;
     this.fechaVencimiento = fechaVencimiento;
     this.groupId = groupId;
     this.estaActivo = true;
-    this.estado = "Activo";
+    this.estado = "activo";
+    this.producto = producto;
+    this.categoria = categoria;
+    this.reglaVencimiento = reglaVencimiento;
   }
 
-  public TimerActivo(OffsetDateTime fechaCreacion, OffsetDateTime fechaVencimiento) {
+  public Timer(OffsetDateTime fechaCreacion, OffsetDateTime fechaVencimiento) {
     this.fechaCreacion = fechaCreacion;
     this.fechaVencimiento = fechaVencimiento;
     this.estaActivo = true;
-    this.estado = "Activo";
+    this.estado = "activo";
   }
 
   @ManyToOne

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right})}">
+<head>
+    <title th:text="${categoria.nombre} + ' - Panel'">Panel de Control</title>
+</head>
+<body>
+
+<!-- FRAGMENTO IZQUIERDO: Botón Volver -->
+<div th:fragment="header_left">
+    <a th:href="@{/category/{id}/products(id=${categoria.id})}"
+       class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+        </svg>
+        Volver
+    </a>
+</div>
+
+<!-- FRAGMENTO CENTRAL: Título Categoría -->
+<div th:fragment="header_center">
+    <h1 class="text-xl md:text-2xl font-black uppercase italic tracking-tighter leading-none"
+        th:text="${categoria.nombre}">Categoría</h1>
+    <span class="text-[10px] opacity-70 uppercase font-bold tracking-widest">Panel de Control</span>
+    <p th:text="${timers}">ads</p>
+</div>
+
+<!-- FRAGMENTO DERECHO: Contador -->
+<div th:fragment="header_right">
+    <div class="bg-black/10 px-4 py-2 rounded-lg font-bold text-sm border border-white/10">
+        <span th:text="${timers != null ? #lists.size(timers) : 0}">0</span> ACTIVO(S)
+    </div>
+</div>
+
+<!-- CONTENIDO PRINCIPAL -->
+<div th:fragment="content" th:classappend="${categoria.tema}" class="flex flex-col h-screen bg-puesto-app transition-colors duration-300 font-sans">
+
+    <!-- MODAL DE IMPORTACIÓN -->
+    <div id="import-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity backdrop-blur-sm" onclick="closeImportModal()"></div>
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border-t-8 border-slate-500">
+                    <!-- Cabecera Modal -->
+                    <div class="bg-gray-50 px-4 py-5 sm:px-6 flex justify-between items-center border-b border-gray-100">
+                        <h3 class="text-xl font-black leading-6 text-gray-800 uppercase italic tracking-tighter" id="modal-title">
+                            Importar Vencimiento
+                        </h3>
+                        <button type="button" class="btn-action-close text-gray-400 hover:text-gray-500 transition-colors" onclick="closeImportModal()">
+                            <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="px-4 py-6 sm:p-6">
+                        <!-- Tarjeta Resumen -->
+                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6 text-center">
+                            <span class="block text-[10px] font-bold text-blue-400 uppercase tracking-widest mb-1">Producto a Importar</span>
+                            <h4 id="modal-product-name" class="text-2xl font-black text-gray-800 uppercase leading-none mb-2">---</h4>
+                            <div class="inline-flex items-center gap-1 bg-white px-3 py-1 rounded-full border border-blue-100 shadow-sm">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                <span id="modal-product-location" class="text-xs font-bold text-gray-500 uppercase">---</span>
+                            </div>
+                        </div>
+
+                        <p class="text-sm font-bold text-gray-500 uppercase tracking-wide text-center mb-4">Seleccione el sector de destino</p>
+                        <input type="hidden" id="modal-timer-id">
+                        <div id="modal-categories-list" class="grid grid-cols-1 gap-3"></div>
+                    </div>
+
+                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                        <button type="button" onclick="closeImportModal()" class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-3 py-2 text-sm font-black text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto uppercase tracking-wide">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LISTADO DE TIMERS -->
+    <div class="flex-grow p-4 overflow-y-auto">
+        <!-- Grid de Tarjetas -->
+        <div th:if="${error != null}" class="flex flex-col items-center justify-center h-64 opacity-30 text-puesto-header">
+            <svg class="w-20 h-20 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <!-- Mostramos el mensaje que viene del mav.addObject("error", ...) -->
+            <p class="text-2xl font-bold uppercase text-center" th:text="${error}">Mensaje de error</p>
+        </div>
+
+
+        <div th:if="${timers != null}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
+
+            <div th:each="timer : ${timers}"
+                 th:id="'timer-card-' + ${timer.id}"
+                 class="timer-card bg-white rounded-2xl shadow-lg border-b-[6px] border-puesto-header flex flex-col overflow-hidden transform transition-all active:scale-95"
+                 th:data-expires="${timer.fechaVencimiento}">
+
+                <div class="p-5 flex-grow">
+                    <div class="mb-1">
+                        <h2 class="text-xl font-black text-gray-800 leading-tight uppercase"
+                            th:text="${timer.producto.nombre}">Nombre Producto</h2>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest"
+                              th:text="${timer.reglaVencimiento?.localizacion ?: 'General'}">Localización</span>
+                    </div>
+
+                    <!-- RELOJ -->
+                    <div class="mt-4 mb-4 py-6 rounded-xl bg-gray-50 border border-gray-200 flex flex-col items-center justify-center">
+                        <span th:id="'timer-' + ${timer.id}" class="timer-display text-4xl font-mono font-black text-gray-700 tabular-nums">
+                            00:00:00
+                        </span>
+                        <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Tiempo restante</div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 text-[10px] font-bold text-gray-400 uppercase border-t border-gray-100 pt-4">
+                        <div>Elab: <span class="text-gray-800 block" th:text="${#temporals.format(timer.fechaCreacion, 'HH:mm dd/MM')}">12:00</span></div>
+                        <div class="text-right">Vence: <span class="text-puesto-header block" th:text="${#temporals.format(timer.fechaVencimiento, 'HH:mm dd/MM')}">14:00</span></div>
+                    </div>
+                </div>
+
+                <!-- BOTONERA -->
+                <div class="grid grid-cols-3 h-16 border-t border-gray-100 divide-x divide-gray-100">
+                    <!-- Eliminar -->
+                    <button type="button" th:data-timer-id="${timer.id}" th:data-category-id="${categoria.id}"
+                            class="btn-eliminar bg-red-50 hover:bg-red-100 text-red-600 flex flex-col items-center justify-center transition-colors active:bg-red-200 group">
+                        <svg class="w-5 h-5 mb-0.5 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <span class="text-[9px] font-black uppercase">Eliminar</span>
+                    </button>
+
+                    <!-- Importar -->
+                    <button type="button" th:data-timer-id="${timer.id}" th:data-product-name="${timer.producto.nombre}"
+                            th:data-location="${timer.reglaVencimiento?.localizacion ?: 'General'}"
+                            class="btn-importar bg-slate-100 hover:bg-slate-200 text-slate-600 flex flex-col items-center justify-center transition-colors active:bg-slate-300 group z-10">
+                        <svg class="w-5 h-5 mb-0.5 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span class="text-[9px] font-black uppercase">Importar</span>
+                    </button>
+
+                    <!-- Renovar -->
+                    <button type="button" th:data-timer-id="${timer.id}" th:data-category-id="${categoria.id}"
+                            class="btn-renovar bg-puesto-btn text-puesto-btn-text flex flex-col items-center justify-center transition-all hover:brightness-105 group">
+                        <svg class="w-5 h-5 mb-0.5 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        <span class="text-[9px] font-black uppercase">Renovar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

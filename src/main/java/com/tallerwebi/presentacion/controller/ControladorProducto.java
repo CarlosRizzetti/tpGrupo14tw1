@@ -37,12 +37,11 @@ public class ControladorProducto {
     if (!esAdministrador(session)) {
       return new ModelAndView("redirect:/acceso-denegado");
     }
-
-    ModelMap modelo = new ModelMap();
-    List<CategoriaDto> categorias = servicioCategoria.obtenerLasCategoriasParaElMenu();
-    modelo.put("categorias", categorias);
-    modelo.put("datosProducto", new ProductoDto());
-    return new ModelAndView("producto/nuevo", modelo);
+    List<CategoriaDto> categorias = (List<CategoriaDto>) session.getAttribute("categorias");
+    ModelAndView mav = new ModelAndView("producto/nuevo");
+    mav.addObject("categorias", categorias);
+    mav.addObject("datosProducto", new ProductoDto());
+    return mav;
   }
 
   // POST — procesar el formulario
