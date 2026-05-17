@@ -16,6 +16,7 @@ module.exports = {
     'tema-mccafe',
     'tema-isla',
     'tema-servicio',
+    'tema-login',
     'bg-puesto-soft',
     'animate-success'
   ],
