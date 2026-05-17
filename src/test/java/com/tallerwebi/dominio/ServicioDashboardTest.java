@@ -11,6 +11,7 @@ import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioDashboard;
 import com.tallerwebi.dominio.services.ServicioDashboardImpl;
+import com.tallerwebi.presentacion.dto.TimerDTO;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,11 +41,10 @@ public class ServicioDashboardTest {
     when(repositorioTimerMock.obtenerTimersSegunEstado(categoria.getId(), "activo"))
       .thenReturn(timersActivos);
 
-    List<Timer> listaObtenida = this.servicioDashboard.obtenerTimersActivos(categoria.getId());
+    List<TimerDTO> listaObtenida = this.servicioDashboard.obtenerTimersActivos(categoria.getId());
 
     assertEquals(1, listaObtenida.size());
     verify(repositorioTimerMock, times(1)).obtenerTimersSegunEstado(categoria.getId(), "activo");
     assertEquals(1L, listaObtenida.get(0).getId());
-    assertEquals(timer, listaObtenida.get(0));
   }
 }

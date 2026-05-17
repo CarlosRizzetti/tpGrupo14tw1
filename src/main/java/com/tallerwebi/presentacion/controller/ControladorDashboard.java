@@ -1,8 +1,8 @@
 package com.tallerwebi.presentacion.controller;
 
-import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.dominio.interfaces.ServicioDashboard;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
+import com.tallerwebi.presentacion.dto.TimerDTO;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
