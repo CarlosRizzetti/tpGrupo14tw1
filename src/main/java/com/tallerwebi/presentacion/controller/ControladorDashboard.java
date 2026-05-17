@@ -30,7 +30,7 @@ public class ControladorDashboard {
 
     ModelAndView mav = new ModelAndView("dashboard");
     mav.addObject("categoria", categoria);
-    List<Timer> timersActivos = servicioDashboard.obtenerTimersActivos(categoria.getId());
+    List<TimerDTO> timersActivos = servicioDashboard.obtenerTimersActivos(categoria.getId());
 
     if (timersActivos.isEmpty()) {
       mav.addObject("error", "No hay timers activos");

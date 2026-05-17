@@ -1,8 +1,9 @@
 package com.tallerwebi.dominio.interfaces;
 
-import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.presentacion.dto.TimerDTO;
+
 import java.util.List;
 
 public interface ServicioDashboard {
-  List<Timer> obtenerTimersActivos(Long id);
+  List<TimerDTO> obtenerTimersActivos(Long id);
 }

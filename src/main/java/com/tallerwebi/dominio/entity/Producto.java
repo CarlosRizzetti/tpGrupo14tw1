@@ -18,8 +18,6 @@ public class Producto {
   private Long id;
 
   private String nombre;
-
-  @Column(name = "esta_activo")
   private Boolean estaActivo;
 
   @ManyToMany

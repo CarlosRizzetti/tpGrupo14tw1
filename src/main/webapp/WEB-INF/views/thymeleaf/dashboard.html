@@ -22,7 +22,6 @@
     <h1 class="text-xl md:text-2xl font-black uppercase italic tracking-tighter leading-none"
         th:text="${categoria.nombre}">Categoría</h1>
     <span class="text-[10px] opacity-70 uppercase font-bold tracking-widest">Panel de Control</span>
-    <p th:text="${timers}">ads</p>
 </div>
 
 <!-- FRAGMENTO DERECHO: Contador -->
@@ -103,7 +102,7 @@
                         <h2 class="text-xl font-black text-gray-800 leading-tight uppercase"
                             th:text="${timer.producto.nombre}">Nombre Producto</h2>
                         <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest"
-                              th:text="${timer.reglaVencimiento?.localizacion ?: 'General'}">Localización</span>
+                              th:text="${timer.reglaVencimiento?.ubicacion ?: 'General'}">ubicacion</span>
                     </div>
 
                     <!-- RELOJ -->
