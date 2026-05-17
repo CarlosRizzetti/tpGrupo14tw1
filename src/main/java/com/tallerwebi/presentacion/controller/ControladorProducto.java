@@ -4,6 +4,7 @@ import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
+import com.tallerwebi.presentacion.dto.CalculoVencimientoDto;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.List;
@@ -21,6 +22,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class ControladorProducto {
+
+  private static final String TEMA_PREFIX = "tema-";
+  private static final String TEMA_CLASE_ATTR = "temaClase";
 
   private final ServicioProducto servicioProducto;
   private final ServicioCategoria servicioCategoria;
@@ -94,20 +98,31 @@ public class ControladorProducto {
     modelo.put("producto", producto);
     modelo.put("reglaVencimiento", producto.getReglaVencimiento());
 
-    if (categoria != null && categoria.getTema() != null) {
-      String temaCat = categoria.getTema().toLowerCase(Locale.ROOT);
-      if (!temaCat.startsWith("tema-")) {
-        modelo.put("temaClase", "tema-" + temaCat);
-      } else {
-        modelo.put("temaClase", temaCat);
-      }
-    } else {
-      modelo.put("temaClase", "tema-cocina"); // Tema por defecto
-    }
+    setearCategoriaTemaEnModelo(categoria, modelo);
 
     modelo.put("categoria", categoria);
 
     return new ModelAndView("producto-vencimiento", modelo);
+  }
+
+  @RequestMapping(path = "/product/{id}/print", method = RequestMethod.POST)
+  public ModelAndView imprimirConstancia(
+    @PathVariable Long id,
+    @RequestParam("offset_minutes") Integer offsetMinutes,
+    @RequestParam(name = "categoryId", required = false) Long categoryId
+  ) {
+    ModelMap modelo = new ModelMap();
+    Producto producto = servicioProducto.obtenerProductoPorId(id);
+    Categoria categoria = determinarCategoria(producto, categoryId);
+
+    CalculoVencimientoDto dto = servicioProducto.calcularVencimiento(producto, offsetMinutes);
+    modelo.put("resultado", dto);
+    modelo.put("categoria", categoria);
+    modelo.put("producto", producto);
+
+    setearCategoriaTemaEnModelo(categoria, modelo);
+
+    return new ModelAndView("imprimir-vencimiento", modelo);
   }
 
   private Categoria determinarCategoria(Producto producto, Long categoryId) {
@@ -129,5 +144,18 @@ public class ControladorProducto {
     if (usuario == null) return false;
     com.tallerwebi.dominio.entity.Usuario user = (com.tallerwebi.dominio.entity.Usuario) usuario;
     return "ADMIN".equalsIgnoreCase(user.getRol());
+  }
+
+  private void setearCategoriaTemaEnModelo(Categoria categoria, ModelMap modelo) {
+    if (categoria != null && categoria.getTema() != null) {
+      String temaCat = categoria.getTema().toLowerCase(Locale.ROOT);
+      if (!temaCat.startsWith(TEMA_PREFIX)) {
+        modelo.put(TEMA_CLASE_ATTR, TEMA_PREFIX + temaCat);
+      } else {
+        modelo.put(TEMA_CLASE_ATTR, temaCat);
+      }
+    } else {
+      modelo.put(TEMA_CLASE_ATTR, "tema-cocina");
+    }
   }
 }

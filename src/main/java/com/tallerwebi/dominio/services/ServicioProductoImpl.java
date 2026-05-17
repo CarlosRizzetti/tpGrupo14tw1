@@ -5,7 +5,9 @@ import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.interfaces.RepositorioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
+import com.tallerwebi.presentacion.dto.CalculoVencimientoDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,6 +60,29 @@ public class ServicioProductoImpl implements ServicioProducto {
   @Override
   public Producto obtenerProductoPorId(Long id) {
     return repositorioProducto.obtenerProductoPorId(id);
+  }
+
+  @Override
+  public CalculoVencimientoDto calcularVencimiento(Producto producto, Integer offsetMinutos) {
+    ReglaVencimiento regla = producto.getReglaVencimiento();
+    if (regla == null) {
+      throw new IllegalArgumentException("El producto no tiene regla de vencimiento");
+    }
+
+    LocalDateTime elaboracion = LocalDateTime.now().minusMinutes(offsetMinutos);
+    LocalDateTime vencimiento = elaboracion.plusMinutes(regla.getDuracionMinutos());
+    LocalDateTime descongelamiento = (Boolean.TRUE.equals(regla.getTieneDescongelamiento()) &&
+        regla.getDescongelamientoMinutos() != null)
+      ? elaboracion.plusMinutes(regla.getDescongelamientoMinutos())
+      : null;
+
+    return new CalculoVencimientoDto(
+      elaboracion,
+      vencimiento,
+      descongelamiento,
+      producto.getNombre(),
+      regla.getUbicacion()
+    );
   }
 
   private void validar(ProductoDto datos) {

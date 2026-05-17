@@ -10,6 +10,7 @@
 
     <th:block th:fragment="header_center">
         <h2 class="text-xl font-bold" th:text="${producto.nombre}">Nombre Producto</h2>
+        <h3 class="text-xl font-bold"> Configurar vencimiento</h3>
     </th:block>
 
     <th:block th:fragment="header_right">
@@ -21,34 +22,164 @@
     <th:block th:fragment="content">
         <div class="p-4 flex flex-col gap-4 max-w-lg mx-auto w-full mt-6">
             <div th:if="${reglaVencimiento != null}" class="bg-puesto-btn text-puesto-btn-text rounded-3xl shadow-md p-6">
-                <h3 class="text-xl font-semibold mb-4 border-b border-gray-300 pb-2">Detalles de Vencimiento</h3>
+                <form th:action="@{'/product/' + ${producto.id} + '/print'}" method="POST" id="form-vencimiento" onsubmit="return processAndSubmit()">
+                    <input type="hidden" name="categoryId" th:value="${categoria != null ? categoria.id : ''}">
+                    <input type="hidden" name="offset_minutes" id="final-offset" value="0">
+                    <input type="hidden" id="duration-val" th:value="${reglaVencimiento.duracionMinutos}">
 
-                <div class="mb-3">
-                    <span class="font-bold">Ubicación: </span>
-                    <span th:text="${reglaVencimiento.ubicacion}">Ubicación</span>
-                </div>
+                    <h3 class="text-xl font-semibold mb-4 border-b border-gray-300 pb-2">Configurar Vencimiento: <span th:text="${reglaVencimiento.ubicacion}"></span></h3>
 
-                <div class="mb-3">
-                    <span class="font-bold">Duración: </span>
-                    <span th:text="${reglaVencimiento.duracionMinutos} + ' minutos'">0 minutos</span>
-                </div>
-
-                <th:block th:if="${reglaVencimiento.tieneDescongelamiento}">
                     <div class="mb-3">
-                        <span class="font-bold">Requiere Descongelamiento: </span>
-                        <span>Sí</span>
+                        <span class="font-bold">Duración: </span>
+                        <span th:text="${reglaVencimiento.duracionMinutos} + ' minutos'">0</span>
                     </div>
-                    <div class="mb-3">
-                        <span class="font-bold">Minutos de Descongelamiento: </span>
-                        <span th:text="${reglaVencimiento.descongelamientoMinutos} + ' minutos'">0 minutos</span>
+
+                    <div class="bg-gray-50 p-5 rounded-3xl border border-gray-100 space-y-4 text-black">
+                        <label class="block text-sm font-bold text-gray-500 uppercase text-center tracking-widest italic">
+                            ¿Hace cuánto se elaboró?
+                        </label>
+
+                        <div class="flex flex-col gap-3">
+                            <select id="unit-selector" onchange="toggleInputs()" class="w-full text-center text-sm font-black bg-white border-2 border-gray-200 rounded-2xl p-3 uppercase focus:outline-none focus:border-puesto-header transition-all">
+                                <option value="1">Restar Minutos</option>
+                                <option value="60">Restar Horas</option>
+                                <option value="1440">Restar Días</option>
+                                <option value="custom">📅 Elegir Hora Exacta</option>
+                            </select>
+
+                            <div id="numeric-container" class="relative">
+                                <input type="number" id="time-val" value="0" min="0" class="w-full text-center text-4xl font-black bg-white border-2 border-gray-200 rounded-2xl p-3 focus:outline-none focus:border-puesto-header text-gray-700">
+                                <span class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-300 font-bold text-xs uppercase italic">Tiempo</span>
+                            </div>
+
+                            <div id="date-container" class="hidden">
+                                <input type="datetime-local" id="date-val" class="w-full text-center text-sm font-bold text-gray-600 bg-white border-2 border-gray-200 rounded-2xl p-4 focus:outline-none focus:border-puesto-header">
+                            </div>
+                        </div>
                     </div>
-                </th:block>
+
+                    <div id="countdown-card" class="hidden bg-white p-5 rounded-3xl border border-red-200 mt-4 text-center shadow-inner">
+                        <h4 class="text-xs font-bold text-red-400 uppercase tracking-widest mb-1">Tiempo Restante</h4>
+                        <div id="countdown-timer" class="text-4xl font-black text-red-600 tracking-tighter">--:--:--</div>
+                    </div>
+
+                    <div class="mt-4 flex flex-col gap-3">
+                        <button type="button" onclick="startCountdown()" class="w-full py-4 bg-gray-500 text-white rounded-[1.5rem] text-xl font-black uppercase tracking-tight transition-all hover:bg-gray-600">
+                            SETEAR VENCIMIENTO
+                        </button>
+                        <button type="submit" class="w-full py-5 bg-puesto-header text-white rounded-[1.5rem] text-2xl font-black uppercase tracking-tight transition-all flex items-center justify-center gap-3 hover:bg-opacity-90">
+                            IMPRIMIR
+                        </button>
+                    </div>
+                </form>
             </div>
 
             <div th:if="${reglaVencimiento == null}" class="bg-puesto-btn text-puesto-btn-text rounded-3xl shadow-md p-6 text-center">
                 <p>Este producto no tiene configurada una regla de vencimiento.</p>
             </div>
         </div>
+
+        <script>
+            function toggleInputs() {
+                const unit = document.getElementById('unit-selector').value;
+                const numCont = document.getElementById('numeric-container');
+                const dateCont = document.getElementById('date-container');
+                if (unit === 'custom') {
+                    numCont.classList.add('hidden');
+                    dateCont.classList.remove('hidden');
+                } else {
+                    numCont.classList.remove('hidden');
+                    dateCont.classList.add('hidden');
+                }
+            }
+
+            function processAndSubmit() {
+                const unit = document.getElementById('unit-selector').value;
+                let offsetMinutes = 0;
+
+                if (unit === 'custom') {
+                    const customDateVal = document.getElementById('date-val').value;
+                    if (!customDateVal) {
+                        alert("Por favor selecciona una fecha y hora.");
+                        return false;
+                    }
+                    const selectedTime = new Date(customDateVal).getTime();
+                    const now = new Date().getTime();
+                    offsetMinutes = Math.floor((now - selectedTime) / 60000);
+                    if (offsetMinutes < 0) offsetMinutes = 0;
+                } else {
+                    const val = parseInt(document.getElementById('time-val').value) || 0;
+                    const multiplier = parseInt(unit);
+                    offsetMinutes = val * multiplier;
+                }
+
+                document.getElementById('final-offset').value = offsetMinutes;
+                return true;
+            }
+
+            let countdownInterval;
+
+            function startCountdown() {
+                const unit = document.getElementById('unit-selector').value;
+                let offsetMinutes = 0;
+
+                if (unit === 'custom') {
+                    const customDateVal = document.getElementById('date-val').value;
+                    if (!customDateVal) {
+                        alert("Por favor selecciona una fecha y hora.");
+                        return;
+                    }
+                    const selectedTime = new Date(customDateVal).getTime();
+                    const now = new Date().getTime();
+                    offsetMinutes = Math.floor((now - selectedTime) / 60000);
+                    if (offsetMinutes < 0) offsetMinutes = 0;
+                } else {
+                    const val = parseInt(document.getElementById('time-val').value) || 0;
+                    const multiplier = parseInt(unit);
+                    offsetMinutes = val * multiplier;
+                }
+
+                const durationMinutes = parseInt(document.getElementById('duration-val').value) || 0;
+
+                const nowTime = new Date().getTime();
+                const expirationTime = nowTime - (offsetMinutes * 60000) + (durationMinutes * 60000);
+
+                document.getElementById('countdown-card').classList.remove('hidden');
+
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                }
+
+                updateTimerDisplay(expirationTime);
+                countdownInterval = setInterval(() => {
+                    updateTimerDisplay(expirationTime);
+                }, 1000);
+            }
+
+            function updateTimerDisplay(expirationTime) {
+                const now = new Date().getTime();
+                const diff = expirationTime - now;
+                const display = document.getElementById('countdown-timer');
+
+                if (diff <= 0) {
+                    display.innerText = "¡VENCIDO!";
+                    display.className = "text-3xl font-black bg-red-600 text-white px-4 py-2 rounded-xl uppercase inline-block";
+                    clearInterval(countdownInterval);
+                    return;
+                }
+
+                display.className = "text-4xl font-black text-red-600 tracking-tighter";
+
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                display.innerText =
+                    String(hours).padStart(2, '0') + ":" +
+                    String(minutes).padStart(2, '0') + ":" +
+                    String(seconds).padStart(2, '0');
+            }
+        </script>
     </th:block>
 
 </th:block>
