@@ -7,44 +7,56 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     <title>MCD Vencimientos</title>
-    <!-- Asegurate de que la consola de Tailwind esté corriendo para generar este archivo -->
+    <!-- Ruta corregida a los recursos estáticos de Spring -->
     <link rel="stylesheet" th:href="@{/resources/core/css/app.css}">
 </head>
 
-<!-- Corregido: Espacio antes de 'flex' para que Tailwind reconozca las clases -->
-<body class="antialiased overflow-hidden"> <!-- Solo un body -->
+<body class="antialiased overflow-hidden">
 
-<div id="app" class="tema-cocina flex flex-col h-screen bg-puesto-app">
+<!--
+   Ajuste Principal: Usamos th:classappend para inyectar el tema.
+   Si 'categoria' existe, usa su tema; si no, hace fallback a 'tema-cocina'.
+-->
+<div id="app"
+     class="flex flex-col h-screen bg-puesto-app transition-colors duration-300'"
+        th:classappend="${categoria?.tema ?: 'tema-cocina'}">
 
     <!-- HEADER: Altura fija -->
     <header class="h-20 bg-puesto-header text-puesto-header-text p-4 shadow-xl flex justify-between items-center z-20 shrink-0">
         <div class="flex items-center min-w-[200px]">
+            <!-- Reemplaza por el fragmento izquierdo o el logo por defecto -->
             <div th:replace="${header_left} ?: ~{::logo_default}"></div>
         </div>
+
         <div class="text-center flex-grow">
+            <!-- Fragmento central (ej: nombre de la categoría) -->
             <div th:replace="${header_center}"></div>
         </div>
+
         <div class="flex items-center justify-end min-w-[200px]">
+            <!-- Fragmento derecho (ej: reloj o contadores) -->
             <div th:replace="${header_right}"></div>
         </div>
     </header>
 
     <!-- MAIN: Ocupa el resto del espacio exacto -->
     <main class="flex-grow overflow-y-auto">
-        <!-- Quitamos el div extra que rodeaba al replace -->
+        <!-- Inyección del contenido de la vista específica -->
         <div th:replace="${content}"></div>
     </main>
 
 </div>
-    <!-- DEFINICIÓN DEL LOGO POR DEFECTO (Solo para uso interno del Layout) -->
-    <div th:fragment="logo_default" th:remove="tag">
-        <a th:href="@{/}" class="hover:opacity-90 transition-opacity flex flex-col">
-            <h1 class="text-2xl font-black tracking-tighter uppercase italic leading-none">
-                MCD <span class="text-puesto-btn">Vencimientos</span>
-            </h1>
-            <span class="text-[9px] font-medium opacity-70 uppercase tracking-[0.2em] ml-0.5">Control de Calidad</span>
-        </a>
-    </div>
+
+<!-- DEFINICIÓN DEL LOGO POR DEFECTO -->
+<div th:fragment="logo_default" th:remove="tag">
+    <a th:href="@{/home}" class="hover:opacity-90 transition-opacity flex flex-col">
+        <h1 class="text-2xl font-black tracking-tighter uppercase italic leading-none">
+            MCD <span class="text-puesto-btn">Vencimientos</span>
+        </h1>
+        <span class="text-[9px] font-medium opacity-70 uppercase tracking-[0.2em] ml-0.5 text-puesto-header-text">
+                Control de Calidad
+            </span>
+    </a>
 </div>
 
 </body>
