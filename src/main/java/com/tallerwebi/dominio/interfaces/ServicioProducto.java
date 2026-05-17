@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface ServicioProducto {
   void crearProducto(ProductoDto datos);
+  Producto obtenerProductoPorId(Long id);
   List<Producto> obtenerProductosPorCategoria(Long categoriaId);
 }

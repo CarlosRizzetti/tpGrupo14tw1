@@ -2,7 +2,15 @@ package com.tallerwebi.dominio.entity;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,14 +27,13 @@ public class Producto {
 
   private String nombre;
 
-  @Column(name = "esta_activo")
   private Boolean estaActivo;
 
   @ManyToMany
   @JoinTable(
-    name = "productos_categoria",
-    joinColumns = @JoinColumn(name = "id_producto"),
-    inverseJoinColumns = @JoinColumn(name = "id_categoria")
+    name = "productosCategoria",
+    joinColumns = @JoinColumn(name = "idProducto"),
+    inverseJoinColumns = @JoinColumn(name = "idCategoria")
   )
   private List<Categoria> categorias = new ArrayList<>();
 

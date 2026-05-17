@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Vencimientos</title>
+</head>
+<body>
+
+<th:block th:replace="~{layouts/app :: layout(~{::content}, _, ~{::header_center}, ~{::header_right}, ${temaClase})}">
+
+    <th:block th:fragment="header_center">
+        <h2 class="text-xl font-bold" th:text="${producto.nombre}">Nombre Producto</h2>
+    </th:block>
+
+    <th:block th:fragment="header_right">
+        <a th:href="@{'/category/' + ${categoria.id} + '/products'}" class="text-white hover:text-gray-200 font-bold">
+            Volver
+        </a>
+    </th:block>
+
+    <th:block th:fragment="content">
+        <div class="p-4 flex flex-col gap-4 max-w-lg mx-auto w-full mt-6">
+            <div th:if="${reglaVencimiento != null}" class="bg-puesto-btn text-puesto-btn-text rounded-3xl shadow-md p-6">
+                <h3 class="text-xl font-semibold mb-4 border-b border-gray-300 pb-2">Detalles de Vencimiento</h3>
+
+                <div class="mb-3">
+                    <span class="font-bold">Ubicación: </span>
+                    <span th:text="${reglaVencimiento.ubicacion}">Ubicación</span>
+                </div>
+
+                <div class="mb-3">
+                    <span class="font-bold">Duración: </span>
+                    <span th:text="${reglaVencimiento.duracionMinutos} + ' minutos'">0 minutos</span>
+                </div>
+
+                <th:block th:if="${reglaVencimiento.tieneDescongelamiento}">
+                    <div class="mb-3">
+                        <span class="font-bold">Requiere Descongelamiento: </span>
+                        <span>Sí</span>
+                    </div>
+                    <div class="mb-3">
+                        <span class="font-bold">Minutos de Descongelamiento: </span>
+                        <span th:text="${reglaVencimiento.descongelamientoMinutos} + ' minutos'">0 minutos</span>
+                    </div>
+                </th:block>
+            </div>
+
+            <div th:if="${reglaVencimiento == null}" class="bg-puesto-btn text-puesto-btn-text rounded-3xl shadow-md p-6 text-center">
+                <p>Este producto no tiene configurada una regla de vencimiento.</p>
+            </div>
+        </div>
+    </th:block>
+
+</th:block>
+
+</body>
+</html>

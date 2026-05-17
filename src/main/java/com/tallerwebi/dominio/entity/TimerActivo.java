@@ -2,7 +2,13 @@ package com.tallerwebi.dominio.entity;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -44,15 +50,15 @@ public class TimerActivo {
   }
 
   @ManyToOne
-  @JoinColumn(name = "id_producto")
+  @JoinColumn(name = "idProducto")
   private Producto producto;
 
   @ManyToOne
-  @JoinColumn(name = "id_categoria")
+  @JoinColumn(name = "idCategoria")
   private Categoria categoria;
 
   @ManyToOne
-  @JoinColumn(name = "id_regla_vencimiento")
+  @JoinColumn(name = "idReglaVencimiento")
   private ReglaVencimiento reglaVencimiento;
 
   @PrePersist

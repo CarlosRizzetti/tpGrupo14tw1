@@ -35,7 +35,7 @@
 
     <div th:unless="${#lists.isEmpty(productos)}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pb-10">
         <a th:each="producto : ${productos}"
-           th:href="@{/product/{id}(id=${producto.id})}"
+           th:href="@{/product/{id}(id=${producto.id}, categoryId=${categoria.id})}"
            class="group relative flex flex-col items-center justify-center p-6 bg-puesto-btn text-puesto-btn-text border-b-[6px] border-puesto-btn-border rounded-3xl shadow-md hover:shadow-xl transition-all duration-200 hover:-translate-y-1 min-h-[160px]">
 
             <span class="text-2xl md:text-3xl font-bold uppercase tracking-tight text-center"

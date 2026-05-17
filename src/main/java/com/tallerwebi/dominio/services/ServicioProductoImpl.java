@@ -47,13 +47,17 @@ public class ServicioProductoImpl implements ServicioProducto {
 
     producto.setReglaVencimiento(regla);
 
-    // Se guarda el producto (la regla se persiste por CascadeType.ALL)
     repositorioProducto.guardar(producto);
   }
 
   @Override
   public List<Producto> obtenerProductosPorCategoria(Long categoriaId) {
     return repositorioProducto.obtenerProductosPorCategoria(categoriaId);
+  }
+
+  @Override
+  public Producto obtenerProductoPorId(Long id) {
+    return repositorioProducto.obtenerProductoPorId(id);
   }
 
   private void validar(ProductoDto datos) {
