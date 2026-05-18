@@ -37,7 +37,7 @@ public class ControladorProducto {
     if (!esAdministrador(session)) {
       return new ModelAndView("redirect:/acceso-denegado");
     }
-    List<CategoriaDto> categorias = (List<CategoriaDto>) session.getAttribute("categorias");
+    List<CategoriaDto> categorias = servicioCategoria.obtenerLasCategoriasParaElMenu();
     ModelAndView mav = new ModelAndView("producto/nuevo");
     mav.addObject("categorias", categorias);
     mav.addObject("datosProducto", new ProductoDto());
@@ -81,9 +81,8 @@ public class ControladorProducto {
 
   // Verificar que el usuario en sesión sea Admin
   private boolean esAdministrador(HttpSession session) {
-    Object usuario = session.getAttribute("usuario");
-    if (usuario == null) return false;
-    com.tallerwebi.dominio.entity.Usuario user = (com.tallerwebi.dominio.entity.Usuario) usuario;
-    return "ADMIN".equalsIgnoreCase(user.getRol());
+    Object rol = session.getAttribute("ROL");
+    if (rol == null) return false;
+    return "ADMIN".equalsIgnoreCase(rol.toString());
   }
 }
