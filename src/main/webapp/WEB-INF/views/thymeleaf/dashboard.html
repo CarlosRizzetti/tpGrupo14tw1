@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right})}">
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, ~{fragments/notificacion::alertaVencimiento})}">
 <head>
     <title th:text="${categoria.nombre} + ' - Panel'">Panel de Control</title>
 </head>
@@ -32,7 +32,7 @@
 </div>
 
 <!-- CONTENIDO PRINCIPAL -->
-<div th:fragment="content" th:classappend="${categoria.tema}" class="flex flex-col h-screen bg-puesto-app transition-colors duration-300 font-sans">
+<div th:fragment="content" th:classappend="${categoria.tema}" class="flex flex-col  bg-puesto-app transition-colors duration-300 font-sans">
 
     <!-- MODAL DE IMPORTACIÓN -->
     <div id="import-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -93,9 +93,10 @@
         <div th:if="${timers != null}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
 
             <div th:each="timer : ${timers}"
-                 th:id="'timer-card-' + ${timer.id}"
-                 class="timer-card bg-white rounded-2xl shadow-lg border-b-[6px] border-puesto-header flex flex-col overflow-hidden transform transition-all active:scale-95"
-                 th:data-expires="${timer.fechaVencimiento}">
+                 th:id="'timer-' + ${timer.id}"
+                 class="timer bg-white rounded-2xl shadow-lg border-b-[6px] border-puesto-header flex flex-col overflow-hidden transform transition-all active:scale-95"
+                 th:data-vencimiento="${timer.fechaVencimiento}"
+            th:data-elaboracion="${timer.fechaCreacion}">
 
                 <div class="p-5 flex-grow">
                     <div class="mb-1">
@@ -107,15 +108,15 @@
 
                     <!-- RELOJ -->
                     <div class="mt-4 mb-4 py-6 rounded-xl bg-gray-50 border border-gray-200 flex flex-col items-center justify-center">
-                        <span th:id="'timer-' + ${timer.id}" class="timer-display text-4xl font-mono font-black text-gray-700 tabular-nums">
+                        <span th:id="'display-' + ${timer.id}" class="timer-display text-4xl font-mono font-black text-gray-700 tabular-nums">
                             00:00:00
                         </span>
                         <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-1">Tiempo restante</div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 text-[10px] font-bold text-gray-400 uppercase border-t border-gray-100 pt-4">
-                        <div>Elab: <span class="text-gray-800 block" th:text="${timer.fechaCreacion}">12:00</span></div>
-                        <div class="text-right">Vence: <span class="text-puesto-header block" th:text="${timer.fechaVencimiento}">14:00</span></div>
+                        <div>Elab: <span th:id="'elab-' + ${timer.id}" class="text-gray-800 block" th:text="${timer.fechaCreacion}">12:00</span></div>
+                        <div class="text-right">Vence: <span th:id="'vence-' + ${timer.id}" class="text-puesto-header block" th:text="${timer.fechaVencimiento}">14:00</span></div>
                     </div>
                 </div>
 
@@ -146,6 +147,8 @@
             </div>
         </div>
     </div>
+    <script type="module" th:src="@{/resources/core/js/actualizarTemporizadores.js}"></script>
 </div>
 </body>
+
 </html>
