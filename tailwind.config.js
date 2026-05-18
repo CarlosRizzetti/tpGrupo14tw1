@@ -17,7 +17,10 @@ module.exports = {
     'tema-isla',
     'tema-servicio',
     'bg-puesto-soft',
-    'animate-success'
+    'animate-success',
+    'bg-green-100', 'bg-yellow-100', 'bg-red-100',
+    'text-green-700', 'text-yellow-700', 'text-red-600',
+    'border-green-500', 'border-yellow-500', 'border-red-600'
   ],
   theme: {
     extend: {
