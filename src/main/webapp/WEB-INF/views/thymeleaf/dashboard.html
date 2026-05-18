@@ -101,9 +101,9 @@
                 <div class="p-5 flex-grow">
                     <div class="mb-1">
                         <h2 class="text-xl font-black text-gray-800 leading-tight uppercase"
-                            th:text="${timer.nombre}">Nombre Producto</h2>
+                            th:id="'nombre-' + ${timer.id}" th:text="${timer.nombre}">Nombre Producto</h2>
                         <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest"
-                              th:text="${timer.ubicacion ?: 'General'}">ubicacion</span>
+                              th:id="'ubicacion-' + ${timer.id}" th:text="${timer.ubicacion ?: 'General'}">ubicacion</span>
                     </div>
 
                     <!-- RELOJ -->
