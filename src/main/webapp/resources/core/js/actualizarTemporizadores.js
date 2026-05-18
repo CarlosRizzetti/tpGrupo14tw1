@@ -83,7 +83,7 @@ class DashboardTimer {
             const venceTextEl = document.getElementById(`vence-${id}`);
             console.log(elabTextEl, venceTextEl);
 
-            const opciones = { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' };
+            const opciones = { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
 
             if (elabTextEl && venceTextEl) {
                 elabTextEl.textContent = elaborado.toLocaleString('es-AR', opciones).replace(',', '');
@@ -102,7 +102,7 @@ class DashboardTimer {
             const dias = Math.floor(tiempo / MS_POR_DIA);
             const horasRestantes = Math.floor((tiempo % MS_POR_DIA) / 3600000);
 
-            return `${dias} ${dias === 1 ? 'Día' : 'Días'} ${horasRestantes}h`;
+            return `${dias}D ${horasRestantes}h`;
         }
 
         const horas = Math.floor(tiempo / 3600000);
@@ -142,15 +142,15 @@ class DashboardTimer {
     enviarNotificacion(id, card) {
         if (this.notificados.has(id)) return;
 
-        const name = card.querySelector(`#name-${id}`)?.textContent || "Producto";
-        const loc = card.querySelector(`#location-${id}`)?.textContent || "General";
+        const nombre = card.querySelector(`#nombre-${id}`)?.textContent || "Producto";
+        const ubicacion = card.querySelector(`#ubicacion-${id}`)?.textContent || "General";
 
 
         this.alertaSonido.play().catch(e => console.log("Interacción requerida para audio"));
 
 
-        this.notifNombre.textContent = name;
-        this.notifLoc.textContent = loc;
+        this.notifNombre.textContent = nombre;
+        this.notifLoc.textContent = ubicacion;
         this.modal.classList.remove('hidden');
 
 
