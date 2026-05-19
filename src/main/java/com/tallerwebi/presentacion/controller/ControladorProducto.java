@@ -1,12 +1,14 @@
 package com.tallerwebi.presentacion.controller;
 
+import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
-import com.tallerwebi.presentacion.dto.CategoriaDto;
+
 import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.List;
 import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -25,8 +27,7 @@ public class ControladorProducto {
   @Autowired
   public ControladorProducto(
     ServicioProducto servicioProducto,
-    ServicioCategoria servicioCategoria
-  ) {
+    ServicioCategoria servicioCategoria) {
     this.servicioProducto = servicioProducto;
     this.servicioCategoria = servicioCategoria;
   }
@@ -37,7 +38,7 @@ public class ControladorProducto {
     if (!esAdministrador(session)) {
       return new ModelAndView("redirect:/acceso-denegado");
     }
-    List<CategoriaDto> categorias = (List<CategoriaDto>) session.getAttribute("categorias");
+    List<CategoriaDto> categorias = servicioCategoria.obtenerLasCategoriasParaElMenu();
     ModelAndView mav = new ModelAndView("producto/nuevo");
     mav.addObject("categorias", categorias);
     mav.addObject("datosProducto", new ProductoDto());
