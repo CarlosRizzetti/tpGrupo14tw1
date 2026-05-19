@@ -4,6 +4,7 @@ import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioDashboard;
 import com.tallerwebi.presentacion.dto.TimerDTO;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javax.transaction.Transactional;
@@ -54,5 +55,19 @@ public class ServicioDashboardImpl implements ServicioDashboard {
       timerDTOS.add(timerDTO);
     }
     return timerDTOS;
+  }
+
+  @Override
+  public void eliminarTimer(Long timerId) {
+    Timer timer = repositorioTimer.buscarPorId(timerId);
+    if (timer != null) {
+      if (timer.getFechaVencimiento().isBefore(OffsetDateTime.now())) {
+        timer.setEstado("vencido");
+      } else {
+        timer.setEstado("eliminado");
+      }
+      timer.setEstaActivo(false);
+      repositorioTimer.guardar(timer);
+    }
   }
 }

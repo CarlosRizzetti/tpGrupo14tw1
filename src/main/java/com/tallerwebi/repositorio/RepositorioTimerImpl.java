@@ -26,4 +26,14 @@ public class RepositorioTimerImpl implements RepositorioTimer {
       .setParameter("idCat", id)
       .list();
   }
+
+  @Override
+  public Timer buscarPorId(Long id) {
+    return sessionFactory.getCurrentSession().get(Timer.class, id);
+  }
+
+  @Override
+  public void guardar(Timer timer) {
+    sessionFactory.getCurrentSession().saveOrUpdate(timer);
+  }
 }

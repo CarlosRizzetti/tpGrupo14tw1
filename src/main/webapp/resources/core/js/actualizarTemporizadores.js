@@ -154,7 +154,6 @@ class DashboardTimer {
         this.modal.classList.remove('hidden');
 
 
-        this.notificados.add(id);
         sessionStorage.setItem('notificados', JSON.stringify([...this.notificados]));
     }
 }
