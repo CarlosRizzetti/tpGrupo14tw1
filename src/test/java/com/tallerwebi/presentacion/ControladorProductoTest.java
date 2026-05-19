@@ -5,10 +5,12 @@ import static org.hamcrest.Matchers.*;
 import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
 import static org.mockito.Mockito.*;
 
+import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.presentacion.controller.ControladorProducto;
+import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.Collections;
 import java.util.List;
@@ -31,12 +33,14 @@ public class ControladorProductoTest {
     servicioCategoriaMock = mock(ServicioCategoria.class);
     sessionMock = mock(HttpSession.class);
     controladorProducto = new ControladorProducto(servicioProductoMock, servicioCategoriaMock);
-
+    Categoria categoriaDefault = new Categoria("default.png", true, "default");
+    CategoriaDto categoriaDefaultDTO = new CategoriaDto(categoriaDefault);
+    List<CategoriaDto> categorias = List.of(categoriaDefaultDTO);
     usuarioAdminMock = mock(Usuario.class);
     when(usuarioAdminMock.getRol()).thenReturn("ADMIN");
     when(sessionMock.getAttribute("usuario")).thenReturn(usuarioAdminMock);
     when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu())
-      .thenReturn(Collections.emptyList());
+      .thenReturn(categorias);
   }
 
   // --- GET /producto/nuevo ---

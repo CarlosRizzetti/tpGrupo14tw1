@@ -16,4 +16,11 @@ INSERT INTO productos_categoria (id_producto, id_categoria) VALUES (4, 3);
 INSERT INTO ReglaVencimiento (id, descongelamientoMinutos, duracionMinutos, tieneDescongelamiento, ubicacion, id_producto) VALUES (1, 120, 4000, 1, 'mesa', 1);
 
 
-INSERT INTO Timer (estaActivo, estado, fechaCreacion, fechaVencimiento, groupId, id_categoria, id_producto, id_regla_vencimiento) VALUES (1, 'activo', NOW(6), '2026-05-31 23:59:59', 'GRP-100', 3, 1, 1);
+INSERT INTO Timer (estaActivo, estado, fechaCreacion, fechaVencimiento, groupId, id_categoria, id_producto, id_regla_vencimiento) VALUES (1, 'activo', NOW(6), '2026-05-18 20:00:59', 'GRP-100', 3, 1, 1);
+INSERT INTO Timer (estaActivo, estado, fechaCreacion, fechaVencimiento, groupId, id_categoria, id_producto, id_regla_vencimiento) VALUES (1, 'activo', NOW(6), '2026-05-18 20:00:59', 'GRP-100', 3, 1, 1);
+INSERT INTO Timer (estaActivo, estado, fechaCreacion, fechaVencimiento, groupId, id_categoria, id_producto, id_regla_vencimiento) VALUES (1, 'activo', NOW(6), '2026-05-18 20:00:59', 'GRP-100', 3, 1, 1);
+INSERT INTO Timer (estaActivo, estado, fechaCreacion, fechaVencimiento, groupId, id_categoria, id_producto, id_regla_vencimiento) VALUES (1, 'activo', NOW(6), '2026-05-18 20:00:59', 'GRP-100', 3, 1, 1);
+INSERT INTO Timer (estaActivo, estado, fechaCreacion, fechaVencimiento, groupId, id_categoria, id_producto, id_regla_vencimiento) VALUES (1, 'activo', NOW(6), '2026-05-18 20:00:59', 'GRP-100', 3, 1, 1);
+INSERT INTO Timer (estaActivo, estado, fechaCreacion, fechaVencimiento, groupId, id_categoria, id_producto, id_regla_vencimiento) VALUES (1, 'activo', NOW(6), '2026-05-18 20:00:59', 'GRP-100', 3, 1, 1);
+INSERT INTO Timer (estaActivo, estado, fechaCreacion, fechaVencimiento, groupId, id_categoria, id_producto, id_regla_vencimiento) VALUES (1, 'activo', NOW(6), '2026-05-18 20:00:59', 'GRP-100', 3, 1, 1);
+INSERT INTO Timer (estaActivo, estado, fechaCreacion, fechaVencimiento, groupId, id_categoria, id_producto, id_regla_vencimiento) VALUES (1, 'activo', NOW(6), '2026-05-18 20:00:59', 'GRP-100', 3, 1, 1);
