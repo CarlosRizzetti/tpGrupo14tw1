@@ -53,10 +53,13 @@ public class ControladorDashboard {
       servicioDashboard.eliminarTimer(timerId);
       return ResponseEntity.ok("Timer eliminado correctamente");
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.status(org.springframework.http.HttpStatus.BAD_REQUEST).body(e.getMessage());
+      return ResponseEntity
+        .status(org.springframework.http.HttpStatus.BAD_REQUEST)
+        .body(e.getMessage());
     } catch (Exception e) {
-      return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar el timer");
+      return ResponseEntity
+        .status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+        .body("Error al eliminar el timer");
     }
   }
-
 }
