@@ -24,3 +24,6 @@ hs_err_pid*
 
 # Reportes de codigo limpio y cobertura de pruebas
 .calidad-de-codigo/
+src/main/webapp/resources/core/css/app.css
+src/main/webapp/resources/core/css/app.css
+src/main/webapp/resources/core/css/app.css

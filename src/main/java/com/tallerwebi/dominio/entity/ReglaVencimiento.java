@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
+@Table(name = "reglaVencimiento")
 public class ReglaVencimiento {
 
   @Id
@@ -16,7 +17,7 @@ public class ReglaVencimiento {
   private Long id;
 
   @OneToOne
-  @JoinColumn(name = "id_producto")
+  @JoinColumn(name = "idProducto")
   private Producto producto;
 
   private String ubicacion;
