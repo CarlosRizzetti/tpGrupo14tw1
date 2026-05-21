@@ -1,14 +1,14 @@
 package com.tallerwebi.presentacion.controller;
 
-import com.tallerwebi.presentacion.dto.CategoriaDto;
+import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
-
+import com.tallerwebi.presentacion.dto.CalculoVencimientoDto;
+import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.List;
 import javax.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
@@ -23,11 +24,13 @@ public class ControladorProducto {
 
   private final ServicioProducto servicioProducto;
   private final ServicioCategoria servicioCategoria;
+  private static final String CATEGORIA = "categoria";
 
   @Autowired
   public ControladorProducto(
     ServicioProducto servicioProducto,
-    ServicioCategoria servicioCategoria) {
+    ServicioCategoria servicioCategoria
+  ) {
     this.servicioProducto = servicioProducto;
     this.servicioCategoria = servicioCategoria;
   }
@@ -38,8 +41,8 @@ public class ControladorProducto {
     if (!esAdministrador(session)) {
       return new ModelAndView("redirect:/acceso-denegado");
     }
-    List<CategoriaDto> categorias = servicioCategoria.obtenerLasCategoriasParaElMenu();
     ModelAndView mav = new ModelAndView("producto/nuevo");
+    List<CategoriaDto> categorias = servicioCategoria.obtenerLasCategoriasParaElMenu();
     mav.addObject("categorias", categorias);
     mav.addObject("datosProducto", new ProductoDto());
     return mav;
@@ -71,16 +74,69 @@ public class ControladorProducto {
   }
 
   @RequestMapping(path = "/category/{id}/products", method = RequestMethod.GET)
-  public ModelAndView mostrarProductosPorCategoria(@PathVariable Long id) {
+  public ModelAndView mostrarProductosPorCategoria(@PathVariable Long id, HttpSession session) {
     ModelMap modelo = new ModelMap();
     CategoriaDto categoria = servicioCategoria.obtenerCategoriaPorId(id);
+    session.setAttribute(CATEGORIA, categoria);
     List<Producto> productos = servicioProducto.obtenerProductosPorCategoria(id);
-    modelo.put("categoria", categoria);
+
+    modelo.put(CATEGORIA, categoria);
     modelo.put("productos", productos);
     return new ModelAndView("productos", modelo);
   }
 
-  // Verificar que el usuario en sesión sea Admin
+  @RequestMapping(path = "/product/{id}", method = RequestMethod.GET)
+  public ModelAndView mostrarVencimientoProducto(
+    @PathVariable Long id,
+    @RequestParam(required = false) Long categoryId,
+    HttpSession session
+  ) {
+    ModelMap modelo = new ModelMap();
+    Producto producto = servicioProducto.obtenerProductoPorId(id);
+    CategoriaDto categoriaDto = (CategoriaDto) session.getAttribute(CATEGORIA);
+    Categoria categoria = determinarCategoria(producto, categoryId);
+
+    modelo.put("producto", producto);
+    modelo.put("reglaVencimiento", producto.getReglaVencimiento());
+    modelo.put(CATEGORIA, categoriaDto != null ? categoriaDto : categoria);
+
+    return new ModelAndView("producto-vencimiento", modelo);
+  }
+
+  @RequestMapping(path = "/product/{id}/print", method = RequestMethod.POST)
+  public ModelAndView imprimirConstancia(
+    @PathVariable Long id,
+    @RequestParam("offset_minutes") Integer offsetMinutes,
+    @RequestParam(name = "categoryId", required = false) Long categoryId,
+    HttpSession session
+  ) {
+    ModelMap modelo = new ModelMap();
+    Producto producto = servicioProducto.obtenerProductoPorId(id);
+    Categoria categoria = determinarCategoria(producto, categoryId);
+    CategoriaDto categoriaDto = (CategoriaDto) session.getAttribute(CATEGORIA);
+    CalculoVencimientoDto dto = servicioProducto.calcularVencimiento(producto, offsetMinutes);
+
+    modelo.put("resultado", dto);
+    modelo.put(CATEGORIA, categoriaDto != null ? categoriaDto : categoria);
+    modelo.put("producto", producto);
+
+    return new ModelAndView("imprimir-vencimiento", modelo);
+  }
+
+  private Categoria determinarCategoria(Producto producto, Long categoryId) {
+    if (producto.getCategorias().isEmpty()) {
+      return null;
+    }
+    if (categoryId != null) {
+      for (Categoria c : producto.getCategorias()) {
+        if (c.getId().equals(categoryId)) {
+          return c;
+        }
+      }
+    }
+    return producto.getCategorias().get(0);
+  }
+
   private boolean esAdministrador(HttpSession session) {
     Object usuario = session.getAttribute("usuario");
     if (usuario == null) return false;

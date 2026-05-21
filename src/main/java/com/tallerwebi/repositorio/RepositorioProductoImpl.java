@@ -22,6 +22,18 @@ public class RepositorioProductoImpl implements RepositorioProducto {
   }
 
   @Override
+  public Producto obtenerProductoPorId(Long id) {
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery(
+        "SELECT p FROM Producto p LEFT JOIN FETCH p.categorias LEFT JOIN FETCH p.reglaVencimiento WHERE p.id = :id",
+        Producto.class
+      )
+      .setParameter("id", id)
+      .uniqueResult();
+  }
+
+  @Override
   public List<Categoria> obtenerCategoriasPorIds(List<Long> ids) {
     return sessionFactory
       .getCurrentSession()

@@ -51,6 +51,16 @@
     .bg-puesto-soft {
         background-color: var(--bg-puesto-soft);
     }
+
+    .tema-login {
+        --bg-app: #f3f4f6; /* Tu color de fondo */
+        --bg-header: #da291c; /* Tu color de header */
+        --text-header: #fff;
+        --btn-bg: #FFC72C;
+        --btn-text: #27251f;
+        --btn-border: #e39f00;
+        --tw-ring-color:#e39f00;
+    }
 }
 @layer utilities {
     @keyframes success-flash {

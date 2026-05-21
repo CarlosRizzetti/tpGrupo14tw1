@@ -39,8 +39,7 @@ public class ControladorProductoTest {
     usuarioAdminMock = mock(Usuario.class);
     when(usuarioAdminMock.getRol()).thenReturn("ADMIN");
     when(sessionMock.getAttribute("usuario")).thenReturn(usuarioAdminMock);
-    when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu())
-      .thenReturn(categorias);
+    when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu()).thenReturn(categorias);
   }
 
   // --- GET /producto/nuevo ---
@@ -157,7 +156,7 @@ public class ControladorProductoTest {
     when(servicioProductoMock.obtenerProductosPorCategoria(categoriaId)).thenReturn(productosMock);
 
     // ejecucion
-    ModelAndView mav = controladorProducto.mostrarProductosPorCategoria(categoriaId);
+    ModelAndView mav = controladorProducto.mostrarProductosPorCategoria(categoriaId, sessionMock);
 
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("productos"));
