@@ -6,7 +6,7 @@
 </head>
 <body>
 
-<th:block th:replace="~{layouts/app :: layout(~{::content}, _, ~{::header_center}, ~{::header_right}, ${temaClase})}">
+<th:block th:replace="~{layouts/app :: layout(~{::content}, _, ~{::header_center}, ~{::header_right}, _)}">
 
     <th:block th:fragment="header_center">
         <h2 class="text-xl font-bold" th:text="${producto.nombre}">Nombre Producto</h2>
@@ -20,7 +20,7 @@
     </th:block>
 
     <th:block th:fragment="content">
-        <div class="p-4 flex flex-col gap-4 max-w-lg mx-auto w-full mt-6">
+        <div th:classappend="${categoria.tema}">
             <div th:if="${reglaVencimiento != null}" class="bg-puesto-btn text-puesto-btn-text rounded-3xl shadow-md p-6">
                 <form th:action="@{'/product/' + ${producto.id} + '/print'}" method="POST" id="form-vencimiento" onsubmit="return processAndSubmit()">
                     <input type="hidden" name="categoryId" th:value="${categoria != null ? categoria.id : ''}">

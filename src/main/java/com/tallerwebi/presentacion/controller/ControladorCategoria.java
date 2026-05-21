@@ -3,9 +3,9 @@ package com.tallerwebi.presentacion.controller;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import java.util.List;
+import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -20,10 +20,13 @@ public class ControladorCategoria {
   }
 
   @RequestMapping("/home")
-  public ModelAndView index() {
-    ModelMap modelo = new ModelMap();
+  public ModelAndView index(HttpSession session) {
+    ModelAndView mav = new ModelAndView("home");
     List<CategoriaDto> categorias = this.servicioCategoria.obtenerLasCategoriasParaElMenu();
-    modelo.put("categorias", categorias);
-    return new ModelAndView("home", modelo);
+    mav.addObject("categorias", categorias);
+    session.setAttribute("categorias", categorias);
+    CategoriaDto categoria = this.servicioCategoria.obtenerCategoriaPorId(3L);
+    session.setAttribute("categoria", categoria);
+    return mav;
   }
 }
