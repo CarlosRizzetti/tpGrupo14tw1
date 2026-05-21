@@ -2,6 +2,10 @@ package com.tallerwebi.dominio.utils;
 
 public class ValidadorPassword {
 
+  private ValidadorPassword() {
+    // constructor privado para clase de utilidad
+  }
+
   public static boolean esValida(String password) {
     if (password == null) return false;
 
