@@ -82,9 +82,8 @@ public class ControladorProducto {
 
   // Verificar que el usuario en sesión sea Admin
   private boolean esAdministrador(HttpSession session) {
-    Object usuario = session.getAttribute("usuario");
-    if (usuario == null) return false;
-    com.tallerwebi.dominio.entity.Usuario user = (com.tallerwebi.dominio.entity.Usuario) usuario;
-    return "ADMIN".equalsIgnoreCase(user.getRol());
+    Object rol = session.getAttribute("ROL");
+    if (rol == null) return false;
+    return "ADMIN".equalsIgnoreCase(rol.toString());
   }
 }
