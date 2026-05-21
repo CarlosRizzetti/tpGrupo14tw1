@@ -5,10 +5,12 @@ import static org.hamcrest.Matchers.*;
 import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
 import static org.mockito.Mockito.*;
 
+import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.presentacion.controller.ControladorProducto;
+import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.Collections;
 import java.util.List;
@@ -31,12 +33,14 @@ public class ControladorProductoTest {
     servicioCategoriaMock = mock(ServicioCategoria.class);
     sessionMock = mock(HttpSession.class);
     controladorProducto = new ControladorProducto(servicioProductoMock, servicioCategoriaMock);
-
+    Categoria categoriaDefault = new Categoria("default.png", true, "default");
+    CategoriaDto categoriaDefaultDTO = new CategoriaDto(categoriaDefault);
+    List<CategoriaDto> categorias = List.of(categoriaDefaultDTO);
     usuarioAdminMock = mock(Usuario.class);
     when(usuarioAdminMock.getRol()).thenReturn("ADMIN");
     when(sessionMock.getAttribute("usuario")).thenReturn(usuarioAdminMock);
-    when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu())
-      .thenReturn(Collections.emptyList());
+    when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu()).thenReturn(categorias);
+
   }
 
   // --- GET /producto/nuevo ---
@@ -114,8 +118,8 @@ public class ControladorProductoTest {
     // preparacion
     ProductoDto datos = new ProductoDto();
     doThrow(new IllegalArgumentException("El nombre del producto es obligatorio"))
-      .when(servicioProductoMock)
-      .crearProducto(datos);
+            .when(servicioProductoMock)
+            .crearProducto(datos);
 
     // ejecucion
     ModelAndView mav = controladorProducto.crearProducto(datos, sessionMock);
@@ -123,8 +127,8 @@ public class ControladorProductoTest {
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("producto/nuevo"));
     assertThat(
-      mav.getModel().get("error").toString(),
-      equalToIgnoringCase("El nombre del producto es obligatorio")
+            mav.getModel().get("error").toString(),
+            equalToIgnoringCase("El nombre del producto es obligatorio")
     );
   }
 
@@ -148,7 +152,7 @@ public class ControladorProductoTest {
     // preparacion
     Long categoriaId = 1L;
     List<com.tallerwebi.dominio.entity.Producto> productosMock = Collections.singletonList(
-      new com.tallerwebi.dominio.entity.Producto()
+            new com.tallerwebi.dominio.entity.Producto()
     );
     when(servicioProductoMock.obtenerProductosPorCategoria(categoriaId)).thenReturn(productosMock);
 
