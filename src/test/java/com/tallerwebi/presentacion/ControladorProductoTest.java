@@ -40,7 +40,6 @@ public class ControladorProductoTest {
     when(usuarioAdminMock.getRol()).thenReturn("ADMIN");
     when(sessionMock.getAttribute("usuario")).thenReturn(usuarioAdminMock);
     when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu()).thenReturn(categorias);
-
   }
 
   // --- GET /producto/nuevo ---
@@ -118,8 +117,8 @@ public class ControladorProductoTest {
     // preparacion
     ProductoDto datos = new ProductoDto();
     doThrow(new IllegalArgumentException("El nombre del producto es obligatorio"))
-            .when(servicioProductoMock)
-            .crearProducto(datos);
+      .when(servicioProductoMock)
+      .crearProducto(datos);
 
     // ejecucion
     ModelAndView mav = controladorProducto.crearProducto(datos, sessionMock);
@@ -127,8 +126,8 @@ public class ControladorProductoTest {
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("producto/nuevo"));
     assertThat(
-            mav.getModel().get("error").toString(),
-            equalToIgnoringCase("El nombre del producto es obligatorio")
+      mav.getModel().get("error").toString(),
+      equalToIgnoringCase("El nombre del producto es obligatorio")
     );
   }
 
@@ -152,7 +151,7 @@ public class ControladorProductoTest {
     // preparacion
     Long categoriaId = 1L;
     List<com.tallerwebi.dominio.entity.Producto> productosMock = Collections.singletonList(
-            new com.tallerwebi.dominio.entity.Producto()
+      new com.tallerwebi.dominio.entity.Producto()
     );
     when(servicioProductoMock.obtenerProductosPorCategoria(categoriaId)).thenReturn(productosMock);
 

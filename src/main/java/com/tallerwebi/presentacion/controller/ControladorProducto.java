@@ -8,7 +8,6 @@ import com.tallerwebi.presentacion.dto.CalculoVencimientoDto;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.List;
-import java.util.Locale;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,11 +22,9 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class ControladorProducto {
 
-  private static final String TEMA_PREFIX = "tema-";
-  private static final String TEMA_CLASE_ATTR = "temaClase";
-
   private final ServicioProducto servicioProducto;
   private final ServicioCategoria servicioCategoria;
+  private static final String CATEGORIA = "categoria";
 
   @Autowired
   public ControladorProducto(
@@ -38,19 +35,20 @@ public class ControladorProducto {
     this.servicioCategoria = servicioCategoria;
   }
 
+  // GET — mostrar el formulario
   @RequestMapping(value = "/producto/nuevo", method = RequestMethod.GET)
   public ModelAndView mostrarFormulario(HttpSession session) {
     if (!esAdministrador(session)) {
       return new ModelAndView("redirect:/acceso-denegado");
     }
-
-    ModelMap modelo = new ModelMap();
+    ModelAndView mav = new ModelAndView("producto/nuevo");
     List<CategoriaDto> categorias = servicioCategoria.obtenerLasCategoriasParaElMenu();
-    modelo.put("categorias", categorias);
-    modelo.put("datosProducto", new ProductoDto());
-    return new ModelAndView("producto/nuevo", modelo);
+    mav.addObject("categorias", categorias);
+    mav.addObject("datosProducto", new ProductoDto());
+    return mav;
   }
 
+  // POST — procesar el formulario
   @RequestMapping(value = "/producto/nuevo", method = RequestMethod.POST)
   public ModelAndView crearProducto(@ModelAttribute ProductoDto productoDto, HttpSession session) {
     if (!esAdministrador(session)) {
@@ -80,7 +78,7 @@ public class ControladorProducto {
     ModelMap modelo = new ModelMap();
     CategoriaDto categoria = servicioCategoria.obtenerCategoriaPorId(id);
     List<Producto> productos = servicioProducto.obtenerProductosPorCategoria(id);
-    modelo.put("categoria", categoria);
+    modelo.put(CATEGORIA, categoria);
     modelo.put("productos", productos);
     return new ModelAndView("productos", modelo);
   }
@@ -88,19 +86,17 @@ public class ControladorProducto {
   @RequestMapping(path = "/product/{id}", method = RequestMethod.GET)
   public ModelAndView mostrarVencimientoProducto(
     @PathVariable Long id,
-    @RequestParam(required = false) Long categoryId
+    @RequestParam(required = false) Long categoryId,
+    HttpSession session
   ) {
     ModelMap modelo = new ModelMap();
     Producto producto = servicioProducto.obtenerProductoPorId(id);
-
+    CategoriaDto categoriaDto = (CategoriaDto) session.getAttribute(CATEGORIA);
     Categoria categoria = determinarCategoria(producto, categoryId);
 
     modelo.put("producto", producto);
     modelo.put("reglaVencimiento", producto.getReglaVencimiento());
-
-    setearCategoriaTemaEnModelo(categoria, modelo);
-
-    modelo.put("categoria", categoria);
+    modelo.put(CATEGORIA, categoriaDto != null ? categoriaDto : categoria);
 
     return new ModelAndView("producto-vencimiento", modelo);
   }
@@ -109,18 +105,18 @@ public class ControladorProducto {
   public ModelAndView imprimirConstancia(
     @PathVariable Long id,
     @RequestParam("offset_minutes") Integer offsetMinutes,
-    @RequestParam(name = "categoryId", required = false) Long categoryId
+    @RequestParam(name = "categoryId", required = false) Long categoryId,
+    HttpSession session
   ) {
     ModelMap modelo = new ModelMap();
     Producto producto = servicioProducto.obtenerProductoPorId(id);
     Categoria categoria = determinarCategoria(producto, categoryId);
-
+    CategoriaDto categoriaDto = (CategoriaDto) session.getAttribute(CATEGORIA);
     CalculoVencimientoDto dto = servicioProducto.calcularVencimiento(producto, offsetMinutes);
-    modelo.put("resultado", dto);
-    modelo.put("categoria", categoria);
-    modelo.put("producto", producto);
 
-    setearCategoriaTemaEnModelo(categoria, modelo);
+    modelo.put("resultado", dto);
+    modelo.put(CATEGORIA, categoriaDto != null ? categoriaDto : categoria);
+    modelo.put("producto", producto);
 
     return new ModelAndView("imprimir-vencimiento", modelo);
   }
@@ -144,18 +140,5 @@ public class ControladorProducto {
     if (usuario == null) return false;
     com.tallerwebi.dominio.entity.Usuario user = (com.tallerwebi.dominio.entity.Usuario) usuario;
     return "ADMIN".equalsIgnoreCase(user.getRol());
-  }
-
-  private void setearCategoriaTemaEnModelo(Categoria categoria, ModelMap modelo) {
-    if (categoria != null && categoria.getTema() != null) {
-      String temaCat = categoria.getTema().toLowerCase(Locale.ROOT);
-      if (!temaCat.startsWith(TEMA_PREFIX)) {
-        modelo.put(TEMA_CLASE_ATTR, TEMA_PREFIX + temaCat);
-      } else {
-        modelo.put(TEMA_CLASE_ATTR, temaCat);
-      }
-    } else {
-      modelo.put(TEMA_CLASE_ATTR, "tema-cocina");
-    }
   }
 }
