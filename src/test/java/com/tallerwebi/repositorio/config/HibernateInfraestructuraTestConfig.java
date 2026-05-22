@@ -23,7 +23,7 @@ public class HibernateInfraestructuraTestConfig {
   public DataSource dataSource() {
     DriverManagerDataSource dataSource = new DriverManagerDataSource();
     dataSource.setDriverClassName("org.hsqldb.jdbcDriver");
-    dataSource.setUrl("jdbc:hsqldb:mem:db_");
+    dataSource.setUrl("jdbc:hsqldb:mem:db_infraestructura;DB_CLOSE_DELAY=-1");
     dataSource.setUsername("sa");
     dataSource.setPassword("");
     return dataSource;
@@ -50,10 +50,7 @@ public class HibernateInfraestructuraTestConfig {
     properties.setProperty("hibernate.format_sql", "true");
     properties.setProperty("hibernate.hbm2ddl.auto", "create");
 
-    boolean isTestProfile = Arrays.asList(env.getActiveProfiles()).contains("test");
-    if (isTestProfile) {
-      properties.setProperty("hibernate.hbm2ddl.import_files", "no-file.sql");
-    }
+    properties.setProperty("hibernate.hbm2ddl.import_files", "no-file.sql");
 
     return properties;
   }

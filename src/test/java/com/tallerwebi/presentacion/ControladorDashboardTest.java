@@ -18,6 +18,8 @@ import javax.servlet.http.HttpSession;
 import org.hibernate.annotations.common.util.StringHelper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.ModelAndView;
 
 public class ControladorDashboardTest {
@@ -64,5 +66,51 @@ public class ControladorDashboardTest {
     assertEquals(1, timers.size());
     assertEquals(1L, timers.get(0).getId());
     assertEquals(timer, timers.get(0));
+  }
+
+  @Test
+  public void queAlEliminarUnTimerCorrectamenteRetorneHttpStatusOkYMensajeExito() {
+    Long timerId = 1L;
+    Long categoryId = 2L;
+
+    doNothing().when(servicioDashboardMock).eliminarTimer(timerId);
+
+    ResponseEntity<String> respuesta = controladorDashboard.eliminarTimer(timerId, categoryId);
+
+    verify(servicioDashboardMock, times(1)).eliminarTimer(timerId);
+    assertEquals(HttpStatus.OK, respuesta.getStatusCode());
+    assertEquals("Timer eliminado correctamente", respuesta.getBody());
+  }
+
+  @Test
+  public void queAlEliminarUnTimerConIdInvalidoLanceIllegalArgumentExceptionYRetorneBadRequest() {
+    Long timerId = 99L;
+    Long categoryId = 2L;
+
+    doThrow(new IllegalArgumentException("Timer no encontrado"))
+      .when(servicioDashboardMock)
+      .eliminarTimer(timerId);
+
+    ResponseEntity<String> respuesta = controladorDashboard.eliminarTimer(timerId, categoryId);
+
+    verify(servicioDashboardMock, times(1)).eliminarTimer(timerId);
+    assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
+    assertEquals("Timer no encontrado", respuesta.getBody());
+  }
+
+  @Test
+  public void queAlEliminarUnTimerYSiOcurreUnErrorInesperadoRetorneInternalServerError() {
+    Long timerId = 1L;
+    Long categoryId = 2L;
+
+    doThrow(new RuntimeException("Error de base de datos"))
+      .when(servicioDashboardMock)
+      .eliminarTimer(timerId);
+
+    ResponseEntity<String> respuesta = controladorDashboard.eliminarTimer(timerId, categoryId);
+
+    verify(servicioDashboardMock, times(1)).eliminarTimer(timerId);
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
+    assertEquals("Error al eliminar el timer", respuesta.getBody());
   }
 }

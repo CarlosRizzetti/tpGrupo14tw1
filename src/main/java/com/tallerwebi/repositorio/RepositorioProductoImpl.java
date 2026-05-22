@@ -6,8 +6,10 @@ import com.tallerwebi.dominio.interfaces.RepositorioProducto;
 import java.util.List;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository("repositorioProducto")
+@Transactional
 public class RepositorioProductoImpl implements RepositorioProducto {
 
   private final SessionFactory sessionFactory;
@@ -18,14 +20,17 @@ public class RepositorioProductoImpl implements RepositorioProducto {
 
   @Override
   public void guardar(Producto producto) {
-    sessionFactory.getCurrentSession().save(producto);
+    sessionFactory.getCurrentSession().saveOrUpdate(producto);
   }
 
   @Override
   public List<Categoria> obtenerCategoriasPorIds(List<Long> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return java.util.Collections.emptyList();
+    }
     return sessionFactory
       .getCurrentSession()
-      .createQuery("FROM Categoria WHERE id IN :ids", Categoria.class)
+      .createQuery("FROM Categoria c WHERE c.id IN (:ids)", Categoria.class)
       .setParameter("ids", ids)
       .list();
   }
@@ -40,5 +45,10 @@ public class RepositorioProductoImpl implements RepositorioProducto {
       )
       .setParameter("categoriaId", categoriaId)
       .list();
+  }
+
+  @Override
+  public Producto buscarPorId(Long id) {
+    return null;
   }
 }

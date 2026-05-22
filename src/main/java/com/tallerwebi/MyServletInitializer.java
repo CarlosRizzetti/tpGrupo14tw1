@@ -37,4 +37,13 @@ public class MyServletInitializer extends AbstractAnnotationConfigDispatcherServ
   protected String[] getServletMappings() {
     return new String[] { "/" };
   }
+
+  @Override
+  protected javax.servlet.Filter[] getServletFilters() {
+    org.springframework.web.filter.CharacterEncodingFilter characterEncodingFilter =
+      new org.springframework.web.filter.CharacterEncodingFilter();
+    characterEncodingFilter.setEncoding("UTF-8");
+    characterEncodingFilter.setForceEncoding(true);
+    return new javax.servlet.Filter[] { characterEncodingFilter };
+  }
 }
