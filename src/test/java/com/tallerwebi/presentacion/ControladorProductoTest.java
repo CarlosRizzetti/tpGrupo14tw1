@@ -39,8 +39,7 @@ public class ControladorProductoTest {
     usuarioAdminMock = mock(Usuario.class);
     when(usuarioAdminMock.getRol()).thenReturn("ADMIN");
     when(sessionMock.getAttribute("usuario")).thenReturn(usuarioAdminMock);
-    when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu())
-      .thenReturn(categorias);
+    when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu()).thenReturn(categorias);
   }
 
   // --- GET /producto/nuevo ---

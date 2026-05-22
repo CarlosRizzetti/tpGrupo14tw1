@@ -8,4 +8,5 @@ public interface RepositorioProducto {
   void guardar(Producto producto);
   List<Categoria> obtenerCategoriasPorIds(List<Long> ids);
   List<Producto> obtenerProductosPorCategoria(Long categoriaId);
+  Producto buscarPorId(Long id);
 }
