@@ -74,10 +74,12 @@ public class ControladorProducto {
   }
 
   @RequestMapping(path = "/category/{id}/products", method = RequestMethod.GET)
-  public ModelAndView mostrarProductosPorCategoria(@PathVariable Long id) {
+  public ModelAndView mostrarProductosPorCategoria(@PathVariable Long id, HttpSession session) {
     ModelMap modelo = new ModelMap();
     CategoriaDto categoria = servicioCategoria.obtenerCategoriaPorId(id);
+    session.setAttribute(CATEGORIA, categoria);
     List<Producto> productos = servicioProducto.obtenerProductosPorCategoria(id);
+
     modelo.put(CATEGORIA, categoria);
     modelo.put("productos", productos);
     return new ModelAndView("productos", modelo);
