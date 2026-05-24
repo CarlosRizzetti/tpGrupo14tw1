@@ -156,7 +156,7 @@ public class ControladorProductoTest {
     when(servicioProductoMock.obtenerProductosPorCategoria(categoriaId)).thenReturn(productosMock);
 
     // ejecucion
-    ModelAndView mav = controladorProducto.mostrarProductosPorCategoria(categoriaId);
+    ModelAndView mav = controladorProducto.mostrarProductosPorCategoria(categoriaId, sessionMock);
 
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("productos"));

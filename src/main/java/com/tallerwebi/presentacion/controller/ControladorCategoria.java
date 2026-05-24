@@ -25,8 +25,6 @@ public class ControladorCategoria {
     List<CategoriaDto> categorias = this.servicioCategoria.obtenerLasCategoriasParaElMenu();
     mav.addObject("categorias", categorias);
     session.setAttribute("categorias", categorias);
-    CategoriaDto categoria = this.servicioCategoria.obtenerCategoriaPorId(3L);
-    session.setAttribute("categoria", categoria);
     return mav;
   }
 }

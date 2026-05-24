@@ -11,6 +11,8 @@
     "tailwindcss": "^3.4.1"
   },
   "scripts": {
-    "build-tw": "tailwindcss -i src/main/webapp/resources/core/css/input.css -o src/main/webapp/resources/core/css/app.css --minify"
+    "build-tw": "tailwindcss -i src/main/webapp/resources/core/css/input.css -o src/main/webapp/resources/core/css/app.css --minify",
+    "watch-tw": "tailwindcss -i src/main/webapp/resources/core/css/input.css -o src/main/webapp/resources/core/css/app.css --watch"
+
   }
 }
