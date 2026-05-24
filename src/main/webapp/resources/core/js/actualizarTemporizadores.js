@@ -3,7 +3,7 @@ class DashboardTimer {
     this.UMBRAL_CRITICO = 15;
     this.UMBRAL_ADVERTENCIA = 45;
 
-    this.notificados = new Set(JSON.parse(sessionStorage.getItem("notificados")) || []);
+    this.notificados = new Set(JSON.parse(sessionStorage.getItem("notificados") || "[]"));
     this.alertaSonido = new Audio("/sounds/alert.mp3");
 
     this.modal = document.getElementById("notificacion-modal");
@@ -134,13 +134,14 @@ class DashboardTimer {
     const nombre = card.querySelector(`#nombre-${id}`)?.textContent || "Producto";
     const ubicacion = card.querySelector(`#ubicacion-${id}`)?.textContent || "General";
 
-    this.alertaSonido.play().catch(console.log("Interacción requerida para audio"));
+    this.alertaSonido.play().catch(() => console.log("Interacción requerida para audio"));
 
     this.notifNombre.textContent = nombre;
     this.notifLoc.textContent = ubicacion;
     this.modal.classList.remove("hidden");
 
     sessionStorage.setItem("notificados", JSON.stringify([...this.notificados]));
+    this.notificados.add(id);
   }
 }
 
