@@ -13,7 +13,7 @@ function cambiarInputs (e){
         dateContainer.classList.add('hidden');
         document.getElementById(`date-${id}`).value = '';
     }
-};
+}
 
 
 function enviarFormulario(e) {
