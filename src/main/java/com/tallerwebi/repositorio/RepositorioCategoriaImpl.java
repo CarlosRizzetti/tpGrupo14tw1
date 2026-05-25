@@ -2,8 +2,11 @@ package com.tallerwebi.repositorio;
 
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -17,12 +20,14 @@ public class RepositorioCategoriaImpl implements RepositorioCategoria {
   }
 
   @Override
-  public List<Categoria> obtenerTodasLasCategoriasActivas() {
-    return (List<Categoria>) sessionFactory
+  public Set<Categoria> obtenerTodasLasCategoriasActivas() {
+    List<Categoria> resultado = sessionFactory
       .getCurrentSession()
       .createCriteria(Categoria.class)
       .add(Restrictions.eq("estaActiva", true))
+      .addOrder(Order.asc("id"))
       .list();
+    return new HashSet<>(resultado);
   }
 
   @Override
@@ -33,5 +38,17 @@ public class RepositorioCategoriaImpl implements RepositorioCategoria {
   @Override
   public Categoria buscarPorId(Long id) {
     return sessionFactory.getCurrentSession().get(Categoria.class, id);
+  }
+
+  @Override
+  public Set<Categoria> obtenerCategoriasPorIds(List<Long> ids) {
+    if (ids == null || ids.isEmpty()) {
+      return java.util.Collections.emptySet();
+    }
+    return (Set<Categoria>) sessionFactory
+      .getCurrentSession()
+      .createQuery("FROM Categoria c WHERE c.id IN (:ids)", Categoria.class)
+      .setParameter("ids", ids)
+      .list();
   }
 }

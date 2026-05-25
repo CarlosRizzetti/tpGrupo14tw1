@@ -46,6 +46,8 @@ public class ControladorProductoTest {
 
   @Test
   public void mostrarFormularioComoAdminDeberiaRetornarVistaNuevoProducto() {
+    when(sessionMock.getAttribute("ROL")).thenReturn("admin");
+
     // ejecucion
     ModelAndView mav = controladorProducto.mostrarFormulario(sessionMock);
 
@@ -55,6 +57,8 @@ public class ControladorProductoTest {
 
   @Test
   public void mostrarFormularioDeberiaIncluirListaDeCategorias() {
+    when(sessionMock.getAttribute("ROL")).thenReturn("admin");
+
     // ejecucion
     ModelAndView mav = controladorProducto.mostrarFormulario(sessionMock);
 
@@ -64,6 +68,8 @@ public class ControladorProductoTest {
 
   @Test
   public void mostrarFormularioDeberiaIncluirDatosProductoVacio() {
+    when(sessionMock.getAttribute("ROL")).thenReturn("admin");
+
     // ejecucion
     ModelAndView mav = controladorProducto.mostrarFormulario(sessionMock);
 
@@ -103,6 +109,7 @@ public class ControladorProductoTest {
   public void crearProductoExitosoDeberiaRedirigirAExito() {
     // preparacion
     ProductoDto datos = new ProductoDto();
+    when(sessionMock.getAttribute("ROL")).thenReturn("admin");
 
     // ejecucion
     ModelAndView mav = controladorProducto.crearProducto(datos, sessionMock);
@@ -114,6 +121,8 @@ public class ControladorProductoTest {
 
   @Test
   public void crearProductoConErrorDeValidacionDeberiaVolverAlFormulario() {
+    when(sessionMock.getAttribute("ROL")).thenReturn("admin");
+
     // preparacion
     ProductoDto datos = new ProductoDto();
     doThrow(new IllegalArgumentException("El nombre del producto es obligatorio"))

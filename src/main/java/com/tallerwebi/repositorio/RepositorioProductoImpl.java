@@ -1,13 +1,14 @@
 package com.tallerwebi.repositorio;
 
-import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.interfaces.RepositorioProducto;
 import java.util.List;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository("repositorioProducto")
+@Transactional
 public class RepositorioProductoImpl implements RepositorioProducto {
 
   private final SessionFactory sessionFactory;
@@ -18,7 +19,7 @@ public class RepositorioProductoImpl implements RepositorioProducto {
 
   @Override
   public void guardar(Producto producto) {
-    sessionFactory.getCurrentSession().save(producto);
+    sessionFactory.getCurrentSession().saveOrUpdate(producto);
   }
 
   @Override
@@ -26,20 +27,11 @@ public class RepositorioProductoImpl implements RepositorioProducto {
     return sessionFactory
       .getCurrentSession()
       .createQuery(
-        "SELECT p FROM Producto p LEFT JOIN FETCH p.categorias LEFT JOIN FETCH p.reglaVencimiento WHERE p.id = :id",
+        "SELECT p FROM Producto p LEFT JOIN FETCH p.reglas WHERE p.id = :id",
         Producto.class
       )
       .setParameter("id", id)
       .uniqueResult();
-  }
-
-  @Override
-  public List<Categoria> obtenerCategoriasPorIds(List<Long> ids) {
-    return sessionFactory
-      .getCurrentSession()
-      .createQuery("FROM Categoria WHERE id IN :ids", Categoria.class)
-      .setParameter("ids", ids)
-      .list();
   }
 
   @Override
@@ -52,5 +44,16 @@ public class RepositorioProductoImpl implements RepositorioProducto {
       )
       .setParameter("categoriaId", categoriaId)
       .list();
+  }
+
+  @Override
+  public Producto obtenerProductoConReglasYCategorias(Long id) {
+    return (Producto) sessionFactory
+      .getCurrentSession()
+      .createQuery(
+        "SELECT p FROM Producto p LEFT JOIN FETCH p.reglas LEFT JOIN FETCH p.categorias WHERE p.id = :id"
+      )
+      .setParameter("id", id)
+      .uniqueResult();
   }
 }

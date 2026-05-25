@@ -1,10 +1,9 @@
-<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, ~{fragments/notificacion::alertaVencimiento})}">
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, ~{fragments/notificacion::alertaVencimiento}, ~{::scripts})}">
 <head>
     <title th:text="${categoria.nombre} + ' - Panel'">Panel de Control</title>
 </head>
-<body>
+<div>
 
 <!-- FRAGMENTO IZQUIERDO: Botón Volver -->
 <div th:fragment="header_left">
@@ -147,10 +146,10 @@
             </div>
         </div>
     </div>
-    <script type="module" th:src="@{/resources/core/js/actualizarTemporizadores.js}"></script>
-    <script th:src="@{/resources/core/js/deleteTimer.js}"></script>
-
 </div>
-</body>
+</div>
 
-</html>
+<div th:fragment="scripts">
+<script type="module" th:src="@{/resources/core/js/actualizarTemporizadores.js}" defer></script>
+<script th:src="@{/resources/core/js/deleteTimer.js}" defer></script>
+</div>
