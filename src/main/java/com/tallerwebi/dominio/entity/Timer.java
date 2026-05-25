@@ -9,13 +9,13 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrePersist;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 public class Timer {
 
@@ -24,7 +24,7 @@ public class Timer {
   private Long id;
 
   private String groupId;
-
+  private OffsetDateTime descongelamiento;
   private OffsetDateTime fechaCreacion;
   private OffsetDateTime fechaVencimiento;
   private Boolean estaActivo;
@@ -48,9 +48,20 @@ public class Timer {
     this.reglaVencimiento = reglaVencimiento;
   }
 
-  public Timer(OffsetDateTime fechaCreacion, OffsetDateTime fechaVencimiento) {
+  public Timer(
+    OffsetDateTime fechaCreacion,
+    OffsetDateTime fechaVencimiento,
+    OffsetDateTime descongelamiento,
+    Producto producto,
+    Categoria categoria,
+    ReglaVencimiento reglaVencimiento
+  ) {
     this.fechaCreacion = fechaCreacion;
     this.fechaVencimiento = fechaVencimiento;
+    this.descongelamiento = descongelamiento;
+    this.producto = producto;
+    this.categoria = categoria;
+    this.reglaVencimiento = reglaVencimiento;
     this.estaActivo = true;
     this.estado = "activo";
   }

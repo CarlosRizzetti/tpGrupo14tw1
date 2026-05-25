@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:fragment="layout(content, header_left, header_center, header_right, extra)">
+      th:fragment="layout(content, header_left, header_center, header_right, extra, scripts)">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
     <title>MCD Vencimientos</title>
-    <!-- Ruta corregida a los recursos estáticos de Spring -->
+    <th:block th:if="${scripts != null}" th:replace="${scripts}"></th:block>
     <link rel="stylesheet" th:href="@{/resources/core/css/app.css}">
 </head>
 

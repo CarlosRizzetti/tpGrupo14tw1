@@ -1,23 +1,15 @@
 package com.tallerwebi.dominio.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.*;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 public class Producto {
 
@@ -35,8 +27,8 @@ public class Producto {
     joinColumns = @JoinColumn(name = "idProducto"),
     inverseJoinColumns = @JoinColumn(name = "idCategoria")
   )
-  private List<Categoria> categorias = new ArrayList<>();
+  private Set<Categoria> categorias = new HashSet<>();
 
-  @OneToOne(mappedBy = "producto", cascade = CascadeType.ALL)
-  private ReglaVencimiento reglaVencimiento;
+  @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private Set<ReglaVencimiento> reglas = new HashSet<>();
 }
