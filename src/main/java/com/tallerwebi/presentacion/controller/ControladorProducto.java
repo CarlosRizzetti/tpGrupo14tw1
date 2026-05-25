@@ -2,12 +2,13 @@ package com.tallerwebi.presentacion.controller;
 
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
+import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
-import com.tallerwebi.presentacion.dto.CalculoVencimientoDto;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.List;
+import java.util.Set;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -86,41 +87,31 @@ public class ControladorProducto {
   }
 
   @RequestMapping(path = "/product/{id}", method = RequestMethod.GET)
-  public ModelAndView mostrarVencimientoProducto(
-    @PathVariable Long id,
-    @RequestParam(required = false) Long categoryId,
-    HttpSession session
-  ) {
+  public ModelAndView mostrarVencimientoProducto(@PathVariable Long id, HttpSession session) {
     ModelMap modelo = new ModelMap();
-    Producto producto = servicioProducto.obtenerProductoPorId(id);
+    Producto producto = servicioProducto.obtenerProductoConReglas(id);
+    Set<ReglaVencimiento> reglas = producto.getReglas();
     CategoriaDto categoriaDto = (CategoriaDto) session.getAttribute(CATEGORIA);
-    Categoria categoria = determinarCategoria(producto, categoryId);
 
     modelo.put("producto", producto);
-    modelo.put("reglaVencimiento", producto.getReglaVencimiento());
-    modelo.put(CATEGORIA, categoriaDto != null ? categoriaDto : categoria);
+    modelo.put("reglas", reglas);
+    modelo.put(CATEGORIA, categoriaDto);
 
     return new ModelAndView("producto-vencimiento", modelo);
   }
 
-  @RequestMapping(path = "/product/{id}/print", method = RequestMethod.POST)
-  public ModelAndView imprimirConstancia(
+  @RequestMapping(path = "/producto/{id}/generar", method = RequestMethod.POST)
+  public String imprimirConstancia(
     @PathVariable Long id,
     @RequestParam("offset_minutes") Integer offsetMinutes,
     @RequestParam(name = "categoryId", required = false) Long categoryId,
-    HttpSession session
+    @RequestParam(name = "reglaId") Long reglaId
   ) {
-    ModelMap modelo = new ModelMap();
-    Producto producto = servicioProducto.obtenerProductoPorId(id);
+    Producto producto = servicioProducto.obtenerProductoConReglas(id);
     Categoria categoria = determinarCategoria(producto, categoryId);
-    CategoriaDto categoriaDto = (CategoriaDto) session.getAttribute(CATEGORIA);
-    CalculoVencimientoDto dto = servicioProducto.calcularVencimiento(producto, offsetMinutes);
+    servicioProducto.generarVencimiento(producto, categoria, reglaId, offsetMinutes);
 
-    modelo.put("resultado", dto);
-    modelo.put(CATEGORIA, categoriaDto != null ? categoriaDto : categoria);
-    modelo.put("producto", producto);
-
-    return new ModelAndView("imprimir-vencimiento", modelo);
+    return "redirect:/dashboard";
   }
 
   private Categoria determinarCategoria(Producto producto, Long categoryId) {
@@ -134,7 +125,7 @@ public class ControladorProducto {
         }
       }
     }
-    return producto.getCategorias().get(0);
+    return producto.getCategorias().stream().findFirst().orElse(null);
   }
 
   private boolean esAdministrador(HttpSession session) {

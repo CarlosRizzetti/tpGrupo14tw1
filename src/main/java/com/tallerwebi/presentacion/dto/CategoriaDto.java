@@ -2,7 +2,11 @@ package com.tallerwebi.presentacion.dto;
 
 import com.tallerwebi.dominio.entity.Categoria;
 import java.util.Locale;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class CategoriaDto {
 
   private Long id;
@@ -25,37 +29,5 @@ public class CategoriaDto {
     } else {
       this.tema = "tema-cocina";
     }
-  }
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getNombre() {
-    return nombre;
-  }
-
-  public void setNombre(String nombre) {
-    this.nombre = nombre;
-  }
-
-  public String getIcono() {
-    return icono;
-  }
-
-  public void setIcono(String icono) {
-    this.icono = icono;
-  }
-
-  public String getTema() {
-    return tema;
-  }
-
-  public void setTema(String tema) {
-    this.tema = tema;
   }
 }

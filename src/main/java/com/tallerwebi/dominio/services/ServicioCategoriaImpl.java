@@ -5,6 +5,7 @@ import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class ServicioCategoriaImpl implements ServicioCategoria {
 
   @Override
   public List<CategoriaDto> obtenerLasCategoriasParaElMenu() {
-    List<Categoria> categorias = repositorioCategoria.obtenerTodasLasCategoriasActivas();
+    Set<Categoria> categorias = repositorioCategoria.obtenerTodasLasCategoriasActivas();
     return categorias
       .stream()
       .map(categoria -> new CategoriaDto(categoria))
