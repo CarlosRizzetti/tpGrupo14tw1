@@ -2,9 +2,9 @@
   "name": "proyecto-taller-web",
   "version": "1.0.0",
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
     "autoprefixer": "^10.4.17",
-    "eslint": "^10.4.0",
+    "cross-env": "^10.1.0",
+    "eslint": "^8.57.0",
     "eslint-plugin-jasmine": "^4.2.2",
     "globals": "^17.6.0",
     "postcss": "^8.4.35",
@@ -12,7 +12,7 @@
   },
   "scripts": {
     "build-tw": "tailwindcss -i src/main/webapp/resources/core/css/input.css -o src/main/webapp/resources/core/css/app.css --minify",
-    "watch-tw": "tailwindcss -i src/main/webapp/resources/core/css/input.css -o src/main/webapp/resources/core/css/app.css --watch"
-
+    "watch-tw": "tailwindcss -i src/main/webapp/resources/core/css/input.css -o src/main/webapp/resources/core/css/app.css --watch",
+    "lint:fix": "cross-env ESLINT_USE_FLAT_CONFIG=false eslint src/main/webapp/resources/**/*.js --fix"
   }
 }
