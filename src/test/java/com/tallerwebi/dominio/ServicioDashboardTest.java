@@ -1,6 +1,7 @@
 package com.tallerwebi.dominio;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
@@ -46,5 +47,50 @@ public class ServicioDashboardTest {
     assertEquals(1, listaObtenida.size());
     verify(repositorioTimerMock, times(1)).obtenerTimersSegunEstado(categoria.getId(), "activo");
     assertEquals(1L, listaObtenida.get(0).getId());
+  }
+
+  @Test
+  public void queNoHagaNadaSiElTimerNoExiste() {
+    when(repositorioTimerMock.buscarPorId(99L)).thenReturn(null);
+
+    this.servicioDashboard.eliminarTimer(99L);
+
+    verify(repositorioTimerMock, never()).guardar(any());
+  }
+
+  @Test
+  public void queElTimerQuedeMarcadoComoVencidoSiYaVencio() {
+    OffsetDateTime fechaVencimientoPasada = OffsetDateTime.now().minusHours(1);
+    Timer timer = new Timer()
+      .builder()
+      .fechaCreacion(OffsetDateTime.now().minusHours(2))
+      .fechaVencimiento(fechaVencimientoPasada)
+      .build();
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+
+    servicioDashboard.eliminarTimer(1L);
+
+    assertEquals("vencido", timer.getEstado());
+    assertFalse(timer.getEstaActivo());
+    verify(repositorioTimerMock).guardar(timer);
+  }
+
+  @Test
+  public void queElTimerQuedeMarcadoComoEliminadoSiNoVencioTodavia() {
+    OffsetDateTime fechaVencimientoFutura = OffsetDateTime.now().plusHours(1);
+    Timer timer = new Timer()
+      .builder()
+      .fechaCreacion(OffsetDateTime.now())
+      .fechaVencimiento(fechaVencimientoFutura)
+      .build();
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+
+    servicioDashboard.eliminarTimer(1L);
+
+    assertEquals("eliminado", timer.getEstado());
+    assertFalse(timer.getEstaActivo());
+    verify(repositorioTimerMock).guardar(timer);
   }
 }

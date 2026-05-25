@@ -3,12 +3,17 @@ package com.tallerwebi.dominio.services;
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
+import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioProducto;
+import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
-import com.tallerwebi.presentacion.dto.CalculoVencimientoDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
-import java.time.LocalDateTime;
+import java.time.Clock;
+import java.time.OffsetDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,10 +23,21 @@ import org.springframework.transaction.annotation.Transactional;
 public class ServicioProductoImpl implements ServicioProducto {
 
   private final RepositorioProducto repositorioProducto;
+  private RepositorioTimer repositorioTimer;
+  private RepositorioCategoria repositorioCategoria;
+  private Clock clock;
 
   @Autowired
-  public ServicioProductoImpl(RepositorioProducto repositorioProducto) {
+  public ServicioProductoImpl(
+    Clock clock,
+    RepositorioProducto repositorioProducto,
+    RepositorioTimer repositorioTimer,
+    RepositorioCategoria repositorioCategoria
+  ) {
+    this.clock = clock;
     this.repositorioProducto = repositorioProducto;
+    this.repositorioTimer = repositorioTimer;
+    this.repositorioCategoria = repositorioCategoria;
   }
 
   @Override
@@ -29,7 +45,7 @@ public class ServicioProductoImpl implements ServicioProducto {
     validar(datos);
 
     // Traer categorías desde la BD
-    List<Categoria> categorias = repositorioProducto.obtenerCategoriasPorIds(
+    Set<Categoria> categorias = repositorioCategoria.obtenerCategoriasPorIds(
       datos.getCategoriasIds()
     );
 
@@ -47,7 +63,9 @@ public class ServicioProductoImpl implements ServicioProducto {
     regla.setDescongelamientoMinutos(datos.getDescongelamientoMinutos());
     regla.setProducto(producto);
 
-    producto.setReglaVencimiento(regla);
+    Set<ReglaVencimiento> listaReglas = new HashSet<>();
+    listaReglas.add(regla);
+    producto.setReglas(listaReglas);
 
     repositorioProducto.guardar(producto);
   }
@@ -63,26 +81,39 @@ public class ServicioProductoImpl implements ServicioProducto {
   }
 
   @Override
-  public CalculoVencimientoDto calcularVencimiento(Producto producto, Integer offsetMinutos) {
-    ReglaVencimiento regla = producto.getReglaVencimiento();
+  public Timer generarVencimiento(
+    Producto producto,
+    Categoria categoria,
+    Long reglaId,
+    Integer offsetMinutos
+  ) {
+    ReglaVencimiento regla = producto
+      .getReglas()
+      .stream()
+      .filter(r -> r.getId().equals(reglaId))
+      .findFirst()
+      .orElse(null);
     if (regla == null) {
       throw new IllegalArgumentException("El producto no tiene regla de vencimiento");
     }
 
-    LocalDateTime elaboracion = LocalDateTime.now().minusMinutes(offsetMinutos);
-    LocalDateTime vencimiento = elaboracion.plusMinutes(regla.getDuracionMinutos());
-    LocalDateTime descongelamiento = (Boolean.TRUE.equals(regla.getTieneDescongelamiento()) &&
+    OffsetDateTime elaboracion = OffsetDateTime.now(clock).minusMinutes(offsetMinutos);
+    OffsetDateTime vencimiento = elaboracion.plusMinutes(regla.getDuracionMinutos());
+    OffsetDateTime descongelamiento = (Boolean.TRUE.equals(regla.getTieneDescongelamiento()) &&
         regla.getDescongelamientoMinutos() != null)
       ? elaboracion.plusMinutes(regla.getDescongelamientoMinutos())
       : null;
 
-    return new CalculoVencimientoDto(
-      elaboracion,
-      vencimiento,
-      descongelamiento,
-      producto.getNombre(),
-      regla.getUbicacion()
-    );
+    Timer timer = new Timer(elaboracion, vencimiento, descongelamiento, producto, categoria, regla);
+    this.repositorioTimer.guardar(timer);
+    return timer;
+  }
+
+  @Override
+  public Producto obtenerProductoConReglas(Long id) {
+    Producto producto = this.repositorioProducto.obtenerProductoConReglasYCategorias(id);
+    if (producto != null) return producto;
+    return producto;
   }
 
   private void validar(ProductoDto datos) {

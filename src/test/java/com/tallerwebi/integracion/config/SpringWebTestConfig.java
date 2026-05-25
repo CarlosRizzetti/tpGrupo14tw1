@@ -1,5 +1,6 @@
 package com.tallerwebi.integracion.config;
 
+import java.time.Clock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -72,5 +73,10 @@ public class SpringWebTestConfig implements WebMvcConfigurer {
     ThymeleafViewResolver viewResolver = new ThymeleafViewResolver();
     viewResolver.setTemplateEngine(templateEngine());
     return viewResolver;
+  }
+
+  @Bean
+  public Clock clock() {
+    return Clock.systemDefaultZone();
   }
 }

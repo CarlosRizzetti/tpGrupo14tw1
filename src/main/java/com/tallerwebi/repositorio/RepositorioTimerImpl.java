@@ -34,6 +34,6 @@ public class RepositorioTimerImpl implements RepositorioTimer {
 
   @Override
   public void guardar(Timer timer) {
-    sessionFactory.getCurrentSession().saveOrUpdate(timer);
+    sessionFactory.getCurrentSession().save(timer);
   }
 }

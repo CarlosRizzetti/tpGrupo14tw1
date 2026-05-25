@@ -1,6 +1,5 @@
 package com.tallerwebi.repositorio;
 
-import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.interfaces.RepositorioProducto;
 import java.util.List;
@@ -28,23 +27,11 @@ public class RepositorioProductoImpl implements RepositorioProducto {
     return sessionFactory
       .getCurrentSession()
       .createQuery(
-        "SELECT p FROM Producto p LEFT JOIN FETCH p.categorias LEFT JOIN FETCH p.reglaVencimiento WHERE p.id = :id",
+        "SELECT p FROM Producto p LEFT JOIN FETCH p.reglas WHERE p.id = :id",
         Producto.class
       )
       .setParameter("id", id)
       .uniqueResult();
-  }
-
-  @Override
-  public List<Categoria> obtenerCategoriasPorIds(List<Long> ids) {
-    if (ids == null || ids.isEmpty()) {
-      return java.util.Collections.emptyList();
-    }
-    return sessionFactory
-      .getCurrentSession()
-      .createQuery("FROM Categoria c WHERE c.id IN (:ids)", Categoria.class)
-      .setParameter("ids", ids)
-      .list();
   }
 
   @Override
@@ -60,7 +47,13 @@ public class RepositorioProductoImpl implements RepositorioProducto {
   }
 
   @Override
-  public Producto buscarPorId(Long id) {
-    return null;
+  public Producto obtenerProductoConReglasYCategorias(Long id) {
+    return (Producto) sessionFactory
+      .getCurrentSession()
+      .createQuery(
+        "SELECT p FROM Producto p LEFT JOIN FETCH p.reglas LEFT JOIN FETCH p.categorias WHERE p.id = :id"
+      )
+      .setParameter("id", id)
+      .uniqueResult();
   }
 }

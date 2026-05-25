@@ -30,8 +30,18 @@ public class TimerActivoTest {
   public void queAlNoTenerGroupIdSeGenereUnoAutomaticamente() {
     OffsetDateTime fechaCreacion = OffsetDateTime.now();
     OffsetDateTime fechaVencimiento = fechaCreacion.plusDays(3);
+    Categoria categoria = new Categoria("mccafe.png", true, "mccafe");
+    Producto producto = new Producto();
+    ReglaVencimiento regla = new ReglaVencimiento();
 
-    Timer timer = new Timer(fechaCreacion, fechaVencimiento);
+    Timer timer = new Timer(
+      fechaCreacion,
+      fechaVencimiento,
+      (OffsetDateTime) null,
+      producto,
+      categoria,
+      regla
+    );
     sessionFactory.getCurrentSession().save(timer);
     assertNotNull(timer.getGroupId());
   }

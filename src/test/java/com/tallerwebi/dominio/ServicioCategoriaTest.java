@@ -10,6 +10,7 @@ import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.services.ServicioCategoriaImpl;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,9 +30,27 @@ public class ServicioCategoriaTest {
     Categoria mccafe = new Categoria("mccafe.png", true, "mccafe");
     Categoria servicio = new Categoria("servicio.png", true, "servicio");
     Categoria cocina = new Categoria("cocina.png", true, "cocina");
-    List<Categoria> categorias = List.of(mccafe, servicio, cocina);
+    Set<Categoria> categorias = Set.of(mccafe, servicio, cocina);
     when(this.repositorioCategoriaMock.obtenerTodasLasCategoriasActivas()).thenReturn(categorias);
     List<CategoriaDto> categoriasActivas = this.servicioCategoria.obtenerLasCategoriasParaElMenu();
     assertEquals(3, categoriasActivas.size());
+  }
+
+  @Test
+  public void queDevuelvaElDtoCorrecto() {
+    Categoria categoria = Categoria
+      .builder()
+      .id(1L)
+      .nombre("McCafe")
+      .icono("mccafe.png")
+      .estaActiva(true)
+      .build();
+    when(repositorioCategoriaMock.buscarPorId(1L)).thenReturn(categoria);
+
+    CategoriaDto resultado = servicioCategoria.obtenerCategoriaPorId(1L);
+
+    assertEquals(1L, resultado.getId());
+    assertEquals("McCafe", resultado.getNombre());
+    assertEquals("mccafe.png", resultado.getIcono());
   }
 }
