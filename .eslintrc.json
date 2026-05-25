@@ -10,6 +10,8 @@
     "sourceType": "module"
   },
   "rules": {
+    "indent": ["error", 2],
+    "quotes": ["error", "double"],
     "no-unused-vars": "off",
     "no-undef": "off",
     "no-console": "off"
