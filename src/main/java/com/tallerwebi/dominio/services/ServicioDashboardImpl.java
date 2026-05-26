@@ -1,6 +1,8 @@
 package com.tallerwebi.dominio.services;
 
+import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioDashboard;
 import com.tallerwebi.presentacion.dto.TimerDTO;
@@ -16,10 +18,15 @@ import org.springframework.stereotype.Service;
 public class ServicioDashboardImpl implements ServicioDashboard {
 
   public RepositorioTimer repositorioTimer;
+  public RepositorioCategoria repositorioCategoria;
 
   @Autowired
-  public ServicioDashboardImpl(RepositorioTimer repositorioTimer) {
+  public ServicioDashboardImpl(
+    RepositorioTimer repositorioTimer,
+    RepositorioCategoria repositorioCategoria
+  ) {
     this.repositorioTimer = repositorioTimer;
+    this.repositorioCategoria = repositorioCategoria;
   }
 
   @Override
@@ -69,5 +76,30 @@ public class ServicioDashboardImpl implements ServicioDashboard {
       timer.setEstaActivo(false);
       repositorioTimer.guardar(timer);
     }
+  }
+
+  @Override
+  public void importarTimer(Long timerId, Long categoriaId) {
+    Timer original = repositorioTimer.buscarPorId(timerId);
+    if (original == null) {
+      throw new IllegalArgumentException("El timer no existe");
+    }
+    Categoria categoriaDestino = repositorioCategoria.buscarPorId(categoriaId);
+
+    if (categoriaDestino == null) {
+      throw new IllegalArgumentException("La categoría no existe");
+    }
+
+    // Crear clon reutilizando el MISMO groupId
+    Timer clon = new Timer(
+      original.getFechaCreacion(),
+      original.getFechaVencimiento(),
+      original.getGroupId(),
+      original.getProducto(),
+      categoriaDestino,
+      original.getReglaVencimiento()
+    );
+
+    repositorioTimer.guardar(clon);
   }
 }

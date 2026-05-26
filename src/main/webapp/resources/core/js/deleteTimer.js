@@ -27,12 +27,12 @@ function eliminarTimer(timerId, categoryId, card) {
     .then(response => {
       if (response.ok) {
         card.remove();
-        if(document.querySelectorAll(".timer").length === 0) {
+        if (document.querySelectorAll(".timer").length === 0) {
           location.reload();
         }
       } else {
         alert("Hubo un error al eliminar el timer.");
-        if(card) {
+        if (card) {
           card.style.opacity = "1";
           card.style.pointerEvents = "auto";
         }
@@ -41,7 +41,7 @@ function eliminarTimer(timerId, categoryId, card) {
     .catch(error => {
       console.error("Error:", error);
       alert("Hubo un error al eliminar el timer.");
-      if(card) {
+      if (card) {
         card.style.opacity = "1";
         card.style.pointerEvents = "auto";
       }
