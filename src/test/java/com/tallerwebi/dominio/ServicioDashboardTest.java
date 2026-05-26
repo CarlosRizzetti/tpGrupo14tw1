@@ -9,6 +9,7 @@ import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioDashboard;
 import com.tallerwebi.dominio.services.ServicioDashboardImpl;
@@ -22,11 +23,14 @@ public class ServicioDashboardTest {
 
   public ServicioDashboard servicioDashboard;
   public RepositorioTimer repositorioTimerMock;
+  public RepositorioCategoria repositorioCategoriaMock;
 
   @BeforeEach
   public void init() {
     this.repositorioTimerMock = mock(RepositorioTimer.class);
-    this.servicioDashboard = new ServicioDashboardImpl(repositorioTimerMock);
+    this.repositorioCategoriaMock = mock(RepositorioCategoria.class);
+    this.servicioDashboard =
+      new ServicioDashboardImpl(repositorioTimerMock, repositorioCategoriaMock);
   }
 
   @Test
