@@ -17,7 +17,7 @@ function eliminarTimer(timerId, categoryId, card) {
     card.style.pointerEvents = "none";
   }
 
-  fetch(`/active-timers/${timerId}/${categoryId}`, {
+  fetch(`active-timers/${timerId}/${categoryId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
