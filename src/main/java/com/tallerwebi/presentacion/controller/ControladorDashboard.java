@@ -1,7 +1,9 @@
 package com.tallerwebi.presentacion.controller;
 
 import com.tallerwebi.dominio.entity.Categoria;
+import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
+import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioDashboard;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ResponseDTO;
@@ -25,19 +27,12 @@ import org.springframework.web.servlet.ModelAndView;
 public class ControladorDashboard {
 
   public ServicioDashboard servicioDashboard;
-  public RepositorioCategoria repositorioCategoria;
+  public RepositorioTimer repositorioTimer;
 
   @Autowired
-  public ControladorDashboard(ServicioDashboard servicioDashboard) {
+  public ControladorDashboard(ServicioDashboard servicioDashboard, RepositorioTimer repositorioTimer) {
     this.servicioDashboard = servicioDashboard;
-  }
-
-  public ControladorDashboard(
-    ServicioDashboard servicioDashboard,
-    RepositorioCategoria repositorioCategoria
-  ) {
-    this.servicioDashboard = servicioDashboard;
-    this.repositorioCategoria = repositorioCategoria;
+    this.repositorioTimer = repositorioTimer;
   }
 
   @GetMapping("/dashboard")
@@ -82,14 +77,14 @@ public class ControladorDashboard {
 
   @GetMapping("/timers/{timerId}/categories")
   public ResponseEntity<Map<String, Object>> getTimerCategories(@PathVariable Long timerId) {
-    Set<Categoria> categorias = repositorioCategoria.obtenerTodasLasCategoriasActivas();
+    Timer timer = repositorioTimer.buscarPorId(timerId);
 
-    List<CategoriaDto> options = categorias
-      .stream()
-      .map(CategoriaDto::new)
-      .collect(Collectors.toList());
+    if (timer == null) {
+      return ResponseEntity.notFound().build();
+    }
 
-    Map<String, Object> response = Map.of("options", options);
+    CategoriaDto categoriaDto = new CategoriaDto(timer.getCategoria());
+    Map<String, Object> response = Map.of("categoria", categoriaDto);
     return ResponseEntity.ok(response);
   }
 
@@ -101,6 +96,19 @@ public class ControladorDashboard {
     ResponseDTO response = new ResponseDTO();
 
     try {
+      Timer timer = repositorioTimer.buscarPorId(timerId);
+      if (timer == null) {
+        response.setSuccess(false);
+        response.setMessage("El timer no existe");
+        return ResponseEntity.badRequest().body(response);
+      }
+
+      if (timer.getCategoria().getId().equals(categoryId)) {
+        response.setSuccess(false);
+        response.setMessage("El timer ya pertenece a esta categoría");
+        return ResponseEntity.badRequest().body(response);
+      }
+
       servicioDashboard.importarTimer(timerId, categoryId);
 
       response.setSuccess(true);
