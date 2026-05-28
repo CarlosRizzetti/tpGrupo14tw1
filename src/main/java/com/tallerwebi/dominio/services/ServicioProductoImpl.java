@@ -8,12 +8,15 @@ import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioProducto;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
+import com.tallerwebi.dominio.utils.ValidacionHelper;
+import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -114,6 +117,48 @@ public class ServicioProductoImpl implements ServicioProducto {
     Producto producto = this.repositorioProducto.obtenerProductoConReglasYCategorias(id);
     if (producto != null) return producto;
     return producto;
+  }
+
+  @Override
+  public List<CategoriaDto> obtenerCategoriasDeUnProducto(Long idProducto) {
+    ValidacionHelper.validarId(idProducto);
+
+    Producto producto = this.repositorioProducto.obtenerProductoConReglasYCategorias(idProducto);
+    ValidacionHelper.queNoSeaNull(producto, "producto");
+
+    Set<Categoria> categorias = producto.getCategorias();
+    ValidacionHelper.queElSetNoSeaNull(categorias, "categorias del producto");
+
+    return categorias.stream().map(CategoriaDto::new).collect(Collectors.toList());
+  }
+
+  @Override
+  public List<CategoriaDto> obtenerCategoriasDeUnProductoDisponiblesParaImportar(
+    Long idProducto,
+    String groupId
+  ) {
+    ValidacionHelper.validarId(idProducto);
+    ValidacionHelper.validarCampoSeguro(groupId, "groupId");
+
+    Producto producto = this.repositorioProducto.obtenerProductoConReglasYCategorias(idProducto);
+    ValidacionHelper.queNoSeaNull(producto, "producto");
+
+    Set<Categoria> categorias = producto.getCategorias();
+    ValidacionHelper.queElSetNoSeaNull(categorias, "categorias del producto");
+
+    return categorias
+      .stream()
+      .map(categoria -> mapearCategoriaConDisponibilidad(categoria, groupId))
+      .collect(Collectors.toList());
+  }
+
+  private CategoriaDto mapearCategoriaConDisponibilidad(Categoria categoria, String groupId) {
+    boolean estaPresente =
+      this.repositorioTimer.existeTimerActivoEnCategoriaYGrupo(categoria.getId(), groupId);
+
+    CategoriaDto categoriaDto = new CategoriaDto(categoria);
+    categoriaDto.setEstaPresente(estaPresente);
+    return categoriaDto;
   }
 
   private void validar(ProductoDto datos) {

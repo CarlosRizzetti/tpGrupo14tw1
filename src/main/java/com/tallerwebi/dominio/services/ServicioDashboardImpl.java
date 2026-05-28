@@ -2,13 +2,16 @@ package com.tallerwebi.dominio.services;
 
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.excepcion.TimerMapeadoException;
+import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioDashboard;
+import com.tallerwebi.dominio.utils.ValidacionHelper;
 import com.tallerwebi.presentacion.dto.TimerDTO;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,37 +34,54 @@ public class ServicioDashboardImpl implements ServicioDashboard {
 
   @Override
   public List<TimerDTO> obtenerTimersActivos(Long id) {
-    List<Timer> timers = this.repositorioTimer.obtenerTimersSegunEstado(id, "activo");
-    List<TimerDTO> timerDTOS = new ArrayList<>();
+    ValidacionHelper.validarId(id);
 
-    for (Timer timer : timers) {
-      Long timerId = timer.getId();
-      String nombre = (timer.getProducto() != null)
-        ? timer.getProducto().getNombre()
-        : "Producto Desconocido";
-      String groupId = timer.getGroupId();
-      String fechaCreacionISO = (timer.getFechaCreacion() != null)
-        ? timer.getFechaCreacion().toString()
-        : "";
-      String fechaVencimientoISO = (timer.getFechaVencimiento() != null)
-        ? timer.getFechaVencimiento().toString()
-        : "";
-      String ubicacion = (timer.getReglaVencimiento() != null)
-        ? timer.getReglaVencimiento().getUbicacion()
-        : "General";
+    List<Timer> timers = ValidacionHelper.queLaListaNoSeaNull(
+      repositorioTimer.obtenerTimersSegunEstado(id, "activo"),
+      "obtenerTimersSegunEstado"
+    );
 
-      TimerDTO timerDTO = new TimerDTO(
-        timerId,
-        nombre,
-        groupId,
-        fechaCreacionISO,
-        fechaVencimientoISO,
-        ubicacion
+    return timers.stream().map(this::mapearATimerDTO).collect(Collectors.toList());
+  }
+
+  private TimerDTO mapearATimerDTO(Timer timer) {
+    try {
+      if (timer == null) {
+        throw new TimerMapeadoException("Se encontró un timer nulo en la lista", null);
+      }
+      return new TimerDTO(
+        timer.getId(),
+        obtenerNombreProducto(timer),
+        timer.getGroupId(),
+        formatearFecha(timer.getFechaCreacion()),
+        formatearFecha(timer.getFechaVencimiento()),
+        obtenerUbicacion(timer)
       );
-
-      timerDTOS.add(timerDTO);
+    } catch (TimerMapeadoException e) {
+      throw e;
+    } catch (ValidacionException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new TimerMapeadoException("Error al mapear el timer con ID: " + timer.getId(), e);
     }
-    return timerDTOS;
+  }
+
+  private String obtenerNombreProducto(Timer timer) {
+    if (timer.getProducto() == null) return "Producto desconocido";
+    String nombre = timer.getProducto().getNombre();
+    ValidacionHelper.validarCampoSeguro(nombre, "nombre del producto");
+    return nombre;
+  }
+
+  private String obtenerUbicacion(Timer timer) {
+    if (timer.getReglaVencimiento() == null) return "General";
+    String ubicacion = timer.getReglaVencimiento().getUbicacion();
+    ValidacionHelper.validarCampoSeguro(ubicacion, "ubicacion del producto");
+    return ubicacion;
+  }
+
+  private String formatearFecha(Object fecha) {
+    return fecha != null ? fecha.toString() : "";
   }
 
   @Override
