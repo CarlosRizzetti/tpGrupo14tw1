@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, ~{}, _)}">
+<head>
+    <title>Usuarios / MCD Vencimientos</title>
+</head>
+<body>
+
+<div th:fragment="header_center">
+    <span class="text-puesto-header-text font-bold uppercase tracking-widest">Gestión de Usuarios</span>
+</div>
+
+<div th:fragment="header_left">
+    <a th:href="@{/home}" class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+        </svg>
+        Volver
+    </a>
+</div>
+
+<div th:fragment="header_right">
+    <a th:href="@{/admin/usuarios/nuevo}"
+       class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg border border-white/20 transition text-xs font-bold uppercase tracking-wider">
+        + Nuevo Usuario
+    </a>
+</div>
+
+<div th:fragment="content" class="p-6">
+
+    <div th:if="${#lists.isEmpty(usuarios)}" class="text-center p-10 mt-10 bg-white/5 rounded-xl border border-white/10">
+        <p class="text-xl text-white font-bold opacity-70">No hay usuarios registrados.</p>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(usuarios)}" class="overflow-x-auto rounded-2xl border border-black/10 shadow">
+        <table class="w-full text-sm text-left border-collapse">
+            <thead class="uppercase text-xs tracking-wider bg-puesto-header text-puesto-header-text">
+                <tr>
+                    <th class="px-6 py-3">ID</th>
+                    <th class="px-6 py-3">Email</th>
+                    <th class="px-6 py-3">Rol</th>
+                    <th class="px-6 py-3">Estado</th>
+                    <th class="px-6 py-3">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="usuario : ${usuarios}"
+                    class="border-b border-black/10 bg-white hover:bg-yellow-50 transition text-gray-800">
+                    <td class="px-6 py-4 font-mono text-gray-500" th:text="${usuario.id}"></td>
+                    <td class="px-6 py-4 font-bold" th:text="${usuario.email}"></td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 rounded text-xs font-bold bg-gray-200 text-gray-800" th:text="${usuario.rol}"></span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span th:if="${usuario.activo}" class="px-2 py-1 rounded text-xs font-bold bg-green-700 text-white">Activo</span>
+                        <span th:unless="${usuario.activo}" class="px-2 py-1 rounded text-xs font-bold bg-red-700 text-white">Inactivo</span>
+                    </td>
+                    <td class="px-6 py-4 flex gap-2 items-center">
+                        <a th:href="@{/admin/usuarios/{id}/editar(id=${usuario.id})}"
+                           class="px-3 py-1 bg-puesto-header text-puesto-header-text rounded-lg text-xs font-bold hover:opacity-80 transition">
+                            Editar
+                        </a>
+                        <form th:if="${usuario.activo}"
+                              th:action="@{/admin/usuarios/{id}/dar-de-baja(id=${usuario.id})}"
+                              method="POST"
+                              onsubmit="return confirm('¿Confirma que desea dar de baja a este usuario?')">
+                            <button type="submit"
+                                    class="px-3 py-1 bg-red-600 !text-white rounded-lg text-xs font-bold hover:bg-red-700 transition">
+                                Dar de baja
+                            </button>
+                        </form>
+                        <form th:unless="${usuario.activo}"
+                              th:action="@{/admin/usuarios/{id}/reactivar(id=${usuario.id})}"
+                              method="POST">
+                            <button type="submit"
+                                    class="px-3 py-1 bg-green-600 text-white rounded-lg text-xs font-bold hover:bg-green-700 transition">
+                                Reactivar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
