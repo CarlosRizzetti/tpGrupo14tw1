@@ -15,6 +15,7 @@ import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class ControladorProducto {
 
+  private static final Logger LOGGER = Logger.getLogger(ControladorProducto.class.getName());
   private final ServicioProducto servicioProducto;
   private final ServicioCategoria servicioCategoria;
   private final ServicioTimer servicioTimer;
@@ -67,6 +69,9 @@ public class ControladorProducto {
       servicioProducto.crearProducto(productoDto);
       return new ModelAndView("redirect:/producto/exito");
     } catch (IllegalArgumentException e) {
+      if (LOGGER.isLoggable(java.util.logging.Level.SEVERE)) {
+        LOGGER.severe(">>> ERROR: " + e.getClass().getName() + " - " + e.getMessage());
+      }
       ModelMap modelo = new ModelMap();
       List<CategoriaDto> categorias = servicioCategoria.obtenerLasCategoriasParaElMenu();
       modelo.put("categorias", categorias);
