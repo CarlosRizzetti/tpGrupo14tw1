@@ -1,5 +1,6 @@
 package com.tallerwebi.dominio.interfaces;
 
+import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.TimerDTO;
 import java.util.List;
 
@@ -8,5 +9,5 @@ public interface ServicioDashboard {
 
   void eliminarTimer(Long timerId);
 
-  void importarTimer(Long timerId, Long categoriaId);
+  CategoriaDto importarTimer(Long timerId, Long categoriaId);
 }

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, _, ~{}, ~{::scripts})}">
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, ~{}, ~{::scripts})}">
 
 <head>
     <title>Configurar Vencimiento</title>
@@ -9,12 +9,11 @@
 <body>
 
 <div th:fragment="header_left" th:remove="tag">
-    <a th:href="@{/category/{id}/products(id=${categoria.id})}"
-       class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
-        </svg>
-        Volver
+    <a th:href="@{/category/{id}/products(id=${categoria.id})}" class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+    </svg>
+    Volver
     </a>
 </div>
 
@@ -26,6 +25,13 @@
             LECHE
         </h2>
     </div>
+</div>
+
+<div th:fragment="header_right">
+    <a th:href="@{/dashboard}"
+       class="hidden md:flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg border border-white/20 transition text-xs font-bold uppercase tracking-wider">
+        Dashboard
+    </a>
 </div>
 
 <div th:fragment="content" th:remove="tag">

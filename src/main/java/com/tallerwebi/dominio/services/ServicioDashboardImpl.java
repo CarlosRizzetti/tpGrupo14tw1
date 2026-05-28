@@ -8,6 +8,7 @@ import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioDashboard;
 import com.tallerwebi.dominio.utils.ValidacionHelper;
+import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.TimerDTO;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -99,7 +100,7 @@ public class ServicioDashboardImpl implements ServicioDashboard {
   }
 
   @Override
-  public void importarTimer(Long timerId, Long categoriaId) {
+  public CategoriaDto importarTimer(Long timerId, Long categoriaId) {
     Timer original = repositorioTimer.buscarPorId(timerId);
     if (original == null) {
       throw new IllegalArgumentException("El timer no existe");
@@ -121,5 +122,6 @@ public class ServicioDashboardImpl implements ServicioDashboard {
     );
 
     repositorioTimer.guardar(clon);
+    return new CategoriaDto(categoriaDestino);
   }
 }
