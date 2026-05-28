@@ -28,31 +28,31 @@
       <h2 class="font-bold text-xl mb-2">Panel de Control de Administrador</h2>
       <p class="text-sm">Bienvenido, tienes acceso a funciones privilegiadas.</p>
       <div class="mt-4 flex gap-4">
-          <a href="#" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition font-bold">Gestionar Usuarios</a>
-          <a href="#" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition font-bold">Ver Estadísticas Avanzadas</a>
-            <a th:href="@{/producto/nuevo}" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition font-bold">Crear Producto</a>
-      </div>
-  </div>
+          <!--     <a href="#" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition font-bold">Gestionar Usuarios</a>
+               <a href="#" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition font-bold">Ver Estadísticas Avanzadas</a>-->
+                 <a th:href="@{/producto/nuevo}" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition font-bold">Crear Producto</a>
+           </div>
+       </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-10">
-    <a th:each="categoria : ${categorias}"
-       th:href="@{/category/{id}/products(id=${categoria.id})}"
-       th:classappend="' ' + ${categoria.tema}"
-       class="group relative flex flex-col items-center justify-center p-6 bg-puesto-btn text-puesto-btn-text border-b-[8px] border-puesto-btn-border rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-200 hover:-translate-y-2 min-h-[180px]">
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-10">
+         <a th:each="categoria : ${categorias}"
+            th:href="@{/category/{id}/products(id=${categoria.id})}"
+            th:classappend="' ' + ${categoria.tema}"
+            class="group relative flex flex-col items-center justify-center p-6 bg-puesto-btn text-puesto-btn-text border-b-[8px] border-puesto-btn-border rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-200 hover:-translate-y-2 min-h-[180px]">
 
-      <div class="mb-4 text-puesto-accent">
-        <img th:src="@{${categoria.icono}}"
-             class="h-16 w-16 md:h-24 md:w-24 object-contain"
-             alt="icono">
-      </div>
+           <div class="mb-4 text-puesto-accent">
+             <img th:src="@{${categoria.icono}}"
+                  class="h-16 w-16 md:h-24 md:w-24 object-contain"
+                  alt="icono">
+           </div>
 
-      <span class="text-3xl md:text-5xl font-black uppercase tracking-tighter text-center"
-            th:text="${categoria.nombre}">
-        </span>
+           <span class="text-3xl md:text-5xl font-black uppercase tracking-tighter text-center"
+                 th:text="${categoria.nombre}">
+             </span>
 
-      <div class="w-12 h-1.5 md:w-20 md:h-2 mt-4 rounded-full opacity-50 bg-puesto-accent"></div>
-    </a>
-  </div>
-</div>
-</body>
-</html>
+           <div class="w-12 h-1.5 md:w-20 md:h-2 mt-4 rounded-full opacity-50 bg-puesto-accent"></div>
+         </a>
+       </div>
+     </div>
+     </body>
+     </html>

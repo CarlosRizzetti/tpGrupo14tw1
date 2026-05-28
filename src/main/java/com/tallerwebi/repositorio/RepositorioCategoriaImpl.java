@@ -45,10 +45,12 @@ public class RepositorioCategoriaImpl implements RepositorioCategoria {
     if (ids == null || ids.isEmpty()) {
       return java.util.Collections.emptySet();
     }
-    return (Set<Categoria>) sessionFactory
-      .getCurrentSession()
-      .createQuery("FROM Categoria c WHERE c.id IN (:ids)", Categoria.class)
-      .setParameter("ids", ids)
-      .list();
+    return new HashSet<>(
+      sessionFactory
+        .getCurrentSession()
+        .createQuery("FROM Categoria c WHERE c.id IN (:ids)", Categoria.class)
+        .setParameter("ids", ids)
+        .list()
+    );
   }
 }
