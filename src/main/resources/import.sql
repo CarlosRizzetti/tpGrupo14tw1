@@ -10,7 +10,8 @@ INSERT INTO Producto (id, estaActivo, nombre) VALUES (4, 1, 'Cafe');
 
 INSERT INTO ReglaVencimiento (descongelamientoMinutos, duracionMinutos, tieneDescongelamiento, ubicacion, idProducto) VALUES (120, 4000, 1, 'Mesa de Producción', 1);
 INSERT INTO ReglaVencimiento (descongelamientoMinutos, duracionMinutos, tieneDescongelamiento, ubicacion, idProducto) VALUES (0, 120, 0, 'Línea de Servicio', 1);
-
+INSERT INTO ReglaVencimiento (descongelamientoMinutos, duracionMinutos, tieneDescongelamiento, ubicacion, idProducto) VALUES (120, 4000, 1, 'Mesa de Producción', 2);
+INSERT INTO ReglaVencimiento (descongelamientoMinutos, duracionMinutos, tieneDescongelamiento, ubicacion, idProducto) VALUES (0, 120, 0, 'Línea de Servicio', 2);
 INSERT INTO productosCategoria (idProducto, idCategoria) VALUES (1, 1); -- Hamburguesa -> Cocina
 INSERT INTO productosCategoria (idProducto, idCategoria) VALUES (2, 1); -- Papas Fritas -> Cocina
 INSERT INTO productosCategoria (idProducto, idCategoria) VALUES (2, 2); -- Papas Fritas -> Servicio

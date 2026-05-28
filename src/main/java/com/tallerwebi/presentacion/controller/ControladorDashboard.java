@@ -1,17 +1,15 @@
 package com.tallerwebi.presentacion.controller;
 
-import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Timer;
-import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
-import com.tallerwebi.dominio.interfaces.RepositorioTimer;
+import com.tallerwebi.dominio.excepcion.IdInvalido;
+import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.ServicioDashboard;
+import com.tallerwebi.dominio.services.ServicioTimer;
+import com.tallerwebi.dominio.utils.ValidacionHelper;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ResponseDTO;
 import com.tallerwebi.presentacion.dto.TimerDTO;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,12 +25,12 @@ import org.springframework.web.servlet.ModelAndView;
 public class ControladorDashboard {
 
   public ServicioDashboard servicioDashboard;
-  public RepositorioTimer repositorioTimer;
+  public ServicioTimer servicioTimer;
 
   @Autowired
-  public ControladorDashboard(ServicioDashboard servicioDashboard, RepositorioTimer repositorioTimer) {
+  public ControladorDashboard(ServicioDashboard servicioDashboard, ServicioTimer servicioTimer) {
     this.servicioDashboard = servicioDashboard;
-    this.repositorioTimer = repositorioTimer;
+    this.servicioTimer = servicioTimer;
   }
 
   @GetMapping("/dashboard")
@@ -75,55 +73,39 @@ public class ControladorDashboard {
     }
   }
 
-  @GetMapping("/timers/{timerId}/categories")
-  public ResponseEntity<Map<String, Object>> getTimerCategories(@PathVariable Long timerId) {
-    Timer timer = repositorioTimer.buscarPorId(timerId);
-
-    if (timer == null) {
-      return ResponseEntity.notFound().build();
-    }
-
-    CategoriaDto categoriaDto = new CategoriaDto(timer.getCategoria());
-    Map<String, Object> response = Map.of("categoria", categoriaDto);
-    return ResponseEntity.ok(response);
-  }
-
   @PostMapping("/import-timer/{timerId}/{categoryId}")
-  public ResponseEntity<ResponseDTO> importTimer(
+  public ResponseEntity<ResponseDTO> importarTimer(
     @PathVariable Long timerId,
     @PathVariable Long categoryId
   ) {
-    ResponseDTO response = new ResponseDTO();
-
     try {
-      Timer timer = repositorioTimer.buscarPorId(timerId);
-      if (timer == null) {
-        response.setSuccess(false);
-        response.setMessage("El timer no existe");
-        return ResponseEntity.badRequest().body(response);
-      }
+      ValidacionHelper.validarId(timerId);
+      ValidacionHelper.validarId(categoryId);
+
+      Timer timer = servicioTimer.buscarPorId(timerId);
+      ValidacionHelper.queNoSeaNull(timer, "timer");
+
+      ValidacionHelper.queNoSeaNull(timer.getCategoria(), "categoria del timer");
 
       if (timer.getCategoria().getId().equals(categoryId)) {
-        response.setSuccess(false);
-        response.setMessage("El timer ya pertenece a esta categoría");
-        return ResponseEntity.badRequest().body(response);
+        throw new ValidacionException("El timer ya pertenece a esta categoría");
       }
 
       servicioDashboard.importarTimer(timerId, categoryId);
 
+      ResponseDTO response = new ResponseDTO();
       response.setSuccess(true);
       response.setMessage("Timer importado correctamente");
-
       return ResponseEntity.ok(response);
-    } catch (IllegalArgumentException e) {
+    } catch (IdInvalido | ValidacionException e) {
+      ResponseDTO response = new ResponseDTO();
       response.setSuccess(false);
       response.setMessage(e.getMessage());
-
       return ResponseEntity.badRequest().body(response);
     } catch (Exception e) {
+      ResponseDTO response = new ResponseDTO();
       response.setSuccess(false);
       response.setMessage("Error al importar el timer");
-
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
   }
