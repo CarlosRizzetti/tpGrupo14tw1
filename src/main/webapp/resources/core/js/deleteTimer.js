@@ -17,7 +17,7 @@ function eliminarTimer(timerId, categoryId, card) {
     card.style.pointerEvents = "none";
   }
 
-  fetch(`active-timers/${timerId}/${categoryId}`, {
+  fetch(`/active-timers/${timerId}/${categoryId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -25,6 +25,7 @@ function eliminarTimer(timerId, categoryId, card) {
     }
   })
     .then(response => {
+      console.log(response);
       if (response.ok) {
         card.remove();
         if (document.querySelectorAll(".timer").length === 0) {
