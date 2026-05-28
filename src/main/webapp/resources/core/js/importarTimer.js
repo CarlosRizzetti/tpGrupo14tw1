@@ -101,7 +101,7 @@ export async function executeImport(timerId, categoryId) {
 
         const data = await response.json();
 
-        if (response.ok && data.success) {
+        if (data.success && data.message === "Timer importado correctamente") {
             window.location.href = '/dashboard';
         } else {
             throw new Error(data.message || 'Error desconocido al importar');
