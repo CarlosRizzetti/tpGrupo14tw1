@@ -3,21 +3,25 @@ package com.tallerwebi.presentacion.controller;
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
+import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.excepcion.IdInvalido;
+import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
+import com.tallerwebi.dominio.services.ServicioTimer;
+import com.tallerwebi.dominio.utils.ValidacionHelper;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
@@ -25,15 +29,18 @@ public class ControladorProducto {
 
   private final ServicioProducto servicioProducto;
   private final ServicioCategoria servicioCategoria;
+  private final ServicioTimer servicioTimer;
   private static final String CATEGORIA = "categoria";
 
   @Autowired
   public ControladorProducto(
     ServicioProducto servicioProducto,
-    ServicioCategoria servicioCategoria
+    ServicioCategoria servicioCategoria,
+    ServicioTimer servicioTimer
   ) {
     this.servicioProducto = servicioProducto;
     this.servicioCategoria = servicioCategoria;
+    this.servicioTimer = servicioTimer;
   }
 
   // GET — mostrar el formulario
@@ -126,6 +133,38 @@ public class ControladorProducto {
       }
     }
     return producto.getCategorias().stream().findFirst().orElse(null);
+  }
+
+  @GetMapping("/timers/{timerId}/categories")
+  @ResponseBody
+  public ResponseEntity<Map<String, Object>> obtenerCategoriasDeUnProducto(
+    @PathVariable Long timerId
+  ) {
+    try {
+      ValidacionHelper.validarId(timerId);
+
+      Timer timer = servicioTimer.buscarPorId(timerId);
+      ValidacionHelper.queNoSeaNull(timer, "timer");
+
+      Producto producto = timer.getProducto();
+      ValidacionHelper.queNoSeaNull(producto, "producto");
+      String groupId = timer.getGroupId();
+
+      List<CategoriaDto> categorias =
+        servicioProducto.obtenerCategoriasDeUnProductoDisponiblesParaImportar(
+          producto.getId(),
+          groupId
+        );
+      ValidacionHelper.queLaListaNoSeaNull(categorias, "categorias del producto");
+      Map<String, Object> response = Map.of("categorias", categorias);
+      return ResponseEntity.ok(response);
+    } catch (IdInvalido e) {
+      return ResponseEntity.badRequest().build();
+    } catch (ValidacionException e) {
+      return ResponseEntity.notFound().build();
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   private boolean esAdministrador(HttpSession session) {

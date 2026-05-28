@@ -36,4 +36,17 @@ public class RepositorioTimerImpl implements RepositorioTimer {
   public void guardar(Timer timer) {
     sessionFactory.getCurrentSession().save(timer);
   }
+
+  @Override
+  public boolean existeTimerActivoEnCategoriaYGrupo(Long categoriaId, String groupId) {
+    String hql =
+      " SELECT COUNT(t) > 0 FROM Timer t WHERE t.categoria.id = :categoriaId AND t.groupId = :groupId AND t.estaActivo = true";
+
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery(hql, Boolean.class)
+      .setParameter("categoriaId", categoriaId)
+      .setParameter("groupId", groupId)
+      .getSingleResult();
+  }
 }

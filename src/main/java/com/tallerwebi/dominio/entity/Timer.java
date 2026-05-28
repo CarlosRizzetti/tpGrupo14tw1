@@ -2,13 +2,7 @@ package com.tallerwebi.dominio.entity;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
+import javax.persistence.*;
 import lombok.*;
 
 @Getter
@@ -66,7 +60,7 @@ public class Timer {
     this.estado = "activo";
   }
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "idProducto")
   private Producto producto;
 
