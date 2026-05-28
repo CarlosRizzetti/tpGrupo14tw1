@@ -12,10 +12,7 @@ import com.tallerwebi.presentacion.controller.ControladorDashboard;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ResponseDTO;
 import com.tallerwebi.presentacion.dto.TimerDTO;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
@@ -61,7 +58,11 @@ public class ControladorDashboardTest {
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
 
-    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(1L, 99L);
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
+      1L,
+      99L,
+      sessionMock
+    );
 
     assertEquals(HttpStatus.OK, respuesta.getStatusCode());
     assertNotNull(respuesta.getBody());
@@ -78,7 +79,7 @@ public class ControladorDashboardTest {
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
 
-    controladorDashboard.importarTimer(1L, 99L);
+    controladorDashboard.importarTimer(1L, 99L, sessionMock);
 
     verify(servicioDashboardMock).importarTimer(1L, 99L);
   }
@@ -86,7 +87,11 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NEG-01 | importarTimer | Retorna 400 cuando el timerId es inválido")
   void importarTimer_deberiaRetornar400CuandoElTimerIdEsInvalido() {
-    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(-1L, 99L);
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
+      -1L,
+      99L,
+      sessionMock
+    );
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
     assertFalse(respuesta.getBody().isSuccess());
@@ -95,7 +100,11 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NEG-02 | importarTimer | Retorna 400 cuando el categoryId es inválido")
   void importarTimer_deberiaRetornar400CuandoElCategoryIdEsInvalido() {
-    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(1L, -1L);
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
+      1L,
+      -1L,
+      sessionMock
+    );
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
     assertFalse(respuesta.getBody().isSuccess());
@@ -106,7 +115,11 @@ public class ControladorDashboardTest {
   void importarTimer_deberiaRetornar400CuandoElTimerNoExiste() {
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(null);
 
-    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(1L, 99L);
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
+      1L,
+      99L,
+      sessionMock
+    );
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
     assertFalse(respuesta.getBody().isSuccess());
@@ -119,7 +132,11 @@ public class ControladorDashboardTest {
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
 
-    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(1L, 99L);
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
+      1L,
+      99L,
+      sessionMock
+    );
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
     assertFalse(respuesta.getBody().isSuccess());
@@ -133,7 +150,11 @@ public class ControladorDashboardTest {
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
 
-    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(1L, 99L);
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
+      1L,
+      99L,
+      sessionMock
+    );
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
     assertFalse(respuesta.getBody().isSuccess());
@@ -149,7 +170,11 @@ public class ControladorDashboardTest {
       .when(servicioDashboardMock)
       .importarTimer(1L, 99L);
 
-    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(1L, 99L);
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
+      1L,
+      99L,
+      sessionMock
+    );
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
     assertFalse(respuesta.getBody().isSuccess());
@@ -166,7 +191,11 @@ public class ControladorDashboardTest {
       .when(servicioDashboardMock)
       .importarTimer(1L, 99L);
 
-    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(1L, 99L);
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
+      1L,
+      99L,
+      sessionMock
+    );
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
     assertEquals("Error al importar el timer", respuesta.getBody().getMessage());
