@@ -7,4 +7,5 @@ public interface RepositorioTimer {
   List<Timer> obtenerTimersSegunEstado(Long id, String estado);
   Timer buscarPorId(Long id);
   void guardar(Timer timer);
+  boolean existeTimerActivoEnCategoriaYGrupo(Long categoriaId, String groupId);
 }

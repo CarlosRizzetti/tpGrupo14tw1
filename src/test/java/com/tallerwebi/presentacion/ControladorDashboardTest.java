@@ -1,22 +1,26 @@
 package com.tallerwebi.presentacion;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.*;
 import com.tallerwebi.dominio.interfaces.ServicioDashboard;
+import com.tallerwebi.dominio.services.ServicioTimer;
 import com.tallerwebi.presentacion.controller.ControladorDashboard;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
+import com.tallerwebi.presentacion.dto.ResponseDTO;
 import com.tallerwebi.presentacion.dto.TimerDTO;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
-import org.hibernate.annotations.common.util.StringHelper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,12 +31,145 @@ public class ControladorDashboardTest {
   private HttpSession sessionMock;
   private ServicioDashboard servicioDashboardMock;
   private ControladorDashboard controladorDashboard;
+  private ServicioTimer servicioTimerMock;
 
   @BeforeEach
   public void init() {
     servicioDashboardMock = mock(ServicioDashboard.class);
     sessionMock = mock(HttpSession.class);
-    controladorDashboard = new ControladorDashboard(servicioDashboardMock);
+    this.servicioTimerMock = mock(ServicioTimer.class);
+    controladorDashboard = new ControladorDashboard(servicioDashboardMock, servicioTimerMock);
+  }
+
+  private Timer buildTimerConCategoria(Long timerId, Long categoriaId) {
+    Timer timer = new Timer();
+    timer.setId(timerId);
+
+    if (categoriaId != null) {
+      Categoria categoria = new Categoria();
+      categoria.setId(categoriaId);
+      timer.setCategoria(categoria);
+    }
+
+    return timer;
+  }
+
+  @Test
+  @DisplayName("HP-01 | importarTimer | Retorna 200 cuando el timer se importa correctamente")
+  void importarTimer_deberiaRetornar200CuandoSeImportaCorrectamente() {
+    Timer timer = buildTimerConCategoria(1L, 10L);
+
+    when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
+
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(1L, 99L);
+
+    assertEquals(HttpStatus.OK, respuesta.getStatusCode());
+    assertNotNull(respuesta.getBody());
+    assertTrue(respuesta.getBody().isSuccess());
+    assertEquals("Timer importado correctamente", respuesta.getBody().getMessage());
+  }
+
+  @Test
+  @DisplayName(
+    "HP-02 | importarTimer | Llama a servicioDashboard.importarTimer con los ids correctos"
+  )
+  void importarTimer_deberiaLlamarAlServicioConLosIdsCorrectos() {
+    Timer timer = buildTimerConCategoria(1L, 10L);
+
+    when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
+
+    controladorDashboard.importarTimer(1L, 99L);
+
+    verify(servicioDashboardMock).importarTimer(1L, 99L);
+  }
+
+  @Test
+  @DisplayName("NEG-01 | importarTimer | Retorna 400 cuando el timerId es inválido")
+  void importarTimer_deberiaRetornar400CuandoElTimerIdEsInvalido() {
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(-1L, 99L);
+
+    assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
+    assertFalse(respuesta.getBody().isSuccess());
+  }
+
+  @Test
+  @DisplayName("NEG-02 | importarTimer | Retorna 400 cuando el categoryId es inválido")
+  void importarTimer_deberiaRetornar400CuandoElCategoryIdEsInvalido() {
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(1L, -1L);
+
+    assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
+    assertFalse(respuesta.getBody().isSuccess());
+  }
+
+  @Test
+  @DisplayName("NEG-03 | importarTimer | Retorna 400 cuando el timer no existe")
+  void importarTimer_deberiaRetornar400CuandoElTimerNoExiste() {
+    when(servicioTimerMock.buscarPorId(1L)).thenReturn(null);
+
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(1L, 99L);
+
+    assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
+    assertFalse(respuesta.getBody().isSuccess());
+  }
+
+  @Test
+  @DisplayName("NEG-04 | importarTimer | Retorna 400 cuando el timer ya pertenece a la categoria")
+  void importarTimer_deberiaRetornar400CuandoElTimerYaPerteneceALaCategoria() {
+    Timer timer = buildTimerConCategoria(1L, 99L);
+
+    when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
+
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(1L, 99L);
+
+    assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
+    assertFalse(respuesta.getBody().isSuccess());
+    assertEquals("El timer ya pertenece a esta categoría", respuesta.getBody().getMessage());
+  }
+
+  @Test
+  @DisplayName("NEG-05 | importarTimer | Retorna 400 cuando la categoria del timer es null")
+  void importarTimer_deberiaRetornar400CuandoLaCategoriaDelTimerEsNull() {
+    Timer timer = buildTimerConCategoria(1L, null);
+
+    when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
+
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(1L, 99L);
+
+    assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
+    assertFalse(respuesta.getBody().isSuccess());
+  }
+
+  @Test
+  @DisplayName("NEG-06 | importarTimer | Retorna 500 cuando el servicio falla inesperadamente")
+  void importarTimer_deberiaRetornar500CuandoElServicioFallaInesperadamente() {
+    Timer timer = buildTimerConCategoria(1L, 10L);
+
+    when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    doThrow(new RuntimeException("Error inesperado"))
+      .when(servicioDashboardMock)
+      .importarTimer(1L, 99L);
+
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(1L, 99L);
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
+    assertFalse(respuesta.getBody().isSuccess());
+    assertEquals("Error al importar el timer", respuesta.getBody().getMessage());
+  }
+
+  @Test
+  @DisplayName("SEC-01 | importarTimer | No expone información interna en errores 500")
+  void importarTimer_noDeberiaExponerInformacionInternaEnErrores500() {
+    Timer timer = buildTimerConCategoria(1L, 10L);
+
+    when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    doThrow(new RuntimeException("password=1234 datos sensibles"))
+      .when(servicioDashboardMock)
+      .importarTimer(1L, 99L);
+
+    ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(1L, 99L);
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
+    assertEquals("Error al importar el timer", respuesta.getBody().getMessage());
   }
 
   @Test
