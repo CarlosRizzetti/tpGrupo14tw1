@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/app :: layout(~{::content}, _, ~{::header_center}, _, _)}">
+      th:replace="~{layouts/app :: layout(~{::content}, _, ~{::header_center}, _, _,_)}">
 <head>
     <title>Registro / MCD Vencimientos</title>
 </head>
@@ -35,9 +35,19 @@
                        class="w-full px-5 py-4 rounded-xl text-black bg-white focus:ring-4 focus:ring-puesto-app outline-none transition-shadow"
                        placeholder="********" required />
                 <ul id="password-hint" class="mt-2 text-xs font-bold opacity-80 pl-4 list-disc">
-                    <li id="hint-len" class="text-red-300">6-10 caracteres</li>
-                    <li id="hint-upper" class="text-red-300">Al menos una mayúscula</li>
-                    <li id="hint-num" class="text-red-300">Al menos un número</li>
+                    <li id="hint-len" class="text-red-800">6-10 caracteres</li>
+                    <li id="hint-upper" class="text-red-800">Al menos una mayúscula</li>
+                    <li id="hint-num" class="text-red-800">Al menos un número</li>
+                </ul>
+            </div>
+
+            <div>
+                <label for="confirm-password" class="block text-sm font-bold uppercase tracking-wider mb-2">Repetir Contraseña</label>
+                <input type="password" id="confirm-password" name="confirmPassword"
+                       class="w-full px-5 py-4 rounded-xl text-black bg-white focus:ring-4 focus:ring-puesto-app outline-none transition-shadow"
+                       placeholder="********" required />
+                <ul class="mt-2 text-xs font-bold opacity-80 pl-4 list-disc">
+                    <li id="hint-match" class="text-red-800">Las contraseñas deben coincidir</li>
                 </ul>
             </div>
 
