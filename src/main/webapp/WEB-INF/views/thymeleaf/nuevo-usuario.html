@@ -21,7 +21,7 @@
             <span class="font-bold text-sm" th:text="${error}"></span>
         </div>
 
-        <form th:action="@{/registrarme}" method="POST" th:object="${usuario}" class="space-y-5">
+        <form id="form-registrarme" th:action="@{/registrarme}" method="POST" th:object="${usuario}" class="space-y-5">
             <div>
                 <label for="email" class="block text-sm font-bold uppercase tracking-wider mb-2">Correo Electrónico</label>
                 <input th:field="*{email}" id="email" type="email"
@@ -49,10 +49,15 @@
                 <ul class="mt-2 text-xs font-bold opacity-80 pl-4 list-disc">
                     <li id="hint-match" class="text-red-800">Las contraseñas deben coincidir</li>
                 </ul>
+                <p id="password-match-error" class="mt-2 text-xs font-bold text-red-800 hidden">
+                    Las contraseñas no coinciden
+                </p>
             </div>
 
-            <button id="btn-registrarme" type="submit"
-                    class="w-full py-4 mt-6 bg-puesto-app text-puesto-header-text font-black uppercase tracking-widest text-lg rounded-xl hover:opacity-90 transition-all border-b-4 border-black/20 hover:-translate-y-1 hover:shadow-xl">
+            <button id="btn-registrarme" type="submit" disabled
+                    class="w-full py-4 mt-6 font-black uppercase tracking-widest text-lg rounded-xl transition-all border-b-4 border-black/20 hover:-translate-y-1 hover:shadow-xl
+                           bg-puesto-header text-puesto-header-text hover:opacity-90
+                           disabled:bg-gray-400 disabled:text-gray-100 disabled:border-gray-500 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none disabled:opacity-100">
                 Registrarme
             </button>
         </form>
@@ -65,7 +70,7 @@
         </div>
     </div>
 
-    <script type="module" th:src="@{/resources/core/js/nuevo-usuario.js}"></script>
+    <script th:src="@{/resources/core/js/nuevo-usuario.js}" defer></script>
 </div>
 </body>
 
