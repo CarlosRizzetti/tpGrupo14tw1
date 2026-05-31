@@ -13,6 +13,7 @@ import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
+import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
 import com.tallerwebi.dominio.services.ServicioTimer;
 import com.tallerwebi.presentacion.controller.ControladorProducto;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
@@ -36,15 +37,22 @@ public class ControladorProductoTest {
   private HttpSession sessionMock;
   private Usuario usuarioAdminMock;
   private ServicioTimer servicioTimerMock;
+  private ServicioReglaVencimiento servicioReglaVencimientoMock;
 
   @BeforeEach
   public void init() {
     servicioProductoMock = mock(ServicioProducto.class);
     servicioCategoriaMock = mock(ServicioCategoria.class);
     servicioTimerMock = mock(ServicioTimer.class);
+    servicioReglaVencimientoMock = mock(ServicioReglaVencimiento.class);
     sessionMock = mock(HttpSession.class);
     controladorProducto =
-      new ControladorProducto(servicioProductoMock, servicioCategoriaMock, servicioTimerMock);
+      new ControladorProducto(
+        servicioProductoMock,
+        servicioCategoriaMock,
+        servicioTimerMock,
+        servicioReglaVencimientoMock
+      );
     Categoria categoriaDefault = new Categoria("default.png", true, "default");
     CategoriaDto categoriaDefaultDTO = new CategoriaDto(categoriaDefault);
     List<CategoriaDto> categorias = List.of(categoriaDefaultDTO);

@@ -8,6 +8,7 @@ import com.tallerwebi.dominio.excepcion.IdInvalido;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
+import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
 import com.tallerwebi.dominio.services.ServicioTimer;
 import com.tallerwebi.dominio.utils.ValidacionHelper;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
@@ -32,17 +33,20 @@ public class ControladorProducto {
   private final ServicioProducto servicioProducto;
   private final ServicioCategoria servicioCategoria;
   private final ServicioTimer servicioTimer;
+  private final ServicioReglaVencimiento servicioReglaVencimiento;
   private static final String CATEGORIA = "categoria";
 
   @Autowired
   public ControladorProducto(
     ServicioProducto servicioProducto,
     ServicioCategoria servicioCategoria,
-    ServicioTimer servicioTimer
+    ServicioTimer servicioTimer,
+    ServicioReglaVencimiento servicioReglaVencimiento
   ) {
     this.servicioProducto = servicioProducto;
     this.servicioCategoria = servicioCategoria;
     this.servicioTimer = servicioTimer;
+    this.servicioReglaVencimiento = servicioReglaVencimiento;
   }
 
   // GET — mostrar el formulario
@@ -121,7 +125,7 @@ public class ControladorProducto {
   ) {
     Producto producto = servicioProducto.obtenerProductoConReglas(id);
     Categoria categoria = determinarCategoria(producto, categoryId);
-    servicioProducto.generarVencimiento(producto, categoria, reglaId, offsetMinutes);
+    servicioReglaVencimiento.generarVencimiento(producto, categoria, reglaId, offsetMinutes);
 
     return "redirect:/dashboard";
   }
