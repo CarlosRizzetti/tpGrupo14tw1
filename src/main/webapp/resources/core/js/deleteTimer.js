@@ -2,7 +2,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".btn-eliminar").forEach(btn => {
     btn.addEventListener("click", () => {
       const timerId = btn.getAttribute("data-timer-id");
-      const categoryId = btn.getAttribute("data-category-id");
       const card = document.getElementById(`timer-${timerId}`);
       eliminarTimer(timerId, categoryId, card);
     });
@@ -17,7 +16,7 @@ function eliminarTimer(timerId, categoryId, card) {
     card.style.pointerEvents = "none";
   }
 
-  fetch(`active-timers/${timerId}/${categoryId}`, {
+  fetch(`active-timers/${timerId}`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",

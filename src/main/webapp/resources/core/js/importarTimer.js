@@ -15,7 +15,7 @@ export async function importTimer(timerId, productName, location) {
 
         if (!response.ok) throw new Error('Error al cargar categorías');
 
-        // El backend retorna "categorias", no "options"
+
         openImportModal(timerId, data.categorias, productName, location);
 
     } catch (error) {
@@ -43,7 +43,7 @@ export function openImportModal(timerId, categories, productName, location) {
         categories.forEach(cat => {
             const btn = document.createElement('button');
 
-            // Jackson serializa isPresent en camelCase
+
             const isDisabled = cat.estaPresente ?? false;
 
             btn.className = `btn-action w-full flex items-center justify-between p-4 border-2 rounded-xl transition-all group text-left mb-2 text-sm
@@ -53,7 +53,6 @@ export function openImportModal(timerId, categories, productName, location) {
 
             btn.disabled = isDisabled;
 
-            // CategoriaDto usa "nombre", no "name"
             btn.innerHTML = `
                 <span class="font-black uppercase ${isDisabled ? '' : 'group-hover:text-blue-700'}">
                     ${cat.nombre}
@@ -123,6 +122,4 @@ export function closeImportModal() {
     document.body.style.cursor = 'default';
 }
 
-// Necesario para el onclick="closeImportModal()" inline del HTML
-// Los módulos ES no exponen al scope global automáticamente
 window.closeImportModal = closeImportModal;

@@ -2,7 +2,6 @@ package com.tallerwebi.dominio.utils;
 
 import com.tallerwebi.dominio.excepcion.IdInvalido;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -71,12 +70,6 @@ public final class ValidacionHelper {
     }
     return set;
   }
-
   // ---- Date validations ----
 
-  public static void validarRangoDeFecha(LocalDateTime desde, LocalDateTime hasta) {
-    if (desde != null && hasta != null && desde.isAfter(hasta)) {
-      throw new ValidacionException("La fecha de inicio no puede ser posterior a la fecha final");
-    }
-  }
 }
