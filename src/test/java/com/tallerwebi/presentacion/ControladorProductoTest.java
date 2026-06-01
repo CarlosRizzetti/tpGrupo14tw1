@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
+import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
@@ -21,6 +22,7 @@ import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -510,5 +512,119 @@ public class ControladorProductoTest {
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
     assertNull(respuesta.getBody());
+  }
+
+  // =========================================================
+  // mostrarVencimientoProducto — GET /product/{id}
+  // =========================================================
+
+  @Test
+  @DisplayName("VP-01 | mostrarVencimientoProducto | Retorna la vista 'producto-vencimiento'")
+  void mostrarVencimientoProducto_deberiaRetornarVistaProductoVencimiento() {
+    // preparacion
+    Producto producto = new Producto();
+    producto.setId(1L);
+    producto.setNombre("Leche");
+
+    when(servicioProductoMock.obtenerProductoConReglas(1L)).thenReturn(producto);
+
+    // ejecucion
+    ModelAndView mav = controladorProducto.mostrarVencimientoProducto(1L, sessionMock);
+
+    // validacion
+    assertThat(mav.getViewName(), equalToIgnoringCase("producto-vencimiento"));
+  }
+
+  @Test
+  @DisplayName("VP-02 | mostrarVencimientoProducto | El modelo contiene el producto")
+  void mostrarVencimientoProducto_deberiaIncluirProductoEnElModelo() {
+    // preparacion
+    Producto producto = new Producto();
+    producto.setId(1L);
+    producto.setNombre("Leche");
+
+    when(servicioProductoMock.obtenerProductoConReglas(1L)).thenReturn(producto);
+
+    // ejecucion
+    ModelAndView mav = controladorProducto.mostrarVencimientoProducto(1L, sessionMock);
+
+    // validacion
+    assertThat(mav.getModel().get("producto"), is(producto));
+  }
+
+  @Test
+  @DisplayName("VP-03 | mostrarVencimientoProducto | El modelo contiene las reglas del producto")
+  void mostrarVencimientoProducto_deberiaIncluirReglasEnElModelo() {
+    // preparacion
+    ReglaVencimiento regla = new ReglaVencimiento();
+    Set<ReglaVencimiento> reglas = Set.of(regla);
+
+    Producto producto = new Producto();
+    producto.setId(1L);
+    producto.setReglas(reglas);
+
+    when(servicioProductoMock.obtenerProductoConReglas(1L)).thenReturn(producto);
+
+    // ejecucion
+    ModelAndView mav = controladorProducto.mostrarVencimientoProducto(1L, sessionMock);
+
+    // validacion
+    assertThat((Set<?>) mav.getModel().get("reglas"), hasSize(1));
+  }
+
+  @Test
+  @DisplayName("VP-04 | mostrarVencimientoProducto | El modelo contiene la categoria de la sesion")
+  void mostrarVencimientoProducto_deberiaIncluirCategoriaDelaSesionEnElModelo() {
+    // preparacion
+    Producto producto = new Producto();
+    producto.setId(1L);
+
+    CategoriaDto categoriaDto = new CategoriaDto();
+    categoriaDto.setId(5L);
+    categoriaDto.setNombre("Lacteos");
+
+    when(servicioProductoMock.obtenerProductoConReglas(1L)).thenReturn(producto);
+    when(sessionMock.getAttribute("categoria")).thenReturn(categoriaDto);
+
+    // ejecucion
+    ModelAndView mav = controladorProducto.mostrarVencimientoProducto(1L, sessionMock);
+
+    // validacion
+    assertThat(mav.getModel().get("categoria"), is(categoriaDto));
+  }
+
+  @Test
+  @DisplayName(
+    "VP-05 | mostrarVencimientoProducto | La categoria en el modelo es null si no hay categoria en sesion"
+  )
+  void mostrarVencimientoProducto_deberiaTenerCategoriaNullSiNoHayEnSesion() {
+    // preparacion
+    Producto producto = new Producto();
+    producto.setId(1L);
+
+    when(servicioProductoMock.obtenerProductoConReglas(1L)).thenReturn(producto);
+    when(sessionMock.getAttribute("categoria")).thenReturn(null);
+
+    // ejecucion
+    ModelAndView mav = controladorProducto.mostrarVencimientoProducto(1L, sessionMock);
+
+    // validacion
+    assertNull(mav.getModel().get("categoria"));
+  }
+
+  @Test
+  @DisplayName("VP-06 | mostrarVencimientoProducto | Llama al servicio con el id correcto")
+  void mostrarVencimientoProducto_deberiaConsultarElServicioConElIdRecibido() {
+    // preparacion
+    Producto producto = new Producto();
+    producto.setId(42L);
+
+    when(servicioProductoMock.obtenerProductoConReglas(42L)).thenReturn(producto);
+
+    // ejecucion
+    controladorProducto.mostrarVencimientoProducto(42L, sessionMock);
+
+    // validacion
+    verify(servicioProductoMock, times(1)).obtenerProductoConReglas(42L);
   }
 }
