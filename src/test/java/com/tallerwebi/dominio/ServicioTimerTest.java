@@ -13,6 +13,7 @@ import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.services.ServicioTimerImpl;
+import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.TimerDTO;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -20,7 +21,9 @@ import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 public class ServicioTimerTest {
 
@@ -438,6 +441,308 @@ public class ServicioTimerTest {
       () -> servicioTimer.obtenerTimersActivos(1L)
     );
     assertTrue(excepcion.getMessage().contains("caracteres inválidos"));
+  }
+
+  @Test
+  @DisplayName(
+    "HAP-01 | clonarTimerACategoria | Clonar timer a categoría válida devuelve CategoriaDto correcta"
+  )
+  public void clonarTimerACategoriaValidaDeberiaRetornarCategoriaDto() {
+    OffsetDateTime fechaCreacion = OffsetDateTime.now();
+    OffsetDateTime fechaVencimiento = fechaCreacion.plusHours(2);
+    Categoria categoriaOrigen = new Categoria("cocina.png", true, "Cocina");
+    categoriaOrigen.setId(1L);
+    Categoria categoriaDestino = new Categoria("isla.png", true, "Isla");
+    categoriaDestino.setId(2L);
+    Producto producto = new Producto();
+    ReglaVencimiento regla = new ReglaVencimiento();
+    Timer original = new Timer(
+      fechaCreacion,
+      fechaVencimiento,
+      "GROUP-01",
+      producto,
+      categoriaOrigen,
+      regla
+    );
+    original.setId(1L);
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(original);
+    when(repositorioCategoriaMock.buscarPorId(2L)).thenReturn(categoriaDestino);
+
+    CategoriaDto resultado = servicioTimer.clonarTimerACategoria(1L, 2L);
+
+    assertNotNull(resultado);
+    assertEquals("Isla", resultado.getNombre());
+    verify(repositorioTimerMock, times(1)).guardar(any(Timer.class));
+  }
+
+  @Test
+  @DisplayName(
+    "HAP-02 | clonarTimerACategoria | El clon preserva fechas y groupId del timer original"
+  )
+  public void clonarTimerDeberiaPreservarFechasYGroupId() {
+    OffsetDateTime fechaCreacion = OffsetDateTime.now();
+    OffsetDateTime fechaVencimiento = fechaCreacion.plusHours(3);
+    Categoria categoriaOrigen = new Categoria("cocina.png", true, "Cocina");
+    categoriaOrigen.setId(1L);
+    Categoria categoriaDestino = new Categoria("isla.png", true, "Isla");
+    categoriaDestino.setId(2L);
+    Producto producto = new Producto();
+    ReglaVencimiento regla = new ReglaVencimiento();
+    Timer original = new Timer(
+      fechaCreacion,
+      fechaVencimiento,
+      "GROUP-ABC",
+      producto,
+      categoriaOrigen,
+      regla
+    );
+    original.setId(1L);
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(original);
+    when(repositorioCategoriaMock.buscarPorId(2L)).thenReturn(categoriaDestino);
+
+    servicioTimer.clonarTimerACategoria(1L, 2L);
+
+    ArgumentCaptor<Timer> captor = ArgumentCaptor.forClass(Timer.class);
+    verify(repositorioTimerMock).guardar(captor.capture());
+    Timer clon = captor.getValue();
+    assertEquals(fechaCreacion, clon.getFechaCreacion());
+    assertEquals(fechaVencimiento, clon.getFechaVencimiento());
+    assertEquals("GROUP-ABC", clon.getGroupId());
+    assertEquals(categoriaDestino, clon.getCategoria());
+  }
+
+  @Test
+  @DisplayName("NEG-01 | clonarTimerACategoria | Timer inexistente lanza ValidacionException")
+  public void clonarTimerInexistenteDeberiaLanzarExcepcion() {
+    when(repositorioTimerMock.buscarPorId(99L)).thenReturn(null);
+
+    assertThrows(ValidacionException.class, () -> servicioTimer.clonarTimerACategoria(99L, 2L));
+    verify(repositorioTimerMock, never()).guardar(any());
+  }
+
+  @Test
+  @DisplayName(
+    "NEG-02 | clonarTimerACategoria | Categoría destino inexistente lanza ValidacionException"
+  )
+  public void clonarTimerACategoriaInexistenteDeberiaLanzarExcepcion() {
+    OffsetDateTime fechaCreacion = OffsetDateTime.now();
+    Categoria categoriaOrigen = new Categoria("cocina.png", true, "Cocina");
+    categoriaOrigen.setId(1L);
+    Timer original = new Timer(
+      fechaCreacion,
+      fechaCreacion.plusHours(1),
+      "GROUP-01",
+      new Producto(),
+      categoriaOrigen,
+      new ReglaVencimiento()
+    );
+    original.setId(1L);
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(original);
+    when(repositorioCategoriaMock.buscarPorId(99L)).thenReturn(null);
+
+    assertThrows(ValidacionException.class, () -> servicioTimer.clonarTimerACategoria(1L, 99L));
+    verify(repositorioTimerMock, never()).guardar(any());
+  }
+
+  @Test
+  @DisplayName(
+    "HAP-03 | importarTimer | Importar timer a categoría distinta devuelve CategoriaDto correcta"
+  )
+  public void importarTimerACategoriaDistintaDeberiaRetornarCategoriaDto() {
+    OffsetDateTime fechaCreacion = OffsetDateTime.now();
+    Categoria categoriaOrigen = new Categoria("cocina.png", true, "Cocina");
+    categoriaOrigen.setId(1L);
+    Categoria categoriaDestino = new Categoria("isla.png", true, "Isla");
+    categoriaDestino.setId(2L);
+    Timer timer = new Timer(
+      fechaCreacion,
+      fechaCreacion.plusHours(2),
+      "GROUP-01",
+      new Producto(),
+      categoriaOrigen,
+      new ReglaVencimiento()
+    );
+    timer.setId(1L);
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(repositorioCategoriaMock.buscarPorId(2L)).thenReturn(categoriaDestino);
+    when(repositorioTimerMock.existeTimerActivoEnCategoriaYGrupo(2L, "GROUP-01")).thenReturn(false);
+
+    CategoriaDto resultado = servicioTimer.importarTimer(1L, 2L);
+
+    assertNotNull(resultado);
+    assertEquals("Isla", resultado.getNombre());
+    verify(repositorioTimerMock, times(1)).guardar(any(Timer.class));
+  }
+
+  @Test
+  @DisplayName("HAP-04 | importarTimer | El clon guardado tiene la categoría destino asignada")
+  public void importarTimerDeberiaGuardarClonConCategoriaDestino() {
+    OffsetDateTime fechaCreacion = OffsetDateTime.now();
+    Categoria categoriaOrigen = new Categoria("cocina.png", true, "Cocina");
+    categoriaOrigen.setId(1L);
+    Categoria categoriaDestino = new Categoria("isla.png", true, "Isla");
+    categoriaDestino.setId(2L);
+    Timer timer = new Timer(
+      fechaCreacion,
+      fechaCreacion.plusHours(2),
+      "GROUP-01",
+      new Producto(),
+      categoriaOrigen,
+      new ReglaVencimiento()
+    );
+    timer.setId(1L);
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(repositorioCategoriaMock.buscarPorId(2L)).thenReturn(categoriaDestino);
+    when(repositorioTimerMock.existeTimerActivoEnCategoriaYGrupo(2L, "GROUP-01")).thenReturn(false);
+
+    servicioTimer.importarTimer(1L, 2L);
+
+    ArgumentCaptor<Timer> captor = ArgumentCaptor.forClass(Timer.class);
+    verify(repositorioTimerMock).guardar(captor.capture());
+    assertEquals(categoriaDestino, captor.getValue().getCategoria());
+  }
+
+  @Test
+  @DisplayName(
+    "NEG-03 | importarTimer | Timer ya importado a la categoría lanza ValidacionException"
+  )
+  public void importarTimerYaImportadoDeberiaLanzarExcepcion() {
+    Categoria categoriaOrigen = new Categoria("cocina.png", true, "Cocina");
+    categoriaOrigen.setId(1L);
+    Categoria categoriaDestino = new Categoria("isla.png", true, "Isla");
+    categoriaDestino.setId(2L);
+    Timer timer = new Timer(
+      OffsetDateTime.now(),
+      OffsetDateTime.now().plusHours(1),
+      "GROUP-01",
+      new Producto(),
+      categoriaOrigen,
+      new ReglaVencimiento()
+    );
+    timer.setId(1L);
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(repositorioCategoriaMock.buscarPorId(2L)).thenReturn(categoriaDestino);
+    when(repositorioTimerMock.existeTimerActivoEnCategoriaYGrupo(2L, "GROUP-01")).thenReturn(true);
+
+    ValidacionException ex = assertThrows(
+      ValidacionException.class,
+      () -> servicioTimer.importarTimer(1L, 2L)
+    );
+    assertEquals("El timer ya fue importado a esta categoría", ex.getMessage());
+    verify(repositorioTimerMock, never()).guardar(any());
+  }
+
+  @Test
+  @DisplayName(
+    "NEG-04 | importarTimer | Importar timer a su misma categoría lanza ValidacionException"
+  )
+  public void importarTimerAMismaCategoriaDeberiaLanzarExcepcion() {
+    Categoria categoria = new Categoria("cocina.png", true, "Cocina");
+    categoria.setId(1L);
+    Timer timer = new Timer(
+      OffsetDateTime.now(),
+      OffsetDateTime.now().plusHours(1),
+      "GROUP-01",
+      new Producto(),
+      categoria,
+      new ReglaVencimiento()
+    );
+    timer.setId(1L);
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(repositorioCategoriaMock.buscarPorId(1L)).thenReturn(categoria);
+
+    ValidacionException ex = assertThrows(
+      ValidacionException.class,
+      () -> servicioTimer.importarTimer(1L, 1L)
+    );
+    assertEquals("El timer ya pertenece a esta categoría", ex.getMessage());
+    verify(repositorioTimerMock, never()).guardar(any());
+  }
+
+  @Test
+  @DisplayName("NEG-05 | importarTimer | Timer inexistente lanza ValidacionException")
+  public void importarTimerInexistenteDeberiaLanzarExcepcion() {
+    when(repositorioTimerMock.buscarPorId(99L)).thenReturn(null);
+
+    assertThrows(ValidacionException.class, () -> servicioTimer.importarTimer(99L, 2L));
+    verify(repositorioTimerMock, never()).guardar(any());
+  }
+
+  @Test
+  @DisplayName(
+    "EDGE-01 | importarTimer | GroupId nulo en timer no rompe la validación de duplicados"
+  )
+  public void importarTimerConGroupIdNuloDeberiaFuncionar() {
+    Categoria categoriaOrigen = new Categoria("cocina.png", true, "Cocina");
+    categoriaOrigen.setId(1L);
+    Categoria categoriaDestino = new Categoria("isla.png", true, "Isla");
+    categoriaDestino.setId(2L);
+    Timer timer = new Timer(
+      OffsetDateTime.now(),
+      OffsetDateTime.now().plusHours(1),
+      (String) null,
+      new Producto(),
+      categoriaOrigen,
+      new ReglaVencimiento()
+    );
+    timer.setId(1L);
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(repositorioCategoriaMock.buscarPorId(2L)).thenReturn(categoriaDestino);
+    when(repositorioTimerMock.existeTimerActivoEnCategoriaYGrupo(2L, null)).thenReturn(false);
+
+    CategoriaDto resultado = servicioTimer.importarTimer(1L, 2L);
+
+    assertNotNull(resultado);
+    verify(repositorioTimerMock, times(1)).guardar(any(Timer.class));
+  }
+
+  @Test
+  @DisplayName("HAP-05 | buscarPorId | Timer existente devuelve el timer correcto")
+  public void buscarPorIdExistenteDeberiaRetornarTimer() {
+    Timer timer = new Timer(
+      OffsetDateTime.now(),
+      OffsetDateTime.now().plusHours(1),
+      "GROUP-01",
+      new Producto(),
+      new Categoria(),
+      new ReglaVencimiento()
+    );
+    timer.setId(1L);
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+
+    Timer resultado = servicioTimer.buscarPorId(1L);
+
+    assertNotNull(resultado);
+    assertEquals(1L, resultado.getId());
+    verify(repositorioTimerMock, times(1)).buscarPorId(1L);
+  }
+
+  @Test
+  @DisplayName("NEG-06 | buscarPorId | Timer inexistente lanza ValidacionException")
+  public void buscarPorIdInexistenteDeberiaLanzarExcepcion() {
+    when(repositorioTimerMock.buscarPorId(99L)).thenReturn(null);
+
+    assertThrows(ValidacionException.class, () -> servicioTimer.buscarPorId(99L));
+  }
+
+  @Test
+  @DisplayName(
+    "EDGE-02 | buscarPorId | Id con valor Long.MAX_VALUE delega correctamente al repositorio"
+  )
+  public void buscarPorIdConValorMaximoDeberiaDelagarAlRepositorio() {
+    when(repositorioTimerMock.buscarPorId(Long.MAX_VALUE)).thenReturn(null);
+
+    assertThrows(ValidacionException.class, () -> servicioTimer.buscarPorId(Long.MAX_VALUE));
+    verify(repositorioTimerMock, times(1)).buscarPorId(Long.MAX_VALUE);
   }
 
   private Timer buildTimer(
