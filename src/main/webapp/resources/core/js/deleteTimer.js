@@ -1,15 +1,7 @@
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".btn-eliminar").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const timerId = btn.getAttribute("data-timer-id");
-      const card = document.getElementById(`timer-${timerId}`);
-      eliminarTimer(timerId, categoryId, card);
-    });
-  });
-});
-
-function eliminarTimer(timerId, categoryId, card) {
+export function deleteTimer(timerId, categoryId) {
   if (!confirm("¿Estás seguro de que deseas eliminar este timer?")) return;
+
+  const card = document.getElementById(`timer-${timerId}`);
 
   if (card) {
     card.style.opacity = "0.5";
@@ -25,7 +17,7 @@ function eliminarTimer(timerId, categoryId, card) {
   })
     .then(response => {
       if (response.ok) {
-        card.remove();
+        if (card) card.remove();
         if (document.querySelectorAll(".timer").length === 0) {
           location.reload();
         }

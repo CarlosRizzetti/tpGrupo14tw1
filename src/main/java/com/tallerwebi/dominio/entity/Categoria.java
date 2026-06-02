@@ -15,7 +15,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-public class Categoria {
+public class Categoria implements Comparable<Categoria> {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,5 +32,10 @@ public class Categoria {
     this.icono = icono;
     this.nombre = nombre;
     this.estaActiva = estaActiva;
+  }
+
+  @Override
+  public int compareTo(Categoria otra) {
+    return Long.compare(this.id, otra.id);
   }
 }

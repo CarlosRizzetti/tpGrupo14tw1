@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @Setter
-public class CategoriaDto {
+public class CategoriaDto implements Comparable<CategoriaDto> {
 
   private Long id;
 
@@ -33,5 +33,10 @@ public class CategoriaDto {
     } else {
       this.tema = "tema-cocina";
     }
+  }
+
+  @Override
+  public int compareTo(CategoriaDto otra) {
+    return Long.compare(this.id, otra.id);
   }
 }

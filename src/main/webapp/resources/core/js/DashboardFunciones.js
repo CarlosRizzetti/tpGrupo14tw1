@@ -1,43 +1,38 @@
-import { importTimer, executeImport, closeImportModal } from './importarTimer.js';
+import { deleteTimer } from "./deleteTimer.js";
+// import { renewTimer } from "./renewTimer.js";
+import { importTimer, executeImport, closeImportModal } from "./importarTimer.js";
 
-document.addEventListener('click', (e) => {
-    const btnImportar = e.target.closest('.btn-importar');
-    if (btnImportar) {
-        const { timerId, productName, location } = btnImportar.dataset;
-        importTimer(timerId, productName, location);
-        return;
-    }
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-action]");
+  console.log(btn);
+  if (!btn) return;
 
-    const btn = e.target.closest('.btn-action[data-action]');
-    if (!btn) return;
+  e.preventDefault();
 
-    e.preventDefault();
+  const { action, timerId, categoryId, productName, location } = btn.dataset;
 
-    const { action, timerId, categoryId } = btn.dataset;
+  switch (action) {
+  case "delete":
+    deleteTimer(timerId, categoryId);
+    break;
 
-    console.log(`Acción: ${action}, ID: ${timerId}`);
+  case "renew":
+    renewTimer(timerId, categoryId);
+    break;
 
-    switch (action) {
-        case 'delete':
-            deleteTimer(timerId, categoryId);
-            break;
+  case "import":
+    importTimer(timerId, productName, location);
+    break;
 
-        case 'renew':
-            updateTimer(timerId, categoryId);
-            break;
+  case "confirm-import":
+    executeImport(timerId, categoryId);
+    break;
 
-        case 'import':
-            const { productName, location } = btn.dataset;
-            importTimer(timerId, productName, location);
-            break;
+  case "closeImportModal":
+    closeImportModal();
+    break;
 
-        case 'confirm-import':
-            executeImport(timerId, categoryId);
-            break;
-        case 'closeImportModal':
-            closeImportModal();
-            break;
-        default:
-            console.warn('Acción no reconocida:', action);
-    }
+  default:
+    console.warn("Acción no reconocida:", action);
+  }
 });
