@@ -13,11 +13,11 @@ document.addEventListener("click", (e) => {
 
   switch (action) {
   case "delete":
-    deleteTimer(timerId, categoryId);
+    deleteTimer(timerId);
     break;
 
   case "renew":
-    renewTimer(timerId, categoryId);
+    // renewTimer(timerId, categoryId);
     break;
 
   case "import":
