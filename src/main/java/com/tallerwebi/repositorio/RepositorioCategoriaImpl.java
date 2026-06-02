@@ -2,9 +2,9 @@ package com.tallerwebi.repositorio;
 
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -27,7 +27,7 @@ public class RepositorioCategoriaImpl implements RepositorioCategoria {
       .add(Restrictions.eq("estaActiva", true))
       .addOrder(Order.asc("id"))
       .list();
-    return new HashSet<>(resultado);
+    return new TreeSet<>(resultado);
   }
 
   @Override
@@ -45,7 +45,7 @@ public class RepositorioCategoriaImpl implements RepositorioCategoria {
     if (ids == null || ids.isEmpty()) {
       return java.util.Collections.emptySet();
     }
-    return new HashSet<>(
+    return new TreeSet<>(
       sessionFactory
         .getCurrentSession()
         .createQuery("FROM Categoria c WHERE c.id IN (:ids)", Categoria.class)
