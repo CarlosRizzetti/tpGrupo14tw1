@@ -107,14 +107,11 @@ public class ControladorDashboard {
   ) {
     try {
       ValidacionHelper.validarId(timerId);
-
       Timer timer = servicioTimer.buscarPorId(timerId);
       ValidacionHelper.queNoSeaNull(timer, "timer");
-
       Producto producto = timer.getProducto();
       ValidacionHelper.queNoSeaNull(producto, "producto");
       String groupId = timer.getGroupId();
-
       List<CategoriaDto> categorias =
         servicioProducto.obtenerCategoriasDeUnProductoDisponiblesParaImportar(
           producto.getId(),
