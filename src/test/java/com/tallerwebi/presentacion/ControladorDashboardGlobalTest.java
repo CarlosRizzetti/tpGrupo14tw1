@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
-import com.tallerwebi.dominio.interfaces.ServicioDashboard;
+import com.tallerwebi.dominio.interfaces.ServicioTimer;
 import com.tallerwebi.presentacion.controller.ControladorDashboardGlobal;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.TimerDTO;
@@ -19,13 +19,13 @@ import org.springframework.web.servlet.ModelAndView;
 public class ControladorDashboardGlobalTest {
 
   private ServicioCategoria servicioCategoriaMock;
-  private ServicioDashboard servicioDashboardMock;
+  private ServicioTimer servicioDashboardMock;
   private ControladorDashboardGlobal controlador;
 
   @BeforeEach
   public void init() {
     servicioCategoriaMock = mock(ServicioCategoria.class);
-    servicioDashboardMock = mock(ServicioDashboard.class);
+    servicioDashboardMock = mock(ServicioTimer.class);
     controlador = new ControladorDashboardGlobal(servicioCategoriaMock, servicioDashboardMock);
   }
 
