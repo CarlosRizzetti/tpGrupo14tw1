@@ -55,16 +55,40 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
       throw new IllegalArgumentException("El producto no tiene regla de vencimiento");
     }
 
-    OffsetDateTime elaboracion = OffsetDateTime.now(clock).minusMinutes(offsetMinutos);
-    OffsetDateTime vencimiento = elaboracion.plusMinutes(regla.getDuracionMinutos());
-    OffsetDateTime descongelamiento = (Boolean.TRUE.equals(regla.getTieneDescongelamiento()) &&
-        regla.getDescongelamientoMinutos() != null)
-      ? elaboracion.plusMinutes(regla.getDescongelamientoMinutos())
-      : null;
+    OffsetDateTime fechaElaboracion = obtenerFechaDeElaboracion(offsetMinutos);
+    OffsetDateTime vencimiento = obtenerFechaVencimiento(fechaElaboracion, regla);
+    OffsetDateTime descongelamiento = obtenerFechaDeDescongelamiento(fechaElaboracion, regla);
 
-    Timer timer = new Timer(elaboracion, vencimiento, descongelamiento, producto, categoria, regla);
+    Timer timer = new Timer(
+      fechaElaboracion,
+      vencimiento,
+      descongelamiento,
+      producto,
+      categoria,
+      regla
+    );
     repositorioTimer.guardar(timer);
     return timer;
+  }
+
+  private OffsetDateTime obtenerFechaDeDescongelamiento(
+    OffsetDateTime fechaElaboracion,
+    ReglaVencimiento regla
+  ) {
+    if (!regla.getTieneDescongelamiento()) return null;
+    if (regla.getDescongelamientoMinutos() == null) return null;
+    return fechaElaboracion.plusMinutes(regla.getDescongelamientoMinutos());
+  }
+
+  private OffsetDateTime obtenerFechaVencimiento(
+    OffsetDateTime fechaElaboracion,
+    ReglaVencimiento regla
+  ) {
+    return fechaElaboracion.plusMinutes(regla.getDuracionMinutos());
+  }
+
+  private OffsetDateTime obtenerFechaDeElaboracion(Integer offsetMinutos) {
+    return OffsetDateTime.now(clock).minusMinutes(offsetMinutos);
   }
 
   private void validar(ReglaVencimiento regla) {

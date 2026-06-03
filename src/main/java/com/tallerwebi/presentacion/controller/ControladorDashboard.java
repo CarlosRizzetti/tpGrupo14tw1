@@ -2,6 +2,7 @@ package com.tallerwebi.presentacion.controller;
 
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.excepcion.IdInvalido;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
@@ -57,7 +58,7 @@ public class ControladorDashboard {
   public ResponseEntity<String> eliminarTimer(@PathVariable Long timerId) {
     try {
       ValidacionHelper.validarId(timerId);
-      servicioTimer.modificarEstadoAEliminado(timerId);
+      servicioTimer.modificarEstado(timerId, EstadoTimer.ELIMINADO);
       return ResponseEntity.ok("Timer eliminado correctamente");
     } catch (IllegalArgumentException e) {
       return ResponseEntity

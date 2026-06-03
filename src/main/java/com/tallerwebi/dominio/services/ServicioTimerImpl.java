@@ -1,7 +1,9 @@
 package com.tallerwebi.dominio.services;
 
 import com.tallerwebi.dominio.entity.Categoria;
+import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
@@ -38,7 +40,7 @@ public class ServicioTimerImpl implements ServicioTimer {
     ValidacionHelper.validarId(idCategoria);
 
     List<Timer> timers = ValidacionHelper.queLaListaNoSeaNull(
-      repositorioTimer.obtenerTimersSegunEstado(idCategoria, "activo"),
+      repositorioTimer.obtenerTimersSegunEstado(idCategoria, EstadoTimer.ACTIVO),
       "obtenerTimersSegunEstado"
     );
 
@@ -46,17 +48,16 @@ public class ServicioTimerImpl implements ServicioTimer {
   }
 
   @Override
-  public void modificarEstadoAEliminado(Long timerId) {
+  public void modificarEstado(Long timerId, EstadoTimer estado) {
     Timer timer = repositorioTimer.buscarPorId(timerId);
     ValidacionHelper.queNoSeaNull(timer, TIMER);
 
     if (timer.getFechaVencimiento().isBefore(OffsetDateTime.now())) {
-      timer.setEstado("vencido");
+      timer.setEstado(EstadoTimer.VENCIDO);
     } else {
-      timer.setEstado("eliminado");
+      timer.setEstado(estado);
     }
 
-    timer.setEstaActivo(false);
     repositorioTimer.guardar(timer);
   }
 
@@ -115,6 +116,12 @@ public class ServicioTimerImpl implements ServicioTimer {
     Timer timer = repositorioTimer.buscarPorId(id);
     ValidacionHelper.queNoSeaNull(timer, TIMER);
     return timer;
+  }
+
+  public Timer renovarTimer(Timer timer) {
+    ReglaVencimiento regla = timer.getReglaVencimiento();
+    ValidacionHelper.queNoSeaNull(regla, "Regla vencimiento");
+    return new Timer();
   }
 
   private String obtenerNombreProducto(Timer timer) {
