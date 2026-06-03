@@ -15,8 +15,8 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class ControladorDashboardGlobal {
 
-  private final ServicioCategoria servicioCategoria;
-  private final ServicioDashboard servicioDashboard;
+  public ServicioCategoria servicioCategoria;
+  public ServicioDashboard servicioDashboard;
 
   @Autowired
   public ControladorDashboardGlobal(
@@ -29,21 +29,40 @@ public class ControladorDashboardGlobal {
 
   @GetMapping("/dashboard/global")
   public ModelAndView dashboardGlobal() {
-    ModelAndView mav = new ModelAndView("dashboard/global");
+    try {
+      ModelAndView mav = new ModelAndView("dashboard/global");
 
-    List<CategoriaDto> categorias = servicioCategoria.obtenerLasCategoriasParaElMenu();
+      List<CategoriaDto> categorias = servicioCategoria.obtenerLasCategoriasParaElMenu();
 
-    Map<Long, List<TimerDTO>> timersPorCategoria = new HashMap<>();
+      if (categorias == null || categorias.isEmpty()) {
+        mav.addObject("error", "No hay categorías disponibles");
+        return mav;
+      }
 
-    for (CategoriaDto categoria : categorias) {
-      List<TimerDTO> timers = servicioDashboard.obtenerTimersActivos(categoria.getId());
+      Map<Long, List<TimerDTO>> timersPorCategoria = new HashMap<>();
+      boolean anyTimers = false;
 
-      timersPorCategoria.put(categoria.getId(), timers);
+      for (CategoriaDto categoria : categorias) {
+        List<TimerDTO> timers = servicioDashboard.obtenerTimersActivos(categoria.getId());
+        timersPorCategoria.put(categoria.getId(), timers);
+        if (timers != null && !timers.isEmpty()) {
+          anyTimers = true;
+        }
+      }
+
+      mav.addObject("categorias", categorias);
+
+      if (!anyTimers) {
+        mav.addObject("error", "No hay timers activos");
+      } else {
+        mav.addObject("timersPorCategoria", timersPorCategoria);
+      }
+
+      return mav;
+    } catch (Exception e) {
+      ModelAndView mav = new ModelAndView("dashboard/global");
+      mav.addObject("error", "Error al cargar el dashboard global");
+      return mav;
     }
-
-    mav.addObject("categorias", categorias);
-    mav.addObject("timersPorCategoria", timersPorCategoria);
-
-    return mav;
   }
 }
