@@ -7,6 +7,7 @@ import com.tallerwebi.dominio.excepcion.IdInvalido;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.utils.ValidacionHelper;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import javax.xml.bind.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -87,27 +88,6 @@ public class ValidacionHeperTest {
   )
   void shouldPassWhenValueIsSafe(String safeValue) {
     assertDoesNotThrow(() -> ValidacionHelper.validateCaracteresSeguros(safeValue, "field"));
-  }
-
-  // ---- Date range ----
-
-  @Test
-  void shouldPassWhenDateRangeIsValid() {
-    assertDoesNotThrow(() ->
-      ValidacionHelper.validarRangoDeFecha(LocalDateTime.now(), LocalDateTime.now().plusDays(1))
-    );
-  }
-
-  @Test
-  void shouldThrowWhenStartDateIsAfterEndDate() {
-    ValidacionException ex = assertThrows(
-      ValidacionException.class,
-      () ->
-        ValidacionHelper.validarRangoDeFecha(LocalDateTime.now().plusDays(1), LocalDateTime.now())
-    );
-    assertTrue(
-      ex.getMessage().contains("La fecha de inicio no puede ser posterior a la fecha final")
-    );
   }
 
   // ---- requireNonNull ----

@@ -1,5 +1,6 @@
 package com.tallerwebi.dominio.entity;
 
+import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 import javax.persistence.*;
@@ -21,8 +22,10 @@ public class Timer {
   private OffsetDateTime descongelamiento;
   private OffsetDateTime fechaCreacion;
   private OffsetDateTime fechaVencimiento;
-  private Boolean estaActivo;
-  private String estado;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private EstadoTimer estado;
 
   public Timer(
     OffsetDateTime fechaCreacion,
@@ -35,8 +38,7 @@ public class Timer {
     this.fechaCreacion = fechaCreacion;
     this.fechaVencimiento = fechaVencimiento;
     this.groupId = groupId;
-    this.estaActivo = true;
-    this.estado = "activo";
+    this.estado = EstadoTimer.ACTIVO;
     this.producto = producto;
     this.categoria = categoria;
     this.reglaVencimiento = reglaVencimiento;
@@ -56,8 +58,7 @@ public class Timer {
     this.producto = producto;
     this.categoria = categoria;
     this.reglaVencimiento = reglaVencimiento;
-    this.estaActivo = true;
-    this.estado = "activo";
+    this.estado = EstadoTimer.ACTIVO;
   }
 
   @ManyToOne(fetch = FetchType.EAGER)
