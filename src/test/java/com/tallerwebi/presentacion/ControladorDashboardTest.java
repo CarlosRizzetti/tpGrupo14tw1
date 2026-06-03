@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.*;
+import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioTimer;
@@ -261,11 +262,11 @@ public class ControladorDashboardTest {
   public void queAlEliminarUnTimerCorrectamenteRetorneHttpStatusOkYMensajeExito() {
     Long timerId = 1L;
 
-    doNothing().when(servicioTimerMock).modificarEstadoAEliminado(timerId);
+    doNothing().when(servicioTimerMock).modificarEstado(timerId, EstadoTimer.ELIMINADO);
 
     ResponseEntity<String> respuesta = controladorDashboard.eliminarTimer(timerId);
 
-    verify(servicioTimerMock, times(1)).modificarEstadoAEliminado(timerId);
+    verify(servicioTimerMock, times(1)).modificarEstado(timerId, EstadoTimer.ELIMINADO);
     assertEquals(HttpStatus.OK, respuesta.getStatusCode());
     assertEquals("Timer eliminado correctamente", respuesta.getBody());
   }
@@ -276,11 +277,11 @@ public class ControladorDashboardTest {
 
     doThrow(new IllegalArgumentException("Timer no encontrado"))
       .when(servicioTimerMock)
-      .modificarEstadoAEliminado(timerId);
+      .modificarEstado(timerId, EstadoTimer.ELIMINADO);
 
     ResponseEntity<String> respuesta = controladorDashboard.eliminarTimer(timerId);
 
-    verify(servicioTimerMock, times(1)).modificarEstadoAEliminado(timerId);
+    verify(servicioTimerMock, times(1)).modificarEstado(timerId, EstadoTimer.ELIMINADO);
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
     assertEquals("Timer no encontrado", respuesta.getBody());
   }
@@ -291,11 +292,11 @@ public class ControladorDashboardTest {
 
     doThrow(new RuntimeException("Error de base de datos"))
       .when(servicioTimerMock)
-      .modificarEstadoAEliminado(timerId);
+      .modificarEstado(timerId, EstadoTimer.ELIMINADO);
 
     ResponseEntity<String> respuesta = controladorDashboard.eliminarTimer(timerId);
 
-    verify(servicioTimerMock, times(1)).modificarEstadoAEliminado(timerId);
+    verify(servicioTimerMock, times(1)).modificarEstado(timerId, EstadoTimer.ELIMINADO);
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
     assertEquals("Error al eliminar el timer", respuesta.getBody());
   }

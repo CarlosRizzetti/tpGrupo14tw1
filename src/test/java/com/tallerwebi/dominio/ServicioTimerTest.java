@@ -8,6 +8,7 @@ import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.excepcion.IdInvalido;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
@@ -49,13 +50,14 @@ public class ServicioTimerTest {
     Timer timer = new Timer(fechaCreacion, fechaVencimiento, "1AF34", producto, categoria, regla);
     timer.setId(1L);
     List<Timer> timersActivos = List.of(timer);
-    when(repositorioTimerMock.obtenerTimersSegunEstado(categoria.getId(), "activo"))
+    when(repositorioTimerMock.obtenerTimersSegunEstado(categoria.getId(), EstadoTimer.ACTIVO))
       .thenReturn(timersActivos);
 
     List<TimerDTO> listaObtenida = this.servicioTimer.obtenerTimersActivos(categoria.getId());
 
     assertEquals(1, listaObtenida.size());
-    verify(repositorioTimerMock, times(1)).obtenerTimersSegunEstado(categoria.getId(), "activo");
+    verify(repositorioTimerMock, times(1))
+      .obtenerTimersSegunEstado(categoria.getId(), EstadoTimer.ACTIVO);
     assertEquals(1L, listaObtenida.get(0).getId());
   }
 
@@ -65,7 +67,7 @@ public class ServicioTimerTest {
 
     ValidacionException excepcion = assertThrows(
       ValidacionException.class,
-      () -> this.servicioTimer.modificarEstadoAEliminado(99L)
+      () -> this.servicioTimer.modificarEstado(99L, EstadoTimer.ELIMINADO)
     );
 
     assertTrue(excepcion.getMessage().contains("nulo"));
@@ -83,10 +85,9 @@ public class ServicioTimerTest {
 
     when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
 
-    servicioTimer.modificarEstadoAEliminado(1L);
+    servicioTimer.modificarEstado(1L, EstadoTimer.ELIMINADO);
 
-    assertEquals("vencido", timer.getEstado());
-    assertFalse(timer.getEstaActivo());
+    assertEquals(EstadoTimer.VENCIDO, timer.getEstado());
     verify(repositorioTimerMock).guardar(timer);
   }
 
@@ -101,10 +102,9 @@ public class ServicioTimerTest {
 
     when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
 
-    servicioTimer.modificarEstadoAEliminado(1L);
+    servicioTimer.modificarEstado(1L, EstadoTimer.ELIMINADO);
 
-    assertEquals("eliminado", timer.getEstado());
-    assertFalse(timer.getEstaActivo());
+    assertEquals(EstadoTimer.ELIMINADO, timer.getEstado());
     verify(repositorioTimerMock).guardar(timer);
   }
 
@@ -119,7 +119,8 @@ public class ServicioTimerTest {
       "Almacen Central"
     );
 
-    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, "activo")).thenReturn(List.of(timer));
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
 
     List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(1L);
 
@@ -135,7 +136,7 @@ public class ServicioTimerTest {
 
   @Test
   void deberiaRetornarListaVaciaSiNoHayTimersActivos() {
-    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, "activo"))
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
       .thenReturn(Collections.emptyList());
 
     List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(1L);
@@ -172,7 +173,7 @@ public class ServicioTimerTest {
       )
     );
 
-    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, "activo")).thenReturn(timers);
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO)).thenReturn(timers);
 
     List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(1L);
 
@@ -193,7 +194,8 @@ public class ServicioTimerTest {
       "Zona Norte"
     );
 
-    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, "activo")).thenReturn(List.of(timer));
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
 
     List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(1L);
 
@@ -211,7 +213,8 @@ public class ServicioTimerTest {
       null
     );
 
-    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, "activo")).thenReturn(List.of(timer));
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
 
     List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(1L);
 
@@ -222,7 +225,8 @@ public class ServicioTimerTest {
   void deberiaFormatearFechaVacíaCuandoEsNula() {
     Timer timer = buildTimer(1L, "Producto A", "g-1", null, null, "Zona Norte");
 
-    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, "activo")).thenReturn(List.of(timer));
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
 
     List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(1L);
 
@@ -262,7 +266,7 @@ public class ServicioTimerTest {
 
   @Test
   void deberiaLanzarExcepcionCuandoRepositorioRetornaNull() {
-    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, "activo")).thenReturn(null);
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO)).thenReturn(null);
 
     ValidacionException excepcion = assertThrows(
       ValidacionException.class,
@@ -273,7 +277,7 @@ public class ServicioTimerTest {
 
   @Test
   void deberiaLanzarExcepcionCuandoRepositorioFalla() {
-    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, "activo"))
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
       .thenThrow(new RuntimeException("Fallo la conexion con la base de datos"));
 
     RuntimeException excepcion = assertThrows(
@@ -285,7 +289,7 @@ public class ServicioTimerTest {
 
   @Test
   void deberiaProcesarConIdMaximo() {
-    when(repositorioTimerMock.obtenerTimersSegunEstado(Long.MAX_VALUE, "activo"))
+    when(repositorioTimerMock.obtenerTimersSegunEstado(Long.MAX_VALUE, EstadoTimer.ACTIVO))
       .thenReturn(Collections.emptyList());
 
     assertDoesNotThrow(() -> servicioTimer.obtenerTimersActivos(Long.MAX_VALUE));
@@ -293,7 +297,7 @@ public class ServicioTimerTest {
 
   @Test
   void deberiaProcesarConIdMinimo() {
-    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, "activo"))
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
       .thenReturn(Collections.emptyList());
 
     assertDoesNotThrow(() -> servicioTimer.obtenerTimersActivos(1L));
@@ -310,7 +314,8 @@ public class ServicioTimerTest {
       "Deposito"
     );
 
-    when(repositorioTimerMock.obtenerTimersSegunEstado(99L, "activo")).thenReturn(List.of(timer));
+    when(repositorioTimerMock.obtenerTimersSegunEstado(99L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
 
     List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(99L);
 
@@ -328,7 +333,8 @@ public class ServicioTimerTest {
       "Zona"
     );
 
-    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, "activo")).thenReturn(List.of(timer));
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
 
     List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(1L);
 
@@ -346,7 +352,8 @@ public class ServicioTimerTest {
       "Zona Norte"
     );
 
-    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, "activo")).thenReturn(List.of(timer));
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
 
     ValidacionException excepcion = assertThrows(
       ValidacionException.class,
@@ -366,7 +373,8 @@ public class ServicioTimerTest {
       "' OR '1'='1'; DROP TABLE timers;--"
     );
 
-    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, "activo")).thenReturn(List.of(timer));
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
 
     ValidacionException excepcion = assertThrows(
       ValidacionException.class,
@@ -386,7 +394,8 @@ public class ServicioTimerTest {
       "Zona"
     );
 
-    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, "activo")).thenReturn(List.of(timer));
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
 
     ValidacionException excepcion = assertThrows(
       ValidacionException.class,
@@ -407,7 +416,8 @@ public class ServicioTimerTest {
       "Zona"
     );
 
-    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, "activo")).thenReturn(List.of(timer));
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
 
     ValidacionException excepcion = assertThrows(
       ValidacionException.class,
@@ -434,7 +444,8 @@ public class ServicioTimerTest {
       "zona; rm -rf /"
     );
 
-    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, "activo")).thenReturn(List.of(timer));
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
 
     ValidacionException excepcion = assertThrows(
       ValidacionException.class,
