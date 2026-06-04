@@ -8,6 +8,7 @@ import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.repositorio.config.HibernateInfraestructuraTestConfig;
 import java.time.OffsetDateTime;
@@ -85,10 +86,13 @@ public class RepositorioTimerTest {
 
     Timer timer = buildTimer("group-1", categoria, producto, regla);
     Timer timer2 = buildTimer("group-2", categoria, producto, regla);
-    timer2.setEstado("inactivo");
+    timer2.setEstado(EstadoTimer.ELIMINADO);
     sessionFactory.getCurrentSession().save(timer2);
 
-    List<Timer> timers = repositorioTimer.obtenerTimersSegunEstado(categoria.getId(), "activo");
+    List<Timer> timers = repositorioTimer.obtenerTimersSegunEstado(
+      categoria.getId(),
+      EstadoTimer.ACTIVO
+    );
 
     assertEquals(1, timers.size());
     assertThat(categoria.getNombre(), is(timers.get(0).getCategoria().getNombre()));
@@ -106,10 +110,13 @@ public class RepositorioTimerTest {
     ReglaVencimiento regla = buildRegla();
 
     Timer timer = buildTimer("group-1", categoria, producto, regla);
-    timer.setEstado("inactivo");
+    timer.setEstado(EstadoTimer.ELIMINADO);
     sessionFactory.getCurrentSession().save(timer);
 
-    List<Timer> timers = repositorioTimer.obtenerTimersSegunEstado(categoria.getId(), "activo");
+    List<Timer> timers = repositorioTimer.obtenerTimersSegunEstado(
+      categoria.getId(),
+      EstadoTimer.ACTIVO
+    );
 
     assertTrue(timers.isEmpty());
   }
@@ -121,7 +128,7 @@ public class RepositorioTimerTest {
     "NEG-02 | obtenerTimersSegunEstado | Retorna lista vacía cuando la categoria no existe"
   )
   public void obtenerTimersSegunEstado_deberiaRetornarListaVaciaCuandoCategoriaNoExiste() {
-    List<Timer> timers = repositorioTimer.obtenerTimersSegunEstado(999L, "activo");
+    List<Timer> timers = repositorioTimer.obtenerTimersSegunEstado(999L, EstadoTimer.ACTIVO);
 
     assertTrue(timers.isEmpty());
   }
@@ -170,21 +177,6 @@ public class RepositorioTimerTest {
 
     assertNotNull(resultado);
     assertEquals("group-1", resultado.getGroupId());
-  }
-
-  @Test
-  @Transactional
-  @Rollback
-  @DisplayName("HP-04 | guardar | El timer guardado tiene estaActivo en true por defecto")
-  public void guardar_deberiaGuardarTimerConEstaActivoTrue() {
-    Categoria categoria = buildCategoria();
-    Producto producto = buildProducto();
-    ReglaVencimiento regla = buildRegla();
-    Timer timer = buildTimer("group-1", categoria, producto, regla);
-
-    Timer resultado = repositorioTimer.buscarPorId(timer.getId());
-
-    assertTrue(resultado.getEstaActivo());
   }
 
   // ===================== existeTimerActivoEnCategoriaYGrupo =====================
@@ -237,7 +229,7 @@ public class RepositorioTimerTest {
     Producto producto = buildProducto();
     ReglaVencimiento regla = buildRegla();
     Timer timer = buildTimer("group-uuid-test", categoria, producto, regla);
-    timer.setEstaActivo(false);
+    timer.setEstado(EstadoTimer.ELIMINADO);
     sessionFactory.getCurrentSession().save(timer);
 
     boolean resultado = repositorioTimer.existeTimerActivoEnCategoriaYGrupo(
