@@ -32,7 +32,7 @@ public class RepositorioProductoImpl implements RepositorioProducto {
     return sessionFactory
       .getCurrentSession()
       .createQuery(
-        "SELECT p FROM Producto p JOIN p.categorias c WHERE c.id = :categoriaId AND p.estaActivo = true",
+              "SELECT p FROM Producto p JOIN p.categorias c WHERE c.id = :categoriaId AND p.estaActivo = true",
         Producto.class
       )
       .list();
