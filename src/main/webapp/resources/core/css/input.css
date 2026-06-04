@@ -71,4 +71,14 @@
     .animate-success {
         animation: success-flash 0.8s ease-in-out;
     }
+
+    #btn-registrarme:disabled {
+        background-color: #9ca3af !important;
+        color: #e5e7eb !important;
+        border-color: #6b7280 !important;
+        cursor: not-allowed !important;
+        transform: none !important;
+        box-shadow: none !important;
+        opacity: 1 !important;
+    }
 }

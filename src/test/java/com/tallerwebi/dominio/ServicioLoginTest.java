@@ -84,6 +84,7 @@ public class ServicioLoginTest {
     this.servicioLogin.registrar(usuario);
 
     // validacion
+    assertThat(usuario.getActivo(), is(false));
     verify(this.repositorioUsuarioMock, times(1)).guardar(usuario);
   }
 

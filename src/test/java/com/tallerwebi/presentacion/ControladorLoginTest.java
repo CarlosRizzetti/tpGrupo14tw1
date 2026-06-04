@@ -9,6 +9,7 @@ import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
 import com.tallerwebi.dominio.interfaces.ServicioLogin;
+import com.tallerwebi.dominio.interfaces.ServicioValidacionIdentidad;
 import com.tallerwebi.presentacion.controller.ControladorLogin;
 import com.tallerwebi.presentacion.dto.LoginDto;
 import javax.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ public class ControladorLoginTest {
   private HttpServletRequest requestMock;
   private HttpSession sessionMock;
   private ServicioLogin servicioLoginMock;
+  private ServicioValidacionIdentidad servicioValidacionIdentidadMock;
 
   @BeforeEach
   public void init() {
@@ -34,7 +36,8 @@ public class ControladorLoginTest {
     requestMock = mock(HttpServletRequest.class);
     sessionMock = mock(HttpSession.class);
     servicioLoginMock = mock(ServicioLogin.class);
-    controladorLogin = new ControladorLogin(servicioLoginMock);
+    servicioValidacionIdentidadMock = mock(ServicioValidacionIdentidad.class);
+    controladorLogin = new ControladorLogin(servicioLoginMock, servicioValidacionIdentidadMock);
   }
 
   @Test
@@ -91,7 +94,8 @@ public class ControladorLoginTest {
   }
 
   @Test
-  public void registrameSiUsuarioNoExisteDeberiaCrearUsuarioYIrAlHome() throws Exception {
+  public void registrameSiUsuarioNoExisteDeberiaCrearUsuarioYRedirigirAValidacion()
+    throws Exception {
     // preparacion
     when(requestMock.getSession()).thenReturn(sessionMock);
 
@@ -99,9 +103,9 @@ public class ControladorLoginTest {
     ModelAndView modelAndView = controladorLogin.registrarme(usuarioMock, requestMock);
 
     // validacion
-    assertThat(modelAndView.getViewName(), equalToIgnoringCase("redirect:/home"));
+    assertThat(modelAndView.getViewName(), equalToIgnoringCase("redirect:/validacion-identidad"));
     verify(servicioLoginMock, times(1)).registrar(usuarioMock);
-    verify(sessionMock, times(1)).setAttribute(eq("ROL"), any());
+    verify(servicioValidacionIdentidadMock, times(1)).solicitarValidacion(usuarioMock.getEmail());
   }
 
   @Test

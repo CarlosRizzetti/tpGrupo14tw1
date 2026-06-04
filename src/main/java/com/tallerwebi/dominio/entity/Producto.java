@@ -21,6 +21,9 @@ public class Producto {
 
   private Boolean estaActivo;
 
+  @Column(nullable = false)
+  private Integer cantidad = 0;
+
   @ManyToMany
   @JoinTable(
     name = "productosCategoria",

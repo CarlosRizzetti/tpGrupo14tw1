@@ -43,6 +43,29 @@ public class ControladorDashboardTest {
     return timer;
   }
 
+  private Timer buildTimerConRegla(Long timerId) {
+    ReglaVencimiento regla = new ReglaVencimiento();
+    regla.setId(1L);
+
+    Producto producto = new Producto();
+    producto.setId(10L);
+
+    Timer timer = new Timer();
+    timer.setId(timerId);
+    timer.setProducto(producto);
+    timer.setGroupId("group-uuid-test");
+    timer.setReglaVencimiento(regla);
+    return timer;
+  }
+
+  private TimerDTO buildTimerDTO(Long id) {
+    TimerDTO dto = new TimerDTO();
+    dto.setId(id);
+    dto.setFechaCreacion(OffsetDateTime.now().toString());
+    dto.setFechaVencimiento(OffsetDateTime.now().plusDays(3).toString());
+    return dto;
+  }
+
   @BeforeEach
   public void init() {
     sessionMock = mock(HttpSession.class);
@@ -74,6 +97,129 @@ public class ControladorDashboardTest {
     cat2.setNombre("Categoria B");
 
     return List.of(cat1, cat2);
+  }
+
+  @Test
+  @DisplayName("HP-01 | renovarTimer | Retorna 200 con los datos del nuevo timer")
+  void renovarTimer_deberiaRetornar200ConNuevoTimer() {
+    Timer timer = buildTimerConRegla(1L);
+    TimerDTO nuevoTimer = buildTimerDTO(2L);
+
+    when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(servicioTimerMock.renovarTimer(timer)).thenReturn(nuevoTimer);
+
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
+
+    assertEquals(HttpStatus.OK, respuesta.getStatusCode());
+    assertNotNull(respuesta.getBody());
+
+    Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
+    assertEquals("ok", body.get("status"));
+    assertEquals(2L, body.get("nuevoTimerId"));
+    assertNotNull(body.get("fechaElaboracion"));
+    assertNotNull(body.get("fechaVencimiento"));
+  }
+
+  @Test
+  @DisplayName("NP-01 | renovarTimer | Id nulo retorna 400")
+  void renovarTimer_conIdNulo_deberiaRetornar400() {
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(null);
+
+    assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
+    Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
+    assertEquals("error", body.get("status"));
+  }
+
+  @Test
+  @DisplayName("NP-02 | renovarTimer | Id negativo retorna 400")
+  void renovarTimer_conIdNegativo_deberiaRetornar400() {
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(-1L);
+
+    assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
+    Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
+    assertEquals("error", body.get("status"));
+  }
+
+  @Test
+  @DisplayName("NP-03 | renovarTimer | Timer no encontrado retorna 500")
+  void renovarTimer_timerNoEncontrado_deberiaRetornar500() {
+    when(servicioTimerMock.buscarPorId(1L)).thenThrow(new RuntimeException("Timer no encontrado"));
+
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
+    Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
+    assertEquals("error", body.get("status"));
+  }
+
+  @Test
+  @DisplayName("NP-04 | renovarTimer | Error en renovarTimer del servicio retorna 500")
+  void renovarTimer_errorEnServicio_deberiaRetornar500() {
+    Timer timer = buildTimerConRegla(1L);
+
+    when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(servicioTimerMock.renovarTimer(timer))
+      .thenThrow(new RuntimeException("Error al generar vencimiento"));
+
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
+  }
+
+  @Test
+  @DisplayName("EC-01 | renovarTimer | Id cero retorna 400")
+  void renovarTimer_conIdCero_deberiaRetornar400() {
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(0L);
+
+    assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
+  }
+
+  @Test
+  @DisplayName("EC-02 | renovarTimer | Id igual a 1 es válido y retorna 200")
+  void renovarTimer_conIdUno_deberiaRetornar200() {
+    Timer timer = buildTimerConRegla(1L);
+    TimerDTO nuevoTimer = buildTimerDTO(2L);
+
+    when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(servicioTimerMock.renovarTimer(timer)).thenReturn(nuevoTimer);
+
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
+
+    assertEquals(HttpStatus.OK, respuesta.getStatusCode());
+  }
+
+  @Test
+  @DisplayName("EC-03 | renovarTimer | DTO con fechas en límite retorna 200 con datos correctos")
+  void renovarTimer_conFechasEnLimite_deberiaRetornarDatosCorrectos() {
+    Timer timer = buildTimerConRegla(1L);
+    TimerDTO nuevoTimer = new TimerDTO();
+    nuevoTimer.setId(2L);
+    nuevoTimer.setFechaCreacion(OffsetDateTime.MIN.toString());
+    nuevoTimer.setFechaVencimiento(OffsetDateTime.MAX.toString());
+
+    when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(servicioTimerMock.renovarTimer(timer)).thenReturn(nuevoTimer);
+
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
+
+    assertEquals(HttpStatus.OK, respuesta.getStatusCode());
+    Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
+    assertNotNull(body.get("fechaElaboracion"));
+    assertNotNull(body.get("fechaVencimiento"));
+  }
+
+  @Test
+  @DisplayName("SC-01 | renovarTimer | Id Long.MAX_VALUE retorna 500 sin exponer stack trace")
+  void renovarTimer_conIdMuyGrande_noDeberiaExponerStackTrace() {
+    when(servicioTimerMock.buscarPorId(Long.MAX_VALUE))
+      .thenThrow(new RuntimeException("Timer no encontrado"));
+
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(Long.MAX_VALUE);
+
+    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
+    Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
+    // El mensaje no debe exponer detalles internos
+    assertEquals("Error al renovar el timer", body.get("mensaje"));
   }
 
   @Test
