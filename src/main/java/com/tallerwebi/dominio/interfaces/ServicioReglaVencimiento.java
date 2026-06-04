@@ -1,0 +1,17 @@
+package com.tallerwebi.dominio.interfaces;
+
+import com.tallerwebi.dominio.entity.Categoria;
+import com.tallerwebi.dominio.entity.Producto;
+import com.tallerwebi.dominio.entity.ReglaVencimiento;
+import com.tallerwebi.dominio.entity.Timer;
+
+public interface ServicioReglaVencimiento {
+  void guardarReglaVencimiento(ReglaVencimiento reglaVencimiento);
+  ReglaVencimiento obtenerReglaVencimientoPorId(Long id);
+  Timer generarVencimiento(
+    Producto producto,
+    Categoria categoria,
+    Long reglaId,
+    Integer offsetMinutos
+  );
+}
