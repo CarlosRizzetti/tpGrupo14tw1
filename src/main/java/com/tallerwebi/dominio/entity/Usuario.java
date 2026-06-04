@@ -4,8 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.JoinColumn;
 
 @Entity
 public class Usuario {
@@ -18,10 +16,6 @@ public class Usuario {
   private String password;
   private String rol;
   private Boolean activo = false;
-
-  @ManyToOne
-  @JoinColumn(name = "categoria_id")
-  private Categoria categoria;
 
   public Long getId() {
     return id;
@@ -65,13 +59,5 @@ public class Usuario {
 
   public void activar() {
     activo = true;
-  }
-
-  public Categoria getCategoria() {
-    return categoria;
-  }
-
-  public void setCategoria(Categoria categoria) {
-    this.categoria = categoria;
   }
 }
