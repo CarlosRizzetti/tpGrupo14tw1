@@ -19,6 +19,6 @@ INSERT INTO productosCategoria (idProducto, idCategoria) VALUES (3, 4); -- Helad
 INSERT INTO productosCategoria (idProducto, idCategoria) VALUES (4, 3); -- Cafe -> McCafe
 
 
-INSERT INTO Timer (estaActivo, estado, fechaCreacion, fechaVencimiento, groupId, idCategoria, idProducto, idReglaVencimiento) VALUES (1, 'activo', NOW(6), '2026-05-24 20:00:59', 'GRP-100', 3, 1, 1);
-INSERT INTO Timer (estaActivo, estado, fechaCreacion, fechaVencimiento, groupId, idCategoria, idProducto, idReglaVencimiento) VALUES (1, 'activo', NOW(6), '2026-05-23 20:00:59', 'GRP-100', 3, 1, 1);
-INSERT INTO Timer (estaActivo, estado, fechaCreacion, fechaVencimiento, groupId, idCategoria, idProducto, idReglaVencimiento) VALUES (1, 'activo', NOW(6), '2026-05-23 19:00:59', 'GRP-100', 3, 1, 1);
+INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, idCategoria, idProducto, idReglaVencimiento) VALUES ('ACTIVO', NOW(6), '2026-05-24 20:00:59', 'GRP-100', 3, 1, 1);
+INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, idCategoria, idProducto, idReglaVencimiento) VALUES ('ACTIVO', NOW(6), '2026-05-23 20:00:59', 'GRP-100', 3, 1, 1);
+INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, idCategoria, idProducto, idReglaVencimiento) VALUES ('ACTIVO', NOW(6), '2026-05-23 19:00:59', 'GRP-100', 3, 1, 1);

@@ -1,7 +1,7 @@
 package com.tallerwebi.dominio.entity;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import javax.persistence.*;
 import lombok.*;
 
@@ -27,8 +27,8 @@ public class Producto {
     joinColumns = @JoinColumn(name = "idProducto"),
     inverseJoinColumns = @JoinColumn(name = "idCategoria")
   )
-  private Set<Categoria> categorias = new HashSet<>();
+  private Set<Categoria> categorias = new TreeSet<>();
 
   @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  private Set<ReglaVencimiento> reglas = new HashSet<>();
+  private Set<ReglaVencimiento> reglas = new TreeSet<>();
 }
