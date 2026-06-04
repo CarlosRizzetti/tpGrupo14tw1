@@ -3,6 +3,7 @@ package com.tallerwebi.dominio.services;
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
+import com.tallerwebi.dominio.utils.ValidacionHelper;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import java.util.List;
 import java.util.Set;
@@ -25,18 +26,14 @@ public class ServicioCategoriaImpl implements ServicioCategoria {
   @Override
   public List<CategoriaDto> obtenerLasCategoriasParaElMenu() {
     Set<Categoria> categorias = repositorioCategoria.obtenerTodasLasCategoriasActivas();
-    return categorias
-      .stream()
-      .map(categoria -> new CategoriaDto(categoria))
-      .collect(Collectors.toList());
+    ValidacionHelper.queElSetNoSeaNull(categorias, "categorias para el menú");
+    return categorias.stream().map(CategoriaDto::new).collect(Collectors.toList());
   }
 
   @Override
   public CategoriaDto obtenerCategoriaPorId(Long id) {
     Categoria categoria = repositorioCategoria.buscarPorId(id);
-    if (categoria == null) {
-      return null;
-    }
+    ValidacionHelper.queNoSeaNull(categoria, "categoria");
     return new CategoriaDto(categoria);
   }
 }

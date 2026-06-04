@@ -2,6 +2,7 @@ package com.tallerwebi.repositorio;
 
 import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
+import java.util.List;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,5 +46,18 @@ public class RepositorioUsuarioImpl implements RepositorioUsuario {
   @Override
   public void modificar(Usuario usuario) {
     sessionFactory.getCurrentSession().update(usuario);
+  }
+
+  @Override
+  public List<Usuario> listarTodos() {
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery("FROM Usuario ORDER BY id", Usuario.class)
+      .list();
+  }
+
+  @Override
+  public Usuario obtenerPorId(Long id) {
+    return sessionFactory.getCurrentSession().get(Usuario.class, id);
   }
 }

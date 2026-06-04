@@ -1,6 +1,7 @@
 package com.tallerwebi.repositorio;
 
 import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import java.util.List;
 import org.hibernate.SessionFactory;
@@ -16,7 +17,7 @@ public class RepositorioTimerImpl implements RepositorioTimer {
   }
 
   @Override
-  public List<Timer> obtenerTimersSegunEstado(Long id, String estado) {
+  public List<Timer> obtenerTimersSegunEstado(Long id, EstadoTimer estado) {
     String hql =
       "FROM Timer t JOIN FETCH t.producto JOIN FETCH t.categoria WHERE t.estado = :estado AND t.categoria.id = :idCat";
     return sessionFactory
@@ -40,13 +41,14 @@ public class RepositorioTimerImpl implements RepositorioTimer {
   @Override
   public boolean existeTimerActivoEnCategoriaYGrupo(Long categoriaId, String groupId) {
     String hql =
-      " SELECT COUNT(t) > 0 FROM Timer t WHERE t.categoria.id = :categoriaId AND t.groupId = :groupId AND t.estaActivo = true";
+      " SELECT COUNT(t) > 0 FROM Timer t WHERE t.categoria.id = :categoriaId AND t.groupId = :groupId AND t.estado = :estado";
 
     return sessionFactory
       .getCurrentSession()
       .createQuery(hql, Boolean.class)
       .setParameter("categoriaId", categoriaId)
       .setParameter("groupId", groupId)
+      .setParameter("estado", EstadoTimer.ACTIVO)
       .getSingleResult();
   }
 }
