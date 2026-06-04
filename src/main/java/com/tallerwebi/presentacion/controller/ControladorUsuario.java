@@ -4,7 +4,9 @@ import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
+import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.presentacion.dto.UsuarioDto;
+import com.tallerwebi.presentacion.dto.CategoriaDto;
 import java.util.List;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
@@ -28,10 +32,12 @@ public class ControladorUsuario {
   private static final String ATTR_DTO = "usuarioDto";
 
   private final ServicioUsuario servicioUsuario;
+  private final ServicioCategoria servicioCategoria;
 
   @Autowired
-  public ControladorUsuario(ServicioUsuario servicioUsuario) {
+  public ControladorUsuario(ServicioUsuario servicioUsuario, ServicioCategoria servicioCategoria) {
     this.servicioUsuario = servicioUsuario;
+    this.servicioCategoria = servicioCategoria;
   }
 
   @RequestMapping(value = "/admin/usuarios", method = RequestMethod.GET)
@@ -139,6 +145,28 @@ public class ControladorUsuario {
       return new ModelAndView(REDIRECT_DENEGADO);
     }
     servicioUsuario.darDeBaja(id);
+    return new ModelAndView(REDIRECT_LISTA);
+  }
+
+  @RequestMapping(value = "/admin/usuarios/{id}/categorias", method = RequestMethod.GET)
+  @ResponseBody
+  public List<CategoriaDto> obtenerCategoriasDisponibles(@PathVariable Long id, HttpSession session) {
+    if (!esAdministrador(session)) {
+      return List.of();
+    }
+    return servicioCategoria.obtenerLasCategoriasParaElMenu();
+  }
+
+  @RequestMapping(value = "/admin/usuarios/{id}/asignar-categoria", method = RequestMethod.POST)
+  public ModelAndView asignarCategoria(
+    @PathVariable Long id,
+    @RequestParam Long categoriaId,
+    HttpSession session
+  ) {
+    if (!esAdministrador(session)) {
+      return new ModelAndView(REDIRECT_DENEGADO);
+    }
+    servicioUsuario.asignarCategoria(id, categoriaId);
     return new ModelAndView(REDIRECT_LISTA);
   }
 

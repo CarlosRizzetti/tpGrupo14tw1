@@ -5,11 +5,14 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
+import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.presentacion.controller.ControladorUsuario;
 import com.tallerwebi.presentacion.dto.UsuarioDto;
+import com.tallerwebi.presentacion.dto.CategoriaDto;
 import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpSession;
@@ -21,13 +24,15 @@ public class ControladorUsuarioTest {
 
   private ControladorUsuario controladorUsuario;
   private ServicioUsuario servicioUsuarioMock;
+  private ServicioCategoria servicioCategoriasMock;
   private HttpSession sessionMock;
 
   @BeforeEach
   public void init() {
     servicioUsuarioMock = mock(ServicioUsuario.class);
+    servicioCategoriasMock = mock(ServicioCategoria.class);
     sessionMock = mock(HttpSession.class);
-    controladorUsuario = new ControladorUsuario(servicioUsuarioMock);
+    controladorUsuario = new ControladorUsuario(servicioUsuarioMock, servicioCategoriasMock);
     when(sessionMock.getAttribute("ROL")).thenReturn("ADMIN");
   }
 
@@ -169,5 +174,58 @@ public class ControladorUsuarioTest {
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/admin/usuarios"));
     verify(servicioUsuarioMock, times(1)).reactivar(1L);
+  }
+
+  @Test
+  public void obtenerCategoriasDisponiblesDeberiaRetornarListaDeCategoriasJSON() {
+    // preparacion
+    List<CategoriaDto> categorias = Arrays.asList(
+      new CategoriaDto(new Categoria("icon1", true, "Electrónica")),
+      new CategoriaDto(new Categoria("icon2", true, "Alimentos"))
+    );
+    when(servicioCategoriasMock.obtenerLasCategoriasParaElMenu()).thenReturn(categorias);
+
+    // ejecucion
+    List<CategoriaDto> resultado = controladorUsuario.obtenerCategoriasDisponibles(1L, sessionMock);
+
+    // validacion
+    assertThat(resultado, hasSize(2));
+    verify(servicioCategoriasMock, times(1)).obtenerLasCategoriasParaElMenu();
+  }
+
+  @Test
+  public void obtenerCategoriasDisponiblesSinRolAdminDeberiaRetornarListaVacia() {
+    // preparacion
+    when(sessionMock.getAttribute("ROL")).thenReturn("USER");
+
+    // ejecucion
+    List<CategoriaDto> resultado = controladorUsuario.obtenerCategoriasDisponibles(1L, sessionMock);
+
+    // validacion
+    assertThat(resultado, empty());
+    verify(servicioCategoriasMock, times(0)).obtenerLasCategoriasParaElMenu();
+  }
+
+  @Test
+  public void asignarCategoriaConDatosValidosDeberiaRedirigirALista() {
+    // ejecucion
+    ModelAndView mav = controladorUsuario.asignarCategoria(1L, 1L, sessionMock);
+
+    // validacion
+    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/admin/usuarios"));
+    verify(servicioUsuarioMock, times(1)).asignarCategoria(1L, 1L);
+  }
+
+  @Test
+  public void asignarCategoriaSinRolAdminDeberiaRedirigirAAccesoDenegado() {
+    // preparacion
+    when(sessionMock.getAttribute("ROL")).thenReturn("USER");
+
+    // ejecucion
+    ModelAndView mav = controladorUsuario.asignarCategoria(1L, 1L, sessionMock);
+
+    // validacion
+    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/acceso-denegado"));
+    verify(servicioUsuarioMock, times(0)).asignarCategoria(1L, 1L);
   }
 }
