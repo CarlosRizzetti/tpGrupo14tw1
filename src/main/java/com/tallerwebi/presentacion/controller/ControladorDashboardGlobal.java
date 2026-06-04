@@ -44,15 +44,16 @@ public class ControladorDashboardGlobal {
       }
 
       Map<Long, List<TimerDTO>> timersPorCategoria = new HashMap<>();
-      boolean anyTimers = false;
 
       for (CategoriaDto categoria : categorias) {
         List<TimerDTO> timers = servicioDashboard.obtenerTimersActivos(categoria.getId());
         timersPorCategoria.put(categoria.getId(), timers);
-        if (timers != null && !timers.isEmpty()) {
-          anyTimers = true;
-        }
       }
+
+      boolean anyTimers = timersPorCategoria
+        .values()
+        .stream()
+        .anyMatch(timers -> timers != null && !timers.isEmpty());
 
       mav.addObject("categorias", categorias);
 
