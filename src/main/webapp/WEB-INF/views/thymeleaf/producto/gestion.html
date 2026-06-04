@@ -92,11 +92,9 @@
 
               <form th:action="@{/admin/productos/{id}/agregar-stock(id=${p.id})}" method="POST">
                 <input type="hidden" name="categoriaId" th:value="${categoriaSeleccionada}">
-                <input type="hidden" name="cantidad" th:id="'add-' + ${p.id}" value="1">
-                <button type="submit"
-                        onclick="syncCantidad(this)"
-                        th:data-input="'cantidad-' + ${p.id}"
-                        th:data-hidden="'add-' + ${p.id}"
+                <input type="hidden" name="cantidad" value="1">
+                <button type="button"
+                        th:onclick="'submitStock(this, \'cantidad-' + ${p.id} + '\')'"
                         class="px-3 py-2 bg-green-600 text-white border-b-4 border-green-800 rounded-xl text-xs font-black uppercase tracking-wider active:border-b-0 active:translate-y-1 transition-all hover:opacity-90">
                   + Agregar
                 </button>
@@ -104,11 +102,9 @@
 
               <form th:action="@{/admin/productos/{id}/quitar-stock(id=${p.id})}" method="POST">
                 <input type="hidden" name="categoriaId" th:value="${categoriaSeleccionada}">
-                <input type="hidden" name="cantidad" th:id="'sub-' + ${p.id}" value="1">
-                <button type="submit"
-                        onclick="syncCantidad(this)"
-                        th:data-input="'cantidad-' + ${p.id}"
-                        th:data-hidden="'sub-' + ${p.id}"
+                <input type="hidden" name="cantidad" value="1">
+                <button type="button"
+                        th:onclick="'submitStock(this, \'cantidad-' + ${p.id} + '\')'"
                         class="px-3 py-2 bg-red-600 text-white border-b-4 border-red-800 rounded-xl text-xs font-black uppercase tracking-wider active:border-b-0 active:translate-y-1 transition-all hover:opacity-90">
                   - Quitar
                 </button>
@@ -121,16 +117,16 @@
     </table>
   </div>
 
-</div>
+  <script>
+  function submitStock(btn, inputId) {
+    var input = document.getElementById(inputId);
+    var hidden = btn.closest('form').querySelector('input[name="cantidad"]');
+    hidden.value = input.value;
+    btn.closest('form').submit();
+  }
+  </script>
 
-<script>
-function syncCantidad(btn) {
-  var inputId = btn.getAttribute('data-input');
-  var hiddenId = btn.getAttribute('data-hidden');
-  var valor = document.getElementById(inputId).value;
-  document.getElementById(hiddenId).value = valor;
-}
-</script>
+</div>
 
 </body>
 </html>
