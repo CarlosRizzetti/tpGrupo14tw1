@@ -23,6 +23,22 @@ public class RepositorioProductoImpl implements RepositorioProducto {
   }
 
   @Override
+  public void actualizar(Producto producto) {
+    sessionFactory.getCurrentSession().merge(producto);
+  }
+
+  @Override
+  public List<Producto> obtenerTodos() {
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery(
+        "SELECT p FROM Producto p JOIN p.categorias c WHERE c.id = :categoriaId AND p.estaActivo = true",
+        Producto.class
+      )
+      .list();
+  }
+
+  @Override
   public Producto obtenerProductoPorId(Long id) {
     return sessionFactory
       .getCurrentSession()
@@ -39,7 +55,7 @@ public class RepositorioProductoImpl implements RepositorioProducto {
     return sessionFactory
       .getCurrentSession()
       .createQuery(
-        "SELECT p FROM Producto p JOIN p.categorias c WHERE c.id = :categoriaId AND p.estaActivo = true",
+        "SELECT DISTINCT p FROM Producto p LEFT JOIN FETCH p.categorias c WHERE c.id = :categoriaId AND p.estaActivo = true ORDER BY p.nombre",
         Producto.class
       )
       .setParameter("categoriaId", categoriaId)

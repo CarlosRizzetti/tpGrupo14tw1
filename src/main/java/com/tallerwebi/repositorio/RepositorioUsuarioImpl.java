@@ -44,6 +44,15 @@ public class RepositorioUsuarioImpl implements RepositorioUsuario {
   }
 
   @Override
+  public Usuario buscarPorTokenValidacion(String tokenValidacion) {
+    return (Usuario) sessionFactory
+      .getCurrentSession()
+      .createCriteria(Usuario.class)
+      .add(Restrictions.eq("tokenValidacion", tokenValidacion))
+      .uniqueResult();
+  }
+
+  @Override
   public void modificar(Usuario usuario) {
     sessionFactory.getCurrentSession().update(usuario);
   }

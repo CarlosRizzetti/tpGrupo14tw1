@@ -28,3 +28,7 @@ src/main/webapp/resources/core/css/app.css
 src/main/webapp/resources/core/css/app.css
 src/main/webapp/resources/core/css/app.css
 runApp.sh
+src/main/webapp/resources/core/css/app.css
+node/node
+docker-compose.yml
+.env

@@ -21,6 +21,7 @@ public class VistaLoginE2E {
   static Browser browser;
   BrowserContext context;
   VistaLogin vistaLogin;
+  VistaNuevoUsuario vistaNuevoUsuario;
 
   @BeforeAll
   static void abrirNavegador() {
@@ -69,13 +70,10 @@ public class VistaLoginE2E {
   }
 
   @Test
-  void deberiaRegistrarUnUsuarioEIniciarSesionExistosamente() throws MalformedURLException {
+  void deberiaRegistrarUnUsuarioYRedirigirAValidacion() throws MalformedURLException {
     dadoQueElUsuarioNavegaALaVistaDeRegistro();
     dadoQueElUsuarioSeRegistraCon("juan@unlam.edu.ar", "123456");
-    dadoQueElUsuarioEstaEnLaVistaDeLogin();
-    dadoQueElUsuarioCargaSusDatosDeLoginCon("juan@unlam.edu.ar", "123456");
-    cuandoElUsuarioTocaElBotonDeLogin();
-    entoncesDeberiaSerRedirigidoALaVistaDeHome();
+    entoncesDeberiaSerRedirigidoALaVistaDeValidacion();
   }
 
   private void entoncesDeberiaVerUNLAMEnElNavbar() {
@@ -112,9 +110,17 @@ public class VistaLoginE2E {
   }
 
   private void dadoQueElUsuarioSeRegistraCon(String email, String clave) {
-    VistaNuevoUsuario vistaNuevoUsuario = new VistaNuevoUsuario(context.pages().get(0));
+    vistaNuevoUsuario = new VistaNuevoUsuario(context.pages().get(0));
     vistaNuevoUsuario.escribirEMAIL(email);
     vistaNuevoUsuario.escribirClave(clave);
     vistaNuevoUsuario.darClickEnRegistrarme();
+  }
+
+  private void entoncesDeberiaSerRedirigidoALaVistaDeValidacion() throws MalformedURLException {
+    URL url = vistaNuevoUsuario.obtenerURLActual();
+    assertThat(
+      url.getPath(),
+      matchesPattern("^/spring/validacion-identidad(?:;jsessionid=[^/\\s]+)?$")
+    );
   }
 }

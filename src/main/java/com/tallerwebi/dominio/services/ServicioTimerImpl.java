@@ -7,6 +7,7 @@ import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
+import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
 import com.tallerwebi.dominio.interfaces.ServicioTimer;
 import com.tallerwebi.dominio.utils.ValidacionHelper;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
@@ -23,16 +24,19 @@ import org.springframework.transaction.annotation.Transactional;
 public class ServicioTimerImpl implements ServicioTimer {
 
   private final String TIMER = "timer";
+  private final ServicioReglaVencimiento servicioReglaVencimiento;
   private RepositorioTimer repositorioTimer;
   private RepositorioCategoria repositorioCategoria;
 
   @Autowired
   public ServicioTimerImpl(
     RepositorioTimer repositorioTimer,
-    RepositorioCategoria repositorioCategoria
+    RepositorioCategoria repositorioCategoria,
+    ServicioReglaVencimiento servicioReglaVencimiento
   ) {
     this.repositorioTimer = repositorioTimer;
     this.repositorioCategoria = repositorioCategoria;
+    this.servicioReglaVencimiento = servicioReglaVencimiento;
   }
 
   @Override
@@ -59,27 +63,6 @@ public class ServicioTimerImpl implements ServicioTimer {
     }
 
     repositorioTimer.guardar(timer);
-  }
-
-  @Override
-  public CategoriaDto clonarTimerACategoria(Long timerId, Long categoriaId) {
-    Timer original = repositorioTimer.buscarPorId(timerId);
-    ValidacionHelper.queNoSeaNull(original, TIMER);
-
-    Categoria categoriaDestino = repositorioCategoria.buscarPorId(categoriaId);
-    ValidacionHelper.queNoSeaNull(categoriaDestino, "categoria");
-
-    Timer clon = new Timer(
-      original.getFechaCreacion(),
-      original.getFechaVencimiento(),
-      original.getGroupId(),
-      original.getProducto(),
-      categoriaDestino,
-      original.getReglaVencimiento()
-    );
-
-    repositorioTimer.guardar(clon);
-    return new CategoriaDto(categoriaDestino);
   }
 
   @Override
@@ -118,10 +101,21 @@ public class ServicioTimerImpl implements ServicioTimer {
     return timer;
   }
 
-  public Timer renovarTimer(Timer timer) {
+  @Override
+  public TimerDTO renovarTimer(Timer timer) {
     ReglaVencimiento regla = timer.getReglaVencimiento();
     ValidacionHelper.queNoSeaNull(regla, "Regla vencimiento");
-    return new Timer();
+
+    modificarEstado(timer.getId(), EstadoTimer.RENOVADO);
+    Timer nuevoTimer = servicioReglaVencimiento.generarVencimiento(
+      timer.getProducto(),
+      timer.getCategoria(),
+      regla.getId(),
+      null,
+      1
+    );
+
+    return mapearATimerDTO(nuevoTimer);
   }
 
   private String obtenerNombreProducto(Timer timer) {

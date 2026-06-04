@@ -11,9 +11,12 @@ import com.tallerwebi.dominio.utils.ValidacionHelper;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ResponseDTO;
 import com.tallerwebi.presentacion.dto.TimerDTO;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +27,7 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class ControladorDashboard {
 
+  private static final Logger logger = LoggerFactory.getLogger(ControladorDashboard.class);
   private ServicioProducto servicioProducto;
   public ServicioTimer servicioTimer;
 
@@ -54,7 +58,7 @@ public class ControladorDashboard {
     return mav;
   }
 
-  @DeleteMapping("/active-timers/{timerId}")
+  @DeleteMapping("/active-timers/eliminarTimer/{timerId}")
   public ResponseEntity<String> eliminarTimer(@PathVariable Long timerId) {
     try {
       ValidacionHelper.validarId(timerId);
@@ -68,6 +72,36 @@ public class ControladorDashboard {
       return ResponseEntity
         .status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
         .body("Error al eliminar el timer");
+    }
+  }
+
+  @PutMapping("/active-timers/renovarTimer/{timerId}")
+  public ResponseEntity<?> renovarTimer(@PathVariable Long timerId) {
+    if (logger.isInfoEnabled()) {
+      logger.info("Entrando a renovarTimer con id {}", timerId);
+    }
+    try {
+      ValidacionHelper.validarId(timerId);
+      Timer timer = servicioTimer.buscarPorId(timerId);
+      TimerDTO nuevoTimer = servicioTimer.renovarTimer(timer);
+      Map<String, Object> response = new HashMap<>();
+      response.put("status", "ok");
+      response.put("nuevoTimerId", nuevoTimer.getId());
+      response.put("fechaElaboracion", nuevoTimer.getFechaCreacion());
+      response.put("fechaVencimiento", nuevoTimer.getFechaVencimiento());
+
+      return ResponseEntity.ok(response);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(Map.of("status", "error", "mensaje", e.getMessage()));
+    } catch (Exception e) {
+      if (logger.isErrorEnabled()) {
+        logger.error("Error al renovar el timer con id {}: {}", timerId, e.getMessage(), e);
+      }
+      return ResponseEntity
+        .status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
+        .body(Map.of("status", "error", "mensaje", "Error al renovar el timer"));
     }
   }
 
