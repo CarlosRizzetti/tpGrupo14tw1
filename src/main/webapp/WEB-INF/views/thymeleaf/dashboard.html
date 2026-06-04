@@ -122,14 +122,18 @@
                 <!-- BOTONERA -->
                 <div class="grid grid-cols-3 h-16 border-t border-gray-100 divide-x divide-gray-100">
                     <!-- Eliminar -->
-                    <button type="button" th:data-timer-id="${timer.id}" th:data-category-id="${categoria.id}"
+                    <button type="button" th:data-action="delete"
+                            th:data-timer-id="${timer.id}"
+                            th:data-category-id="${categoria.id}"
                             class="btn-eliminar bg-red-50 hover:bg-red-100 text-red-600 flex flex-col items-center justify-center transition-colors active:bg-red-200 group">
                         <svg class="w-5 h-5 mb-0.5 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         <span class="text-[9px] font-black uppercase">Eliminar</span>
                     </button>
 
                     <!-- Importar -->
-                    <button type="button" th:data-timer-id="${timer.id}" th:data-product-name="${timer.nombre}"
+                    <button type="button" th:data-action="import"
+                            th:data-timer-id="${timer.id}"
+                            th:data-product-name="${timer.nombre}"
                             th:data-location="${timer.ubicacion ?: 'General'}"
                             class="btn-importar bg-slate-100 hover:bg-slate-200 text-slate-600 flex flex-col items-center justify-center transition-colors active:bg-slate-300 group z-10">
                         <svg class="w-5 h-5 mb-0.5 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -152,6 +156,5 @@
 
 <div th:fragment="scripts">
 <script type="module" th:src="@{/resources/core/js/actualizarTemporizadores.js}" defer></script>
-<script th:src="@{/resources/core/js/deleteTimer.js}" defer></script>
     <script type="module" th:src="@{/resources/core/js/DashboardFunciones.js}" defer></script>
 </div>

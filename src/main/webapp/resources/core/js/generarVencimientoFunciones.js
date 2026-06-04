@@ -39,7 +39,7 @@ function enviarFormulario(e) {
   }
 
   console.log("Minutos a restar calculados: " + finalInput.value);
-  form.submit;
+  form.submit();
 }
 
 document.addEventListener("submit", enviarFormulario);
