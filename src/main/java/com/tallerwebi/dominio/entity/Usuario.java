@@ -15,6 +15,7 @@ public class Usuario {
   private String email;
   private String password;
   private String rol;
+  private String tokenValidacion;
   private Boolean activo = false;
 
   public Long getId() {
@@ -47,6 +48,14 @@ public class Usuario {
 
   public void setRol(String rol) {
     this.rol = rol;
+  }
+
+  public String getTokenValidacion() {
+    return tokenValidacion;
+  }
+
+  public void setTokenValidacion(String tokenValidacion) {
+    this.tokenValidacion = tokenValidacion;
   }
 
   public Boolean getActivo() {

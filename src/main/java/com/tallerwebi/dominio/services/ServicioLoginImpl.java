@@ -42,7 +42,7 @@ public class ServicioLoginImpl implements ServicioLogin {
       throw new UsuarioExistente();
     }
     usuario.setRol("USER");
-    usuario.setActivo(true);
+    usuario.setActivo(false);
     repositorioUsuario.guardar(usuario);
   }
 }

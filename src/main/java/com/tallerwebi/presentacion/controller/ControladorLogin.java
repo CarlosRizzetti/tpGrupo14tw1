@@ -4,6 +4,7 @@ import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
 import com.tallerwebi.dominio.interfaces.ServicioLogin;
+import com.tallerwebi.dominio.interfaces.ServicioValidacionIdentidad;
 import com.tallerwebi.presentacion.dto.LoginDto;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,17 @@ public class ControladorLogin {
 
   private static final String ERROR = "error";
   private static final String VISTA_NUEVO_USUARIO = "nuevo-usuario";
-  private ServicioLogin servicioLogin;
+  private static final String REDIRECT_VALIDACION = "redirect:/validacion-identidad";
+  private final ServicioLogin servicioLogin;
+  private final ServicioValidacionIdentidad servicioValidacionIdentidad;
 
   @Autowired
-  public ControladorLogin(ServicioLogin servicioLogin) {
+  public ControladorLogin(
+    ServicioLogin servicioLogin,
+    ServicioValidacionIdentidad servicioValidacionIdentidad
+  ) {
     this.servicioLogin = servicioLogin;
+    this.servicioValidacionIdentidad = servicioValidacionIdentidad;
   }
 
   @RequestMapping("/")
@@ -71,7 +78,7 @@ public class ControladorLogin {
     ModelMap model = new ModelMap();
     try {
       servicioLogin.registrar(usuario);
-      request.getSession().setAttribute("ROL", usuario.getRol());
+      servicioValidacionIdentidad.solicitarValidacion(usuario.getEmail());
     } catch (UsuarioExistente e) {
       model.put(ERROR, "El usuario ya existe");
       return new ModelAndView(VISTA_NUEVO_USUARIO, model);
@@ -82,7 +89,7 @@ public class ControladorLogin {
       model.put(ERROR, "Error al registrar el nuevo usuario");
       return new ModelAndView(VISTA_NUEVO_USUARIO, model);
     }
-    return new ModelAndView("redirect:/home");
+    return new ModelAndView(REDIRECT_VALIDACION);
   }
 
   @RequestMapping(path = "/nuevo-usuario", method = RequestMethod.GET)
