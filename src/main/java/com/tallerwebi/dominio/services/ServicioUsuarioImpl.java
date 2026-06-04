@@ -1,9 +1,11 @@
 package com.tallerwebi.dominio.services;
 
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
+import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
 import com.tallerwebi.dominio.utils.ValidadorPassword;
 import com.tallerwebi.presentacion.dto.UsuarioDto;
@@ -17,10 +19,12 @@ import org.springframework.stereotype.Service;
 public class ServicioUsuarioImpl implements ServicioUsuario {
 
   private final RepositorioUsuario repositorioUsuario;
+  private final RepositorioCategoria repositorioCategoria;
 
   @Autowired
-  public ServicioUsuarioImpl(RepositorioUsuario repositorioUsuario) {
+  public ServicioUsuarioImpl(RepositorioUsuario repositorioUsuario, RepositorioCategoria repositorioCategoria) {
     this.repositorioUsuario = repositorioUsuario;
+    this.repositorioCategoria = repositorioCategoria;
   }
 
   @Override
@@ -84,6 +88,21 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
     if (usuario == null) {
       throw new IllegalArgumentException("Usuario no encontrado");
     }
+    usuario.setActivo(true);
+    repositorioUsuario.modificar(usuario);
+  }
+
+  @Override
+  public void asignarCategoria(Long usuarioId, Long categoriaId) {
+    Usuario usuario = repositorioUsuario.obtenerPorId(usuarioId);
+    if (usuario == null) {
+      throw new IllegalArgumentException("Usuario no encontrado");
+    }
+    Categoria categoria = repositorioCategoria.buscarPorId(categoriaId);
+    if (categoria == null) {
+      throw new IllegalArgumentException("Categoría no encontrada");
+    }
+    usuario.setCategoria(categoria);
     usuario.setActivo(true);
     repositorioUsuario.modificar(usuario);
   }

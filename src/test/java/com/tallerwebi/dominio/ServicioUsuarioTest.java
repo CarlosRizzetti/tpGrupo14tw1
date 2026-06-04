@@ -8,9 +8,11 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
+import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
 import com.tallerwebi.dominio.services.ServicioUsuarioImpl;
 import com.tallerwebi.presentacion.dto.UsuarioDto;
@@ -23,11 +25,13 @@ public class ServicioUsuarioTest {
 
   private ServicioUsuario servicioUsuario;
   private RepositorioUsuario repositorioUsuarioMock;
+  private RepositorioCategoria repositorioCategoriasMock;
 
   @BeforeEach
   public void init() {
     this.repositorioUsuarioMock = mock(RepositorioUsuario.class);
-    this.servicioUsuario = new ServicioUsuarioImpl(this.repositorioUsuarioMock);
+    this.repositorioCategoriasMock = mock(RepositorioCategoria.class);
+    this.servicioUsuario = new ServicioUsuarioImpl(this.repositorioUsuarioMock, this.repositorioCategoriasMock);
   }
 
   @Test
@@ -232,6 +236,46 @@ public class ServicioUsuarioTest {
 
     // ejecucion y validacion
     assertThrows(IllegalArgumentException.class, () -> servicioUsuario.reactivar(99L));
+  }
+
+  @Test
+  public void asignarCategoriaAUsuarioExistenteDeberiaAsignarlaYActivarUsuario() {
+    // preparacion
+    Usuario usuario = new Usuario();
+    usuario.setActivo(false);
+    Categoria categoria = new Categoria("icono", true, "Electrónica");
+    categoria.setId(1L);
+
+    when(repositorioUsuarioMock.obtenerPorId(1L)).thenReturn(usuario);
+    when(repositorioCategoriasMock.buscarPorId(1L)).thenReturn(categoria);
+
+    // ejecucion
+    servicioUsuario.asignarCategoria(1L, 1L);
+
+    // validacion
+    assertThat(usuario.getCategoria(), equalTo(categoria));
+    assertThat(usuario.getActivo(), is(true));
+    verify(repositorioUsuarioMock, times(1)).modificar(usuario);
+  }
+
+  @Test
+  public void asignarCategoriaAUsuarioInexistenteDeberiaLanzarExcepcion() {
+    // preparacion
+    when(repositorioUsuarioMock.obtenerPorId(99L)).thenReturn(null);
+
+    // ejecucion y validacion
+    assertThrows(IllegalArgumentException.class, () -> servicioUsuario.asignarCategoria(99L, 1L));
+  }
+
+  @Test
+  public void asignarCategoriaInexistenteDeberiaLanzarExcepcion() {
+    // preparacion
+    Usuario usuario = new Usuario();
+    when(repositorioUsuarioMock.obtenerPorId(1L)).thenReturn(usuario);
+    when(repositorioCategoriasMock.buscarPorId(99L)).thenReturn(null);
+
+    // ejecucion y validacion
+    assertThrows(IllegalArgumentException.class, () -> servicioUsuario.asignarCategoria(1L, 99L));
   }
 
   private UsuarioDto dtoValido() {

@@ -60,6 +60,15 @@
                            class="px-3 py-1 bg-puesto-header text-puesto-header-text rounded-lg text-xs font-bold hover:opacity-80 transition">
                             Editar
                         </a>
+                        <button th:if="${usuario.rol == 'USER'}"
+                                type="button"
+                                data-accion="asignar-categoria"
+                                th:data-usuario-id="${usuario.id}"
+                                th:data-categoria-id="${usuario.categoria?.id}"
+                                class="px-3 py-1 bg-amber-600 text-white rounded-lg text-xs font-bold hover:bg-amber-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                th:disabled="${usuario.categoria == null}">
+                            Asignar categoría
+                        </button>
                         <form th:if="${usuario.activo}"
                               th:action="@{/admin/usuarios/{id}/dar-de-baja(id=${usuario.id})}"
                               method="POST"
@@ -83,5 +92,80 @@
         </table>
     </div>
 </div>
+
+<!-- Modal para asignar categoría -->
+<div id="modalAsignarCategoria" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg p-6 max-w-md w-full mx-4">
+        <h2 class="text-xl font-bold mb-4 text-gray-800">Asignar categoría</h2>
+        <div id="categoriasContainer" class="space-y-3 mb-6 max-h-96 overflow-y-auto">
+            <!-- Las categorías se cargarán aquí -->
+        </div>
+        <div class="flex gap-3 justify-end">
+            <button type="button" onclick="cerrarModal()" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg font-bold hover:bg-gray-400 transition">
+                Cancelar
+            </button>
+            <button type="button" onclick="guardarCategoria()" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition">
+                Guardar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+let usuarioIdActual = null;
+
+document.querySelectorAll('[data-accion="asignar-categoria"]').forEach(btn => {
+    btn.addEventListener('click', function() {
+        usuarioIdActual = this.dataset.usuarioId;
+        const categoriaIdActual = this.dataset.categoriaId;
+        abrirModal(usuarioIdActual, categoriaIdActual);
+    });
+});
+
+function abrirModal(usuarioId, categoriaIdActual) {
+    fetch(`/admin/usuarios/${usuarioId}/categorias`)
+        .then(res => res.json())
+        .then(categorias => {
+            const container = document.getElementById('categoriasContainer');
+            container.innerHTML = '';
+            categorias.forEach(cat => {
+                const checked = categoriaIdActual && parseInt(categoriaIdActual) === cat.id;
+                container.innerHTML += `
+                    <label class="flex items-center p-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                        <input type="radio" name="categoria" value="${cat.id}" ${checked ? 'checked' : ''} class="mr-3">
+                        <span class="text-gray-800">${cat.nombre}</span>
+                    </label>
+                `;
+            });
+            document.getElementById('modalAsignarCategoria').classList.remove('hidden');
+        })
+        .catch(err => console.error('Error:', err));
+}
+
+function cerrarModal() {
+    document.getElementById('modalAsignarCategoria').classList.add('hidden');
+    usuarioIdActual = null;
+}
+
+function guardarCategoria() {
+    const categoriaSeleccionada = document.querySelector('input[name="categoria"]:checked');
+    if (!categoriaSeleccionada) {
+        alert('Por favor selecciona una categoría');
+        return;
+    }
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/admin/usuarios/${usuarioIdActual}/asignar-categoria?categoriaId=${categoriaSeleccionada.value}`;
+    document.body.appendChild(form);
+    form.submit();
+}
+
+document.getElementById('modalAsignarCategoria').addEventListener('click', function(e) {
+    if (e.target === this) {
+        cerrarModal();
+    }
+});
+</script>
 </body>
 </html>
