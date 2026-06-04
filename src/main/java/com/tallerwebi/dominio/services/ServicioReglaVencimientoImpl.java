@@ -4,8 +4,11 @@ import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.entity.enums.TipoMovimientoStock;
 import com.tallerwebi.dominio.interfaces.RepositorioReglaVencimiento;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
+import com.tallerwebi.dominio.interfaces.ServicioControlStock;
+import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -19,16 +22,22 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
 
   private final RepositorioReglaVencimiento repositorioReglaVencimiento;
   private final RepositorioTimer repositorioTimer;
+  private final ServicioProducto servicioProducto;
+  private final ServicioControlStock servicioControlStock;
   private final Clock clock;
 
   @Autowired
   public ServicioReglaVencimientoImpl(
     RepositorioReglaVencimiento repositorioReglaVencimiento,
     RepositorioTimer repositorioTimer,
+    ServicioProducto servicioProducto,
+    ServicioControlStock servicioControlStock,
     Clock clock
   ) {
     this.repositorioReglaVencimiento = repositorioReglaVencimiento;
     this.repositorioTimer = repositorioTimer;
+    this.servicioProducto = servicioProducto;
+    this.servicioControlStock = servicioControlStock;
     this.clock = clock;
   }
 
@@ -48,12 +57,16 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
     Producto producto,
     Categoria categoria,
     Long reglaId,
-    Integer offsetMinutos
+    Integer offsetMinutos,
+    Integer cantidadUsada
   ) {
     ReglaVencimiento regla = repositorioReglaVencimiento.obtenerReglaVencimientoPorId(reglaId);
     if (regla == null) {
       throw new IllegalArgumentException("El producto no tiene regla de vencimiento");
     }
+
+    validarCantidadUsada(cantidadUsada);
+    servicioProducto.descontarStock(producto, cantidadUsada);
 
     OffsetDateTime fechaElaboracion = obtenerFechaDeElaboracion(offsetMinutos);
     OffsetDateTime vencimiento = obtenerFechaVencimiento(fechaElaboracion, regla);
@@ -68,7 +81,21 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
       regla
     );
     repositorioTimer.guardar(timer);
+
+    servicioControlStock.registrarMovimiento(
+      producto,
+      timer,
+      cantidadUsada,
+      TipoMovimientoStock.EGRESO
+    );
+
     return timer;
+  }
+
+  private void validarCantidadUsada(Integer cantidadUsada) {
+    if (cantidadUsada == null || cantidadUsada <= 0) {
+      throw new IllegalArgumentException("La cantidad a utilizar debe ser mayor a 0");
+    }
   }
 
   private OffsetDateTime obtenerFechaDeDescongelamiento(

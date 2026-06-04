@@ -28,6 +28,7 @@ public class ControladorProducto {
   private final ServicioTimer servicioTimer;
   private final ServicioReglaVencimiento servicioReglaVencimiento;
   private static final String CATEGORIA = "categoria";
+  private static final String REDIRECT_DENEGADO = "redirect:/acceso-denegado";
 
   @Autowired
   public ControladorProducto(
@@ -46,7 +47,7 @@ public class ControladorProducto {
   @RequestMapping(value = "/producto/nuevo", method = RequestMethod.GET)
   public ModelAndView mostrarFormulario(HttpSession session) {
     if (!esAdministrador(session)) {
-      return new ModelAndView("redirect:/acceso-denegado");
+      return new ModelAndView(REDIRECT_DENEGADO);
     }
     ModelAndView mav = new ModelAndView("producto/nuevo");
     List<CategoriaDto> categorias = servicioCategoria.obtenerLasCategoriasParaElMenu();
@@ -59,7 +60,7 @@ public class ControladorProducto {
   @RequestMapping(value = "/producto/nuevo", method = RequestMethod.POST)
   public ModelAndView crearProducto(@ModelAttribute ProductoDto productoDto, HttpSession session) {
     if (!esAdministrador(session)) {
-      return new ModelAndView("redirect:/acceso-denegado");
+      return new ModelAndView(REDIRECT_DENEGADO);
     }
 
     try {
@@ -81,6 +82,55 @@ public class ControladorProducto {
   @RequestMapping("/producto/exito")
   public ModelAndView exito() {
     return new ModelAndView("producto/exito");
+  }
+
+  @RequestMapping(value = "/admin/productos", method = RequestMethod.GET)
+  public ModelAndView gestionProductos(
+    @RequestParam(name = "categoriaId", required = false) Long categoriaId,
+    HttpSession session
+  ) {
+    if (!esAdministrador(session)) {
+      return new ModelAndView(REDIRECT_DENEGADO);
+    }
+    ModelMap modelo = new ModelMap();
+    modelo.put("productos", servicioProducto.listarProductos(categoriaId));
+    modelo.put("categorias", servicioCategoria.obtenerLasCategoriasParaElMenu());
+    modelo.put("categoriaSeleccionada", categoriaId);
+    return new ModelAndView("producto/gestion", modelo);
+  }
+
+  @RequestMapping(value = "/admin/productos/{id}/agregar-stock", method = RequestMethod.POST)
+  public String agregarStock(
+    @PathVariable Long id,
+    @RequestParam("cantidad") Integer cantidad,
+    @RequestParam(name = "categoriaId", required = false) Long categoriaId,
+    HttpSession session
+  ) {
+    if (!esAdministrador(session)) {
+      return REDIRECT_DENEGADO;
+    }
+    servicioProducto.agregarStock(id, cantidad);
+    if (categoriaId != null) {
+      return "redirect:/admin/productos?categoriaId=" + categoriaId;
+    }
+    return "redirect:/admin/productos";
+  }
+
+  @RequestMapping(value = "/admin/productos/{id}/quitar-stock", method = RequestMethod.POST)
+  public String quitarStock(
+    @PathVariable Long id,
+    @RequestParam("cantidad") Integer cantidad,
+    @RequestParam(name = "categoriaId", required = false) Long categoriaId,
+    HttpSession session
+  ) {
+    if (!esAdministrador(session)) {
+      return REDIRECT_DENEGADO;
+    }
+    servicioProducto.quitarStock(id, cantidad);
+    if (categoriaId != null) {
+      return "redirect:/admin/productos?categoriaId=" + categoriaId;
+    }
+    return "redirect:/admin/productos";
   }
 
   @RequestMapping(path = "/category/{id}/products", method = RequestMethod.GET)
@@ -114,11 +164,18 @@ public class ControladorProducto {
     @PathVariable Long id,
     @RequestParam("offset_minutes") Integer offsetMinutes,
     @RequestParam(name = "categoryId", required = false) Long categoryId,
-    @RequestParam(name = "reglaId") Long reglaId
+    @RequestParam(name = "reglaId") Long reglaId,
+    @RequestParam(name = "cantidad") Integer cantidad
   ) {
     Producto producto = servicioProducto.obtenerProductoConReglas(id);
     Categoria categoria = determinarCategoria(producto, categoryId);
-    servicioReglaVencimiento.generarVencimiento(producto, categoria, reglaId, offsetMinutes);
+    servicioReglaVencimiento.generarVencimiento(
+      producto,
+      categoria,
+      reglaId,
+      offsetMinutes,
+      cantidad
+    );
 
     return "redirect:/dashboard";
   }
