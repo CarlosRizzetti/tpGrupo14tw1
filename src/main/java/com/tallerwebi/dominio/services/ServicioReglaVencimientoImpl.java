@@ -115,7 +115,11 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
   }
 
   private OffsetDateTime obtenerFechaDeElaboracion(Integer offsetMinutos) {
-    return OffsetDateTime.now(clock).minusMinutes(offsetMinutos);
+    OffsetDateTime fechaElaboracion = OffsetDateTime.now(clock);
+    if (offsetMinutos != null && offsetMinutos > 0) {
+      fechaElaboracion.minusMinutes(offsetMinutos);
+    }
+    return fechaElaboracion;
   }
 
   private void validar(ReglaVencimiento regla) {

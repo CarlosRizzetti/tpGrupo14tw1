@@ -1,5 +1,5 @@
 import { deleteTimer } from "./deleteTimer.js";
-// import { renewTimer } from "./renewTimer.js";
+import { renovarTimer } from "./renovarTimer.js";
 import { importTimer, executeImport, closeImportModal } from "./importarTimer.js";
 
 document.addEventListener("click", (e) => {
@@ -17,7 +17,7 @@ document.addEventListener("click", (e) => {
     break;
 
   case "renew":
-    // renewTimer(timerId, categoryId);
+    renovarTimer(timerId, categoryId);
     break;
 
   case "import":
