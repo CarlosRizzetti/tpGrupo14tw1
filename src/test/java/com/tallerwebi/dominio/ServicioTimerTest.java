@@ -46,6 +46,7 @@ public class ServicioTimerTest {
         servicioReglaVencimientoMock
       );
   }
+
   private Timer buildTimerCompleto(Long timerId) {
     ReglaVencimiento regla = new ReglaVencimiento();
     regla.setId(1L);
@@ -717,193 +718,256 @@ public class ServicioTimerTest {
     return timer;
   }
 
-    // ─── HAPPY PATH ───────────────────────────────────────────────
+  // ─── HAPPY PATH ───────────────────────────────────────────────
 
-    @Test
-    @DisplayName("HP-01 | renovarTimer | Retorna DTO del nuevo timer correctamente")
-    void renovarTimer_deberiaRetornarDTODelNuevoTimer() {
-      Timer timer = buildTimerCompleto(1L);
-      Timer nuevoTimer = buildTimerGenerado();
+  @Test
+  @DisplayName("HP-01 | renovarTimer | Retorna DTO del nuevo timer correctamente")
+  void renovarTimer_deberiaRetornarDTODelNuevoTimer() {
+    Timer timer = buildTimerCompleto(1L);
+    Timer nuevoTimer = buildTimerGenerado();
 
-      when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
-      when(servicioReglaVencimientoMock.generarVencimiento(
-              timer.getProducto(), timer.getCategoria(), 1L, null, 1
-      )).thenReturn(nuevoTimer);
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(
+      servicioReglaVencimientoMock.generarVencimiento(
+        timer.getProducto(),
+        timer.getCategoria(),
+        1L,
+        null,
+        1
+      )
+    )
+      .thenReturn(nuevoTimer);
 
-      TimerDTO resultado = servicioTimer.renovarTimer(timer);
+    TimerDTO resultado = servicioTimer.renovarTimer(timer);
 
-      assertNotNull(resultado);
-      assertEquals(99L, resultado.getId());
-    }
+    assertNotNull(resultado);
+    assertEquals(99L, resultado.getId());
+  }
 
-    @Test
-    @DisplayName("HP-02 | renovarTimer | Cambia estado del timer original a RENOVADO cuando no está vencido")
-    void renovarTimer_deberiaModificarEstadoARenoVado() {
-      Timer timer = buildTimerCompleto(1L);
-      Timer nuevoTimer = buildTimerGenerado();
+  @Test
+  @DisplayName(
+    "HP-02 | renovarTimer | Cambia estado del timer original a RENOVADO cuando no está vencido"
+  )
+  void renovarTimer_deberiaModificarEstadoARenoVado() {
+    Timer timer = buildTimerCompleto(1L);
+    Timer nuevoTimer = buildTimerGenerado();
 
-      when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
-      when(servicioReglaVencimientoMock.generarVencimiento(
-              timer.getProducto(), timer.getCategoria(), 1L, null, 1
-      )).thenReturn(nuevoTimer);
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(
+      servicioReglaVencimientoMock.generarVencimiento(
+        timer.getProducto(),
+        timer.getCategoria(),
+        1L,
+        null,
+        1
+      )
+    )
+      .thenReturn(nuevoTimer);
 
-      servicioTimer.renovarTimer(timer);
+    servicioTimer.renovarTimer(timer);
 
-      verify(repositorioTimerMock).guardar(argThat(t ->
-              t.getEstado() == EstadoTimer.RENOVADO
-      ));
-    }
+    verify(repositorioTimerMock).guardar(argThat(t -> t.getEstado() == EstadoTimer.RENOVADO));
+  }
 
-    @Test
-    @DisplayName("HP-03 | renovarTimer | Llama a generarVencimiento con los datos del timer original")
-    void renovarTimer_deberiaLlamarGenerarVencimientoConDatosCorrectos() {
-      Timer timer = buildTimerCompleto(1L);
-      Timer nuevoTimer = buildTimerGenerado();
+  @Test
+  @DisplayName("HP-03 | renovarTimer | Llama a generarVencimiento con los datos del timer original")
+  void renovarTimer_deberiaLlamarGenerarVencimientoConDatosCorrectos() {
+    Timer timer = buildTimerCompleto(1L);
+    Timer nuevoTimer = buildTimerGenerado();
 
-      when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
-      when(servicioReglaVencimientoMock.generarVencimiento(
-              timer.getProducto(), timer.getCategoria(), 1L, null, 1
-      )).thenReturn(nuevoTimer);
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(
+      servicioReglaVencimientoMock.generarVencimiento(
+        timer.getProducto(),
+        timer.getCategoria(),
+        1L,
+        null,
+        1
+      )
+    )
+      .thenReturn(nuevoTimer);
 
-      servicioTimer.renovarTimer(timer);
+    servicioTimer.renovarTimer(timer);
 
-      verify(servicioReglaVencimientoMock).generarVencimiento(
-              timer.getProducto(), timer.getCategoria(), 1L, null, 1
+    verify(servicioReglaVencimientoMock)
+      .generarVencimiento(timer.getProducto(), timer.getCategoria(), 1L, null, 1);
+  }
+
+  // ─── NEGATIVE PATH ────────────────────────────────────────────
+
+  @Test
+  @DisplayName("NP-01 | renovarTimer | Timer sin regla de vencimiento lanza ValidacionException")
+  void renovarTimer_sinReglaVencimiento_deberiaLanzarValidacionException() {
+    Timer timer = buildTimerCompleto(1L);
+    timer.setReglaVencimiento(null);
+
+    assertThrows(ValidacionException.class, () -> servicioTimer.renovarTimer(timer));
+  }
+
+  @Test
+  @DisplayName("NP-02 | renovarTimer | Error en generarVencimiento propaga la excepcion")
+  void renovarTimer_errorEnGenerarVencimiento_deberiaPropagarExcepcion() {
+    Timer timer = buildTimerCompleto(1L);
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(
+      servicioReglaVencimientoMock.generarVencimiento(
+        timer.getProducto(),
+        timer.getCategoria(),
+        1L,
+        null,
+        1
+      )
+    )
+      .thenThrow(new IllegalArgumentException("El producto no tiene regla de vencimiento"));
+
+    assertThrows(IllegalArgumentException.class, () -> servicioTimer.renovarTimer(timer));
+  }
+
+  @Test
+  @DisplayName(
+    "NP-03 | renovarTimer | Timer no encontrado en modificarEstado lanza ValidacionException"
+  )
+  void renovarTimer_timerNoEncontradoEnModificarEstado_deberiaLanzarValidacionException() {
+    Timer timer = buildTimerCompleto(1L);
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(null);
+
+    assertThrows(ValidacionException.class, () -> servicioTimer.renovarTimer(timer));
+  }
+
+  // ─── EDGE CASES ───────────────────────────────────────────────
+
+  @Test
+  @DisplayName("EC-01 | renovarTimer | Timer vencido cambia estado a VENCIDO en lugar de RENOVADO")
+  void renovarTimer_timerVencido_deberiaSetearEstadoVencido() {
+    Timer timer = buildTimerCompleto(1L);
+    timer.setFechaVencimiento(OffsetDateTime.now().minusMinutes(1)); // ya venció
+    Timer nuevoTimer = buildTimerGenerado();
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(
+      servicioReglaVencimientoMock.generarVencimiento(
+        timer.getProducto(),
+        timer.getCategoria(),
+        1L,
+        null,
+        1
+      )
+    )
+      .thenReturn(nuevoTimer);
+
+    servicioTimer.renovarTimer(timer);
+
+    verify(repositorioTimerMock).guardar(argThat(t -> t.getEstado() == EstadoTimer.VENCIDO));
+  }
+
+  @Test
+  @DisplayName(
+    "EC-02 | renovarTimer | Timer con fecha vencimiento exactamente ahora se considera vencido"
+  )
+  void renovarTimer_fechaVencimientoAhora_deberiaConsiderarseVencido() {
+    Timer timer = buildTimerCompleto(1L);
+    timer.setFechaVencimiento(OffsetDateTime.now().minusNanos(1));
+    Timer nuevoTimer = buildTimerGenerado();
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(
+      servicioReglaVencimientoMock.generarVencimiento(
+        timer.getProducto(),
+        timer.getCategoria(),
+        1L,
+        null,
+        1
+      )
+    )
+      .thenReturn(nuevoTimer);
+
+    servicioTimer.renovarTimer(timer);
+
+    verify(repositorioTimerMock).guardar(argThat(t -> t.getEstado() == EstadoTimer.VENCIDO));
+  }
+
+  @Test
+  @DisplayName(
+    "EC-03 | renovarTimer | El nuevo timer generado tiene fechas posteriores a la creacion original"
+  )
+  void renovarTimer_nuevoTimer_deberiaHaberSidoGeneradoDespuesDelOriginal() {
+    Timer timer = buildTimerCompleto(1L);
+    Timer nuevoTimer = buildTimerGenerado();
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(
+      servicioReglaVencimientoMock.generarVencimiento(
+        timer.getProducto(),
+        timer.getCategoria(),
+        1L,
+        null,
+        1
+      )
+    )
+      .thenReturn(nuevoTimer);
+
+    TimerDTO resultado = servicioTimer.renovarTimer(timer);
+
+    OffsetDateTime fechaCreacionDTO = OffsetDateTime.parse(resultado.getFechaCreacion());
+    assertTrue(fechaCreacionDTO.isAfter(timer.getFechaCreacion()));
+  }
+
+  // ─── SECURITY CASES ───────────────────────────────────────────
+
+  @Test
+  @DisplayName("SC-01 | renovarTimer | No se puede renovar un timer con regla de id negativo")
+  void renovarTimer_reglaConIdNegativo_deberiaLanzarExcepcion() {
+    Timer timer = buildTimerCompleto(1L);
+    ReglaVencimiento reglaInvalida = new ReglaVencimiento();
+    reglaInvalida.setId(-1L);
+    timer.setReglaVencimiento(reglaInvalida);
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(
+      servicioReglaVencimientoMock.generarVencimiento(
+        timer.getProducto(),
+        timer.getCategoria(),
+        -1L,
+        null,
+        1
+      )
+    )
+      .thenThrow(new IllegalArgumentException("El producto no tiene regla de vencimiento"));
+
+    assertThrows(IllegalArgumentException.class, () -> servicioTimer.renovarTimer(timer));
+  }
+
+  @Test
+  @DisplayName(
+    "SC-02 | renovarTimer | No se puede renovar un timer de otro producto manipulando el objeto"
+  )
+  void renovarTimer_productoManipulado_deberiaUsarDatosDelTimerOriginal() {
+    Timer timer = buildTimerCompleto(1L);
+    Timer nuevoTimer = buildTimerGenerado();
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(
+      servicioReglaVencimientoMock.generarVencimiento(
+        timer.getProducto(),
+        timer.getCategoria(),
+        1L,
+        null,
+        1
+      )
+    )
+      .thenReturn(nuevoTimer);
+
+    servicioTimer.renovarTimer(timer);
+
+    verify(servicioReglaVencimientoMock)
+      .generarVencimiento(
+        eq(timer.getProducto()),
+        eq(timer.getCategoria()),
+        eq(1L),
+        isNull(),
+        eq(1)
       );
-    }
-
-    // ─── NEGATIVE PATH ────────────────────────────────────────────
-
-    @Test
-    @DisplayName("NP-01 | renovarTimer | Timer sin regla de vencimiento lanza ValidacionException")
-    void renovarTimer_sinReglaVencimiento_deberiaLanzarValidacionException() {
-      Timer timer = buildTimerCompleto(1L);
-      timer.setReglaVencimiento(null);
-
-      assertThrows(ValidacionException.class, () ->
-              servicioTimer.renovarTimer(timer)
-      );
-    }
-
-    @Test
-    @DisplayName("NP-02 | renovarTimer | Error en generarVencimiento propaga la excepcion")
-    void renovarTimer_errorEnGenerarVencimiento_deberiaPropagarExcepcion() {
-      Timer timer = buildTimerCompleto(1L);
-
-      when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
-      when(servicioReglaVencimientoMock.generarVencimiento(
-              timer.getProducto(), timer.getCategoria(), 1L, null, 1
-      )).thenThrow(new IllegalArgumentException("El producto no tiene regla de vencimiento"));
-
-      assertThrows(IllegalArgumentException.class, () ->
-              servicioTimer.renovarTimer(timer)
-      );
-    }
-
-    @Test
-    @DisplayName("NP-03 | renovarTimer | Timer no encontrado en modificarEstado lanza ValidacionException")
-    void renovarTimer_timerNoEncontradoEnModificarEstado_deberiaLanzarValidacionException() {
-      Timer timer = buildTimerCompleto(1L);
-
-      when(repositorioTimerMock.buscarPorId(1L)).thenReturn(null);
-
-      assertThrows(ValidacionException.class, () ->
-              servicioTimer.renovarTimer(timer)
-      );
-    }
-
-    // ─── EDGE CASES ───────────────────────────────────────────────
-
-    @Test
-    @DisplayName("EC-01 | renovarTimer | Timer vencido cambia estado a VENCIDO en lugar de RENOVADO")
-    void renovarTimer_timerVencido_deberiaSetearEstadoVencido() {
-      Timer timer = buildTimerCompleto(1L);
-      timer.setFechaVencimiento(OffsetDateTime.now().minusMinutes(1)); // ya venció
-      Timer nuevoTimer = buildTimerGenerado();
-
-      when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
-      when(servicioReglaVencimientoMock.generarVencimiento(
-              timer.getProducto(), timer.getCategoria(), 1L, null, 1
-      )).thenReturn(nuevoTimer);
-
-      servicioTimer.renovarTimer(timer);
-
-      verify(repositorioTimerMock).guardar(argThat(t ->
-              t.getEstado() == EstadoTimer.VENCIDO
-      ));
-    }
-
-    @Test
-    @DisplayName("EC-02 | renovarTimer | Timer con fecha vencimiento exactamente ahora se considera vencido")
-    void renovarTimer_fechaVencimientoAhora_deberiaConsiderarseVencido() {
-      Timer timer = buildTimerCompleto(1L);
-      timer.setFechaVencimiento(OffsetDateTime.now().minusNanos(1));
-      Timer nuevoTimer = buildTimerGenerado();
-
-      when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
-      when(servicioReglaVencimientoMock.generarVencimiento(
-              timer.getProducto(), timer.getCategoria(), 1L, null, 1
-      )).thenReturn(nuevoTimer);
-
-      servicioTimer.renovarTimer(timer);
-
-      verify(repositorioTimerMock).guardar(argThat(t ->
-              t.getEstado() == EstadoTimer.VENCIDO
-      ));
-    }
-
-    @Test
-    @DisplayName("EC-03 | renovarTimer | El nuevo timer generado tiene fechas posteriores a la creacion original")
-    void renovarTimer_nuevoTimer_deberiaHaberSidoGeneradoDespuesDelOriginal() {
-      Timer timer = buildTimerCompleto(1L);
-      Timer nuevoTimer = buildTimerGenerado();
-
-      when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
-      when(servicioReglaVencimientoMock.generarVencimiento(
-              timer.getProducto(), timer.getCategoria(), 1L, null, 1
-      )).thenReturn(nuevoTimer);
-
-      TimerDTO resultado = servicioTimer.renovarTimer(timer);
-
-      OffsetDateTime fechaCreacionDTO = OffsetDateTime.parse(resultado.getFechaCreacion());
-      assertTrue(fechaCreacionDTO.isAfter(timer.getFechaCreacion()));
-    }
-
-    // ─── SECURITY CASES ───────────────────────────────────────────
-
-    @Test
-    @DisplayName("SC-01 | renovarTimer | No se puede renovar un timer con regla de id negativo")
-    void renovarTimer_reglaConIdNegativo_deberiaLanzarExcepcion() {
-      Timer timer = buildTimerCompleto(1L);
-      ReglaVencimiento reglaInvalida = new ReglaVencimiento();
-      reglaInvalida.setId(-1L);
-      timer.setReglaVencimiento(reglaInvalida);
-
-      when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
-      when(servicioReglaVencimientoMock.generarVencimiento(
-              timer.getProducto(), timer.getCategoria(), -1L, null, 1
-      )).thenThrow(new IllegalArgumentException("El producto no tiene regla de vencimiento"));
-
-      assertThrows(IllegalArgumentException.class, () ->
-              servicioTimer.renovarTimer(timer)
-      );
-    }
-
-    @Test
-    @DisplayName("SC-02 | renovarTimer | No se puede renovar un timer de otro producto manipulando el objeto")
-    void renovarTimer_productoManipulado_deberiaUsarDatosDelTimerOriginal() {
-      Timer timer = buildTimerCompleto(1L);
-      Timer nuevoTimer = buildTimerGenerado();
-
-      when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
-      when(servicioReglaVencimientoMock.generarVencimiento(
-              timer.getProducto(), timer.getCategoria(), 1L, null, 1
-      )).thenReturn(nuevoTimer);
-
-      servicioTimer.renovarTimer(timer);
-
-      verify(servicioReglaVencimientoMock).generarVencimiento(
-              eq(timer.getProducto()), eq(timer.getCategoria()), eq(1L), isNull(), eq(1)
-      );
-    }
+  }
 }

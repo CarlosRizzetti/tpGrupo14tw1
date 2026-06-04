@@ -111,7 +111,8 @@ public class ServicioTimerImpl implements ServicioTimer {
       timer.getProducto(),
       timer.getCategoria(),
       regla.getId(),
-      null, 1
+      null,
+      1
     );
 
     return mapearATimerDTO(nuevoTimer);

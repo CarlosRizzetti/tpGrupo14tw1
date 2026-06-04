@@ -66,7 +66,6 @@ public class ControladorDashboardTest {
     return dto;
   }
 
-
   @BeforeEach
   public void init() {
     sessionMock = mock(HttpSession.class);
@@ -144,8 +143,7 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NP-03 | renovarTimer | Timer no encontrado retorna 500")
   void renovarTimer_timerNoEncontrado_deberiaRetornar500() {
-    when(servicioTimerMock.buscarPorId(1L))
-            .thenThrow(new RuntimeException("Timer no encontrado"));
+    when(servicioTimerMock.buscarPorId(1L)).thenThrow(new RuntimeException("Timer no encontrado"));
 
     ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
 
@@ -154,8 +152,6 @@ public class ControladorDashboardTest {
     assertEquals("error", body.get("status"));
   }
 
-
-
   @Test
   @DisplayName("NP-04 | renovarTimer | Error en renovarTimer del servicio retorna 500")
   void renovarTimer_errorEnServicio_deberiaRetornar500() {
@@ -163,7 +159,7 @@ public class ControladorDashboardTest {
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
     when(servicioTimerMock.renovarTimer(timer))
-            .thenThrow(new RuntimeException("Error al generar vencimiento"));
+      .thenThrow(new RuntimeException("Error al generar vencimiento"));
 
     ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
 
@@ -216,7 +212,7 @@ public class ControladorDashboardTest {
   @DisplayName("SC-01 | renovarTimer | Id Long.MAX_VALUE retorna 500 sin exponer stack trace")
   void renovarTimer_conIdMuyGrande_noDeberiaExponerStackTrace() {
     when(servicioTimerMock.buscarPorId(Long.MAX_VALUE))
-            .thenThrow(new RuntimeException("Timer no encontrado"));
+      .thenThrow(new RuntimeException("Timer no encontrado"));
 
     ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(Long.MAX_VALUE);
 
@@ -225,8 +221,6 @@ public class ControladorDashboardTest {
     // El mensaje no debe exponer detalles internos
     assertEquals("Error al renovar el timer", body.get("mensaje"));
   }
-
-
 
   @Test
   @DisplayName("HP-01 | importarTimer | Retorna 200 cuando el timer se importa correctamente")
@@ -452,8 +446,6 @@ public class ControladorDashboardTest {
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
     assertEquals("Error al eliminar el timer", respuesta.getBody());
   }
-
-
 
   @Test
   @DisplayName(
