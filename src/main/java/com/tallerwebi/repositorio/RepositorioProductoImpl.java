@@ -32,7 +32,7 @@ public class RepositorioProductoImpl implements RepositorioProducto {
     return sessionFactory
       .getCurrentSession()
       .createQuery(
-        "SELECT DISTINCT p FROM Producto p LEFT JOIN FETCH p.categorias WHERE p.estaActivo = true ORDER BY p.nombre",
+        "SELECT p FROM Producto p JOIN p.categorias c WHERE c.id = :categoriaId AND p.estaActivo = true",
         Producto.class
       )
       .list();
