@@ -5,7 +5,9 @@ import java.util.List;
 
 public interface RepositorioProducto {
   void guardar(Producto producto);
+  void actualizar(Producto producto);
   Producto obtenerProductoPorId(Long id);
+  List<Producto> obtenerTodos();
   List<Producto> obtenerProductosPorCategoria(Long categoriaId);
   Producto obtenerProductoConReglasYCategorias(Long id);
 }

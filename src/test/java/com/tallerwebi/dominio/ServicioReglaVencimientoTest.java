@@ -12,6 +12,8 @@ import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.dominio.interfaces.RepositorioReglaVencimiento;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
+import com.tallerwebi.dominio.interfaces.ServicioControlStock;
+import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.services.ServicioReglaVencimientoImpl;
 import java.time.Clock;
 import java.time.Instant;
@@ -25,6 +27,8 @@ public class ServicioReglaVencimientoTest {
   private ServicioReglaVencimientoImpl servicioReglaVencimiento;
   private RepositorioReglaVencimiento repositorioReglaVencimientoMock;
   private RepositorioTimer repositorioTimerMock;
+  private ServicioProducto servicioProductoMock;
+  private ServicioControlStock servicioControlStockMock;
   private Clock clock;
 
   @BeforeEach
@@ -32,10 +36,14 @@ public class ServicioReglaVencimientoTest {
     clock = Clock.fixed(Instant.now(), ZoneOffset.ofHours(-3));
     repositorioReglaVencimientoMock = mock(RepositorioReglaVencimiento.class);
     repositorioTimerMock = mock(RepositorioTimer.class);
+    servicioProductoMock = mock(ServicioProducto.class);
+    servicioControlStockMock = mock(ServicioControlStock.class);
     servicioReglaVencimiento =
       new ServicioReglaVencimientoImpl(
         repositorioReglaVencimientoMock,
         repositorioTimerMock,
+        servicioProductoMock,
+        servicioControlStockMock,
         clock
       );
   }
@@ -128,7 +136,13 @@ public class ServicioReglaVencimientoTest {
       .estaActiva(true)
       .nombre("Cocina")
       .build();
-    Producto producto = Producto.builder().id(1L).nombre("Dona").estaActivo(true).build();
+    Producto producto = Producto
+      .builder()
+      .id(1L)
+      .nombre("Dona")
+      .estaActivo(true)
+      .cantidad(10)
+      .build();
 
     when(repositorioReglaVencimientoMock.obtenerReglaVencimientoPorId(2L)).thenReturn(regla);
 
@@ -145,7 +159,13 @@ public class ServicioReglaVencimientoTest {
     );
 
     // ejecucion
-    Timer timerGenerado = servicioReglaVencimiento.generarVencimiento(producto, categoria, 2L, 0);
+    Timer timerGenerado = servicioReglaVencimiento.generarVencimiento(
+      producto,
+      categoria,
+      2L,
+      0,
+      1
+    );
 
     // validacion
     assertEquals(timerEsperado.getFechaVencimiento(), timerGenerado.getFechaVencimiento());
