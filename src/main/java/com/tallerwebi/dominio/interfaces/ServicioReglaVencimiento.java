@@ -12,6 +12,7 @@ public interface ServicioReglaVencimiento {
     Producto producto,
     Categoria categoria,
     Long reglaId,
-    Integer offsetMinutos
+    Integer offsetMinutos,
+    Integer cantidadUsada
   );
 }

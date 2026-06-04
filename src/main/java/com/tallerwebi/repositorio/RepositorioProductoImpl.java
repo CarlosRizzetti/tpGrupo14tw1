@@ -23,6 +23,22 @@ public class RepositorioProductoImpl implements RepositorioProducto {
   }
 
   @Override
+  public void actualizar(Producto producto) {
+    sessionFactory.getCurrentSession().merge(producto);
+  }
+
+  @Override
+  public List<Producto> obtenerTodos() {
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery(
+        "SELECT DISTINCT p FROM Producto p LEFT JOIN FETCH p.categorias WHERE p.estaActivo = true ORDER BY p.nombre",
+        Producto.class
+      )
+      .list();
+  }
+
+  @Override
   public Producto obtenerProductoPorId(Long id) {
     return sessionFactory
       .getCurrentSession()

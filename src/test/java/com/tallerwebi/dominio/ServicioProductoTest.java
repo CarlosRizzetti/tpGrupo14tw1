@@ -3,17 +3,23 @@ package com.tallerwebi.dominio;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
+import com.tallerwebi.dominio.entity.enums.TipoMovimientoStock;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioProducto;
+import com.tallerwebi.dominio.interfaces.RepositorioReglaVencimiento;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
-import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
+import com.tallerwebi.dominio.interfaces.ServicioControlStock;
 import com.tallerwebi.dominio.services.ServicioProductoImpl;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
@@ -31,20 +37,23 @@ public class ServicioProductoTest {
   private RepositorioProducto repositorioProductoMock;
   private RepositorioTimer repositorioTimerMock;
   private RepositorioCategoria repositorioCategoriaMock;
-  private ServicioReglaVencimiento servicioReglaVencimientoMock;
+  private RepositorioReglaVencimiento repositorioReglaVencimientoMock;
+  private ServicioControlStock servicioControlStockMock;
 
   @BeforeEach
   public void init() {
     repositorioTimerMock = mock(RepositorioTimer.class);
     repositorioProductoMock = mock(RepositorioProducto.class);
     repositorioCategoriaMock = mock(RepositorioCategoria.class);
-    servicioReglaVencimientoMock = mock(ServicioReglaVencimiento.class);
+    repositorioReglaVencimientoMock = mock(RepositorioReglaVencimiento.class);
+    servicioControlStockMock = mock(ServicioControlStock.class);
     servicioProducto =
       new ServicioProductoImpl(
         repositorioProductoMock,
         repositorioTimerMock,
         repositorioCategoriaMock,
-        servicioReglaVencimientoMock
+        repositorioReglaVencimientoMock,
+        servicioControlStockMock
       );
   }
 
@@ -62,8 +71,7 @@ public class ServicioProductoTest {
 
     // validacion
     verify(repositorioProductoMock, times(1)).guardar(any(Producto.class));
-    verify(servicioReglaVencimientoMock, times(1))
-      .guardarReglaVencimiento(any(ReglaVencimiento.class));
+    verify(repositorioReglaVencimientoMock, times(1)).guardar(any(ReglaVencimiento.class));
   }
 
   @Test
@@ -80,8 +88,7 @@ public class ServicioProductoTest {
 
     // validacion
     verify(repositorioProductoMock, times(1)).guardar(any(Producto.class));
-    verify(servicioReglaVencimientoMock, times(1))
-      .guardarReglaVencimiento(any(ReglaVencimiento.class));
+    verify(repositorioReglaVencimientoMock, times(1)).guardar(any(ReglaVencimiento.class));
   }
 
   // --- Validaciones de Producto ---
@@ -430,7 +437,269 @@ public class ServicioProductoTest {
     assertNull(resultado);
   }
 
+  // --- listarProductos ---
+
+  @Test
+  @DisplayName("HAP-08 | listarProductos | Sin filtro delega a obtenerTodos")
+  public void listarProductosSinFiltroDeberiaRetornarTodos() {
+    List<Producto> todos = Arrays.asList(new Producto(), new Producto(), new Producto());
+    when(repositorioProductoMock.obtenerTodos()).thenReturn(todos);
+
+    List<Producto> resultado = servicioProducto.listarProductos(null);
+
+    assertEquals(3, resultado.size());
+    verify(repositorioProductoMock, times(1)).obtenerTodos();
+    verify(repositorioProductoMock, never()).obtenerProductosPorCategoria(any());
+  }
+
+  @Test
+  @DisplayName("HAP-09 | listarProductos | Con categoriaId delega a obtenerProductosPorCategoria")
+  public void listarProductosConCategoriaDeberiaFiltrarPorCategoria() {
+    List<Producto> filtrados = Arrays.asList(new Producto());
+    when(repositorioProductoMock.obtenerProductosPorCategoria(1L)).thenReturn(filtrados);
+
+    List<Producto> resultado = servicioProducto.listarProductos(1L);
+
+    assertEquals(1, resultado.size());
+    verify(repositorioProductoMock, times(1)).obtenerProductosPorCategoria(1L);
+    verify(repositorioProductoMock, never()).obtenerTodos();
+  }
+
+  @Test
+  @DisplayName("HAP-10 | listarProductos | Retorna lista vacía si no hay productos")
+  public void listarProductosSinResultadosDeberiaRetornarListaVacia() {
+    when(repositorioProductoMock.obtenerTodos()).thenReturn(Collections.emptyList());
+
+    List<Producto> resultado = servicioProducto.listarProductos(null);
+
+    assertNotNull(resultado);
+    assertTrue(resultado.isEmpty());
+  }
+
+  // --- agregarStock ---
+
+  @Test
+  @DisplayName("HAP-11 | agregarStock | Suma la cantidad al stock existente del producto")
+  public void agregarStockDeberiaIncrementarLaCantidad() {
+    Producto producto = productoConStock(5L, 10);
+    when(repositorioProductoMock.obtenerProductoPorId(5L)).thenReturn(producto);
+
+    servicioProducto.agregarStock(5L, 3);
+
+    assertEquals(13, producto.getCantidad());
+    verify(repositorioProductoMock, times(1)).actualizar(producto);
+    verify(servicioControlStockMock, times(1))
+      .registrarMovimiento(eq(producto), isNull(), eq(3), eq(TipoMovimientoStock.INGRESO));
+  }
+
+  @Test
+  @DisplayName("HAP-12 | agregarStock | Funciona cuando el stock inicial es cero")
+  public void agregarStockConStockCeroDeberiaQuedarEnLaCantidadAgregada() {
+    Producto producto = productoConStock(1L, 0);
+    when(repositorioProductoMock.obtenerProductoPorId(1L)).thenReturn(producto);
+
+    servicioProducto.agregarStock(1L, 5);
+
+    assertEquals(5, producto.getCantidad());
+  }
+
+  @Test
+  @DisplayName("NEG-08 | agregarStock | Cantidad cero lanza excepción")
+  public void agregarStockConCantidadCeroDeberiaLanzarExcepcion() {
+    IllegalArgumentException ex = assertThrows(
+      IllegalArgumentException.class,
+      () -> servicioProducto.agregarStock(1L, 0)
+    );
+    assertEquals("La cantidad a agregar debe ser mayor a 0", ex.getMessage());
+    verify(repositorioProductoMock, never()).actualizar(any());
+  }
+
+  @Test
+  @DisplayName("NEG-09 | agregarStock | Cantidad negativa lanza excepción")
+  public void agregarStockConCantidadNegativaDeberiaLanzarExcepcion() {
+    IllegalArgumentException ex = assertThrows(
+      IllegalArgumentException.class,
+      () -> servicioProducto.agregarStock(1L, -5)
+    );
+    assertEquals("La cantidad a agregar debe ser mayor a 0", ex.getMessage());
+    verify(repositorioProductoMock, never()).actualizar(any());
+  }
+
+  @Test
+  @DisplayName("NEG-10 | agregarStock | Cantidad nula lanza excepción")
+  public void agregarStockConCantidadNulaDeberiaLanzarExcepcion() {
+    assertThrows(IllegalArgumentException.class, () -> servicioProducto.agregarStock(1L, null));
+    verify(repositorioProductoMock, never()).actualizar(any());
+  }
+
+  @Test
+  @DisplayName("NEG-11 | agregarStock | Producto inexistente lanza excepción")
+  public void agregarStockConProductoInexistenteDeberiaLanzarExcepcion() {
+    when(repositorioProductoMock.obtenerProductoPorId(99L)).thenReturn(null);
+
+    IllegalArgumentException ex = assertThrows(
+      IllegalArgumentException.class,
+      () -> servicioProducto.agregarStock(99L, 5)
+    );
+    assertEquals("Producto no encontrado", ex.getMessage());
+  }
+
+  // --- descontarStock ---
+
+  @Test
+  @DisplayName("HAP-13 | descontarStock | Resta la cantidad del stock existente")
+  public void descontarStockDeberiaReducirLaCantidad() {
+    Producto producto = productoConStock(1L, 10);
+
+    servicioProducto.descontarStock(producto, 4);
+
+    assertEquals(6, producto.getCantidad());
+  }
+
+  @Test
+  @DisplayName("HAP-14 | descontarStock | Permite descontar exactamente el stock disponible")
+  public void descontarStockExactoDeberiaDejarEnCero() {
+    Producto producto = productoConStock(1L, 5);
+
+    servicioProducto.descontarStock(producto, 5);
+
+    assertEquals(0, producto.getCantidad());
+  }
+
+  @Test
+  @DisplayName("NEG-12 | descontarStock | Cantidad mayor al stock lanza excepción")
+  public void descontarStockMayorAlDisponibleDeberiaLanzarExcepcion() {
+    Producto producto = productoConStock(1L, 3);
+
+    IllegalArgumentException ex = assertThrows(
+      IllegalArgumentException.class,
+      () -> servicioProducto.descontarStock(producto, 5)
+    );
+    assertTrue(ex.getMessage().contains("Stock insuficiente"));
+    assertTrue(ex.getMessage().contains("3"));
+    assertTrue(ex.getMessage().contains("5"));
+  }
+
+  @Test
+  @DisplayName("NEG-13 | descontarStock | Stock en cero no permite descontar")
+  public void descontarStockConStockCeroDeberiaLanzarExcepcion() {
+    Producto producto = productoConStock(1L, 0);
+
+    assertThrows(
+      IllegalArgumentException.class,
+      () -> servicioProducto.descontarStock(producto, 1)
+    );
+  }
+
+  // --- quitarStock ---
+
+  @Test
+  @DisplayName("HAP-17 | quitarStock | Resta la cantidad y registra EGRESO en ControlStock")
+  public void quitarStockDeberiaRestarYRegistrarEgreso() {
+    Producto producto = productoConStock(1L, 10);
+    when(repositorioProductoMock.obtenerProductoPorId(1L)).thenReturn(producto);
+
+    servicioProducto.quitarStock(1L, 4);
+
+    assertEquals(6, producto.getCantidad());
+    verify(repositorioProductoMock, times(1)).actualizar(producto);
+    verify(servicioControlStockMock, times(1))
+      .registrarMovimiento(eq(producto), isNull(), eq(4), eq(TipoMovimientoStock.EGRESO));
+  }
+
+  @Test
+  @DisplayName("HAP-18 | quitarStock | Permite quitar exactamente el stock disponible")
+  public void quitarStockExactoDeberiaDejarEnCero() {
+    Producto producto = productoConStock(1L, 5);
+    when(repositorioProductoMock.obtenerProductoPorId(1L)).thenReturn(producto);
+
+    servicioProducto.quitarStock(1L, 5);
+
+    assertEquals(0, producto.getCantidad());
+  }
+
+  @Test
+  @DisplayName("NEG-15 | quitarStock | Cantidad mayor al stock lanza excepción")
+  public void quitarStockMayorAlDisponibleDeberiaLanzarExcepcion() {
+    Producto producto = productoConStock(1L, 3);
+    when(repositorioProductoMock.obtenerProductoPorId(1L)).thenReturn(producto);
+
+    IllegalArgumentException ex = assertThrows(
+      IllegalArgumentException.class,
+      () -> servicioProducto.quitarStock(1L, 5)
+    );
+    assertTrue(ex.getMessage().contains("Stock insuficiente"));
+    verify(repositorioProductoMock, never()).actualizar(any());
+  }
+
+  @Test
+  @DisplayName("NEG-16 | quitarStock | Cantidad cero lanza excepción")
+  public void quitarStockConCantidadCeroDeberiaLanzarExcepcion() {
+    assertThrows(IllegalArgumentException.class, () -> servicioProducto.quitarStock(1L, 0));
+    verify(repositorioProductoMock, never()).actualizar(any());
+  }
+
+  @Test
+  @DisplayName("NEG-17 | quitarStock | Producto inexistente lanza excepción")
+  public void quitarStockConProductoInexistenteDeberiaLanzarExcepcion() {
+    when(repositorioProductoMock.obtenerProductoPorId(99L)).thenReturn(null);
+
+    IllegalArgumentException ex = assertThrows(
+      IllegalArgumentException.class,
+      () -> servicioProducto.quitarStock(99L, 1)
+    );
+    assertEquals("Producto no encontrado", ex.getMessage());
+  }
+
+  // --- validarCantidad (via crearProducto) ---
+
+  @Test
+  @DisplayName("NEG-14 | validarCantidad | Cantidad negativa al crear producto lanza excepción")
+  public void crearProductoConCantidadNegativaDeberiaLanzarExcepcion() {
+    ProductoDto datos = datoValidos();
+    datos.setCantidad(-1);
+
+    IllegalArgumentException ex = assertThrows(
+      IllegalArgumentException.class,
+      () -> servicioProducto.crearProducto(datos)
+    );
+    assertEquals("La cantidad no puede ser negativa", ex.getMessage());
+  }
+
+  @Test
+  @DisplayName("HAP-15 | validarCantidad | Cantidad cero al crear producto es válida")
+  public void crearProductoConCantidadCeroDeberiaGuardar() {
+    ProductoDto datos = datoValidos();
+    datos.setCantidad(0);
+    when(repositorioCategoriaMock.obtenerCategoriasPorIds(datos.getCategoriasIds()))
+      .thenReturn(Set.of(new Categoria()));
+
+    servicioProducto.crearProducto(datos);
+
+    verify(repositorioProductoMock, times(1)).guardar(any(Producto.class));
+  }
+
+  @Test
+  @DisplayName("HAP-16 | validarCantidad | Sin cantidad informada se guarda con 0 por defecto")
+  public void crearProductoSinCantidadDeberiaGuardarConCero() {
+    ProductoDto datos = datoValidos();
+    datos.setCantidad(null);
+    when(repositorioCategoriaMock.obtenerCategoriasPorIds(datos.getCategoriasIds()))
+      .thenReturn(Set.of(new Categoria()));
+
+    servicioProducto.crearProducto(datos);
+
+    verify(repositorioProductoMock, times(1)).guardar(argThat(p -> p.getCantidad() == 0));
+  }
+
   // --- Helper ---
+
+  private Producto productoConStock(Long id, int cantidad) {
+    Producto p = new Producto();
+    p.setId(id);
+    p.setCantidad(cantidad);
+    return p;
+  }
 
   private ProductoDto datoValidos() {
     ProductoDto datos = new ProductoDto();

@@ -9,7 +9,8 @@ import lombok.Setter;
 public class ProductoDto {
 
   private String nombre;
-  private List<Long> categoriasIds; // IDs de las categorías seleccionadas
+  private List<Long> categoriasIds;
+  private Integer cantidad;
   private String ubicacion;
   private Integer duracionMinutos;
   private Boolean tieneDescongelamiento;
