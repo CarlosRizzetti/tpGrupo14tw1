@@ -1,7 +1,7 @@
 package com.tallerwebi.presentacion.controller;
 
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
-import com.tallerwebi.dominio.interfaces.ServicioDashboard;
+import com.tallerwebi.dominio.interfaces.ServicioTimer;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.TimerDTO;
 import java.util.HashMap;
@@ -13,15 +13,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
+/**
+ * Controlador para la vista global del dashboard.
+ * Muestra las categorías y los timers activos por categoría.
+ */
 public class ControladorDashboardGlobal {
 
   private final ServicioCategoria servicioCategoria;
-  private final ServicioDashboard servicioDashboard;
+  private final ServicioTimer servicioDashboard;
 
   @Autowired
   public ControladorDashboardGlobal(
     ServicioCategoria servicioCategoria,
-    ServicioDashboard servicioDashboard
+    ServicioTimer servicioDashboard
   ) {
     this.servicioCategoria = servicioCategoria;
     this.servicioDashboard = servicioDashboard;
@@ -29,21 +33,41 @@ public class ControladorDashboardGlobal {
 
   @GetMapping("/dashboard/global")
   public ModelAndView dashboardGlobal() {
-    ModelAndView mav = new ModelAndView("dashboard/global");
+    try {
+      ModelAndView mav = new ModelAndView("dashboard/global");
 
-    List<CategoriaDto> categorias = servicioCategoria.obtenerLasCategoriasParaElMenu();
+      List<CategoriaDto> categorias = servicioCategoria.obtenerLasCategoriasParaElMenu();
 
-    Map<Long, List<TimerDTO>> timersPorCategoria = new HashMap<>();
+      if (categorias == null || categorias.isEmpty()) {
+        mav.addObject("error", "No hay categorías disponibles");
+        return mav;
+      }
 
-    for (CategoriaDto categoria : categorias) {
-      List<TimerDTO> timers = servicioDashboard.obtenerTimersActivos(categoria.getId());
+      Map<Long, List<TimerDTO>> timersPorCategoria = new HashMap<>();
 
-      timersPorCategoria.put(categoria.getId(), timers);
+      for (CategoriaDto categoria : categorias) {
+        List<TimerDTO> timers = servicioDashboard.obtenerTimersActivos(categoria.getId());
+        timersPorCategoria.put(categoria.getId(), timers);
+      }
+
+      boolean anyTimers = timersPorCategoria
+        .values()
+        .stream()
+        .anyMatch(timers -> timers != null && !timers.isEmpty());
+
+      mav.addObject("categorias", categorias);
+
+      if (!anyTimers) {
+        mav.addObject("error", "No hay timers activos");
+      } else {
+        mav.addObject("timersPorCategoria", timersPorCategoria);
+      }
+
+      return mav;
+    } catch (Exception e) {
+      ModelAndView mav = new ModelAndView("dashboard/global");
+      mav.addObject("error", "Error al cargar el dashboard global");
+      return mav;
     }
-
-    mav.addObject("categorias", categorias);
-    mav.addObject("timersPorCategoria", timersPorCategoria);
-
-    return mav;
   }
 }
