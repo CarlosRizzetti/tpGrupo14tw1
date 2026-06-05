@@ -41,7 +41,7 @@ public class ControladorUsuarioTest {
     ModelAndView mav = controladorUsuario.listarUsuarios(sessionMock);
 
     // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("usuario/lista"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/usuario/lista"));
     assertThat(mav.getModel().get("usuarios"), equalTo(usuarios));
   }
 
@@ -63,7 +63,7 @@ public class ControladorUsuarioTest {
     ModelAndView mav = controladorUsuario.mostrarFormularioNuevo(sessionMock);
 
     // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("usuario/nuevo"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/usuario/nuevo"));
     assertThat(mav.getModel().get("usuarioDto"), instanceOf(UsuarioDto.class));
   }
 
@@ -90,7 +90,7 @@ public class ControladorUsuarioTest {
     ModelAndView mav = controladorUsuario.crearUsuario(dto, sessionMock);
 
     // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("usuario/nuevo"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/usuario/nuevo"));
     assertThat(mav.getModel().get("error").toString(), equalToIgnoringCase("El usuario ya existe"));
   }
 
@@ -106,7 +106,7 @@ public class ControladorUsuarioTest {
     ModelAndView mav = controladorUsuario.crearUsuario(dto, sessionMock);
 
     // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("usuario/nuevo"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/usuario/nuevo"));
     assertThat(mav.getModel().get("error").toString(), containsString("contraseña"));
   }
 
@@ -122,7 +122,7 @@ public class ControladorUsuarioTest {
     ModelAndView mav = controladorUsuario.mostrarFormularioEditar(1L, sessionMock);
 
     // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("usuario/editar"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/usuario/editar"));
     assertThat(mav.getModel().get("usuarioId"), equalTo(1L));
   }
 

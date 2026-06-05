@@ -50,7 +50,7 @@ public class ControladorLoginTest {
 
     ModelAndView modelAndView = result.getModelAndView();
     assert modelAndView != null;
-    assertThat(modelAndView.getViewName(), equalToIgnoringCase("login"));
+    assertThat(modelAndView.getViewName(), equalToIgnoringCase("loginYRegistro/login"));
     assertThat(
       modelAndView.getModel().get("loginDto").toString(),
       containsString("com.tallerwebi.presentacion.dto.LoginDto")

@@ -59,7 +59,7 @@ public class ControladorValidacionIdentidadTest {
   public void mostrarValidacionSinTokenDeberiaRetornarVista() {
     ModelAndView mav = controladorValidacionIdentidad.mostrarValidacion(null);
 
-    assertThat(mav.getViewName(), equalToIgnoringCase("validacion-identidad"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("loginYRegistro/validacion-identidad"));
     assertThat(mav.getModel().get("message"), is(nullValue()));
   }
 
@@ -69,7 +69,7 @@ public class ControladorValidacionIdentidadTest {
 
     ModelAndView mav = controladorValidacionIdentidad.mostrarValidacion("token");
 
-    assertThat(mav.getViewName(), equalToIgnoringCase("validacion-identidad"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("loginYRegistro/validacion-identidad"));
     assertThat(mav.getModel().get("success"), is(true));
     assertThat(mav.getModel().get("message").toString(), containsString("Cuenta activada"));
     assertThat(mav.getModel().get("redirectUrl").toString(), equalToIgnoringCase("/login"));
