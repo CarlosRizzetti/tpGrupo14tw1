@@ -1,3 +1,5 @@
+import {getTimers} from "./actualizarTemporizadores.js";
+
 export function renovarTimer(id, categoryId) {
   if (!confirm("¿Estás seguro de que quieres renovar este vencimiento?")) return;
 
@@ -46,26 +48,37 @@ function updateCardDOM(card, id, categoryId, data) {
   const newId = data.nuevoTimerId;
 
   card.id = `timer-${newId}`;
-  card.setAttribute("data-expires", data.fechaVencimiento);
+  card.setAttribute("data-vencimiento", data.fechaVencimiento);
 
-  const spans = {
-    [`elab-${id}`]: { text: formatearFecha(data.fechaElaboracion), newId: `elab-${newId}` },
-    [`vence-${id}`]: { text: formatearFecha(data.fechaVencimiento), newId: `vence-${newId}` }
+  const elementosSubId = {
+    [`display-${id}`]:   `display-${newId}`,
+    [`elab-${id}`]:      `elab-${newId}`,
+    [`vence-${id}`]:     `vence-${newId}`,
+    [`nombre-${id}`]:    `nombre-${newId}`,
+    [`ubicacion-${id}`]: `ubicacion-${newId}`
   };
 
-  Object.entries(spans).forEach(([oldId, { text, newId: spanNewId }]) => {
-    const span = document.getElementById(oldId);
-    if (span) {
-      span.innerText = text;
-      span.id = spanNewId;
+  Object.entries(elementosSubId).forEach(([oldId, newElementId]) => {
+    const el = document.getElementById(oldId);
+    if (el) {
+      el.id = newElementId;
     }
   });
+
+  const elabSpan = document.getElementById(`elab-${newId}`);
+  const venceSpan = document.getElementById(`vence-${newId}`);
+
+  if (elabSpan) elabSpan.innerText = formatearFecha(data.fechaElaboracion);
+  if (venceSpan) venceSpan.innerText = formatearFecha(data.fechaVencimiento);
 
   ["btn-eliminar", "btn-importar", "btn-renovar"].forEach(btnClass => {
     card.querySelector(`.${btnClass}`)?.setAttribute("data-timer-id", `${newId}`);
   });
 
-
+  const btnImportar = card.querySelector(".btn-importar");
+  if (btnImportar) {
+    btnImportar.setAttribute("data-product-name", data.nombre || card.querySelector(`[id^='nombre-']`)?.textContent || "");
+  }
 }
 
 function formatearFecha(isoString) {

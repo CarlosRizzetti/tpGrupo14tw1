@@ -45,7 +45,7 @@ public class ControladorDashboard {
       return new ModelAndView("redirect:/home");
     }
 
-    ModelAndView mav = new ModelAndView("dashboard");
+    ModelAndView mav = new ModelAndView("dashboard/dashboard");
     mav.addObject("categoria", categoria);
     List<TimerDTO> timersActivos = servicioTimer.obtenerTimersActivos(categoria.getId());
 

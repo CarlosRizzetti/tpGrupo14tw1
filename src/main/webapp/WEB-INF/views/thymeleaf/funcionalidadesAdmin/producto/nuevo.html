@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/app :: layout(~{::content}, _, ~{::header_center}, ~{::header_right}, _, _)}">
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, _, _, _)}">
 <head>
   <title>Nuevo Producto</title>
 </head>
 <body>
 
 <div th:fragment="header_center">
-  <h1 class="text-white text-3xl font-black uppercase text-center drop-shadow-md tracking-wider flex justify-center items-center">CREAR NUEVO PRODUCTO</h1>
+  <span class="text-puesto-header-text font-bold uppercase tracking-widest">Nuevo producto</span>
 </div>
 
-<div th:fragment="header_right">
-  <!-- Puedes agregar un botón para volver -->
-  <a th:href="@{/}" class="text-white bg-puesto-btn hover:bg-puesto-btn-hover font-bold py-2 px-4 rounded">VOLVER</a>
+
+<div th:fragment="header_left" th:remove="tag">
+  <a href="/home" class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+    </svg>
+    Volver al menú
+  </a>
 </div>
 
 <div th:fragment="content" class="w-full flex justify-center mt-8">

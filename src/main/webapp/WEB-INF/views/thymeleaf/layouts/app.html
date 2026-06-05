@@ -22,7 +22,8 @@
         th:classappend="${categoria?.tema ?: 'tema-cocina'}">
 
     <!-- HEADER: Altura fija -->
-    <header class="h-20 bg-puesto-header text-puesto-header-text p-4 shadow-xl flex justify-between items-center z-20 shrink-0">
+    <header>
+        <nav class="h-20 bg-puesto-header text-puesto-header-text p-4 shadow-xl flex justify-between items-center z-20 shrink-0">
         <div class="flex items-center min-w-[200px]">
             <!-- Reemplaza por el fragmento izquierdo o el logo por defecto -->
             <div th:replace="${header_left} ?: ~{::logo_default}"></div>
@@ -37,6 +38,7 @@
             <!-- Fragmento derecho (ej: reloj o contadores) -->
             <div th:replace="${header_right}"></div>
         </div>
+        </nav>
     </header>
 
     <!-- MAIN: Ocupa el resto del espacio exacto -->

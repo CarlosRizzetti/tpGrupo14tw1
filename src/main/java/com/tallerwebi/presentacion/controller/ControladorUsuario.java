@@ -20,9 +20,9 @@ import org.springframework.web.servlet.ModelAndView;
 public class ControladorUsuario {
 
   private static final String ERROR = "error";
-  private static final String VISTA_LISTA = "usuario/lista";
-  private static final String VISTA_NUEVO = "usuario/nuevo";
-  private static final String VISTA_EDITAR = "usuario/editar";
+  private static final String VISTA_LISTA = "funcionalidadesAdmin/usuario/lista";
+  private static final String VISTA_NUEVO = "funcionalidadesAdmin/usuario/nuevo";
+  private static final String VISTA_EDITAR = "funcionalidadesAdmin/usuario/editar";
   private static final String REDIRECT_LISTA = "redirect:/admin/usuarios";
   private static final String REDIRECT_DENEGADO = "redirect:/acceso-denegado";
   private static final String ATTR_DTO = "usuarioDto";

@@ -16,7 +16,7 @@ public class ControladorValidacionIdentidad {
 
   private static final String MENSAJE_SOLICITUD =
     "Si el correo existe, hemos enviado un enlace de validación";
-  private static final String VISTA_VALIDACION = "validacion-identidad";
+  private static final String VISTA_VALIDACION = "loginYRegistro/validacion-identidad";
   private static final String REDIRECT_URL = "/login";
   private static final int REDIRECT_DELAY_MS = 3000;
 
