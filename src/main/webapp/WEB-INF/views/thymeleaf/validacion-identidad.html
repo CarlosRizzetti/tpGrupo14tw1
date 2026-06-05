@@ -59,9 +59,9 @@
 
     <script th:if="${success}" th:inline="javascript">
         /*<![CDATA[*/
-        const redirectUrl = [[${redirectUrl}]];
-        const delayMs = [[${redirectDelayMs}]];
-        setTimeout(function() {
+        const redirectUrl = '/login';
+        const delayMs = 3000;
+        setTimeout( function() {
             window.location.href = redirectUrl;
         }, delayMs);
         /*]]>*/
