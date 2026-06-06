@@ -84,7 +84,15 @@ public class ServicioTimerTest {
     categoria.setId(1L);
     Producto producto = new Producto();
     ReglaVencimiento regla = new ReglaVencimiento();
-    Timer timer = new Timer(fechaCreacion, fechaVencimiento, "1AF34", producto, categoria, regla);
+    Timer timer = new Timer(
+      fechaCreacion,
+      fechaVencimiento,
+      "1AF34",
+      producto,
+      categoria,
+      regla,
+      1
+    );
     timer.setId(1L);
     List<Timer> timersActivos = List.of(timer);
     when(repositorioTimerMock.obtenerTimersSegunEstado(categoria.getId(), EstadoTimer.ACTIVO))
@@ -507,7 +515,8 @@ public class ServicioTimerTest {
       "GROUP-01",
       new Producto(),
       categoriaOrigen,
-      new ReglaVencimiento()
+      new ReglaVencimiento(),
+      1
     );
     timer.setId(1L);
 
@@ -515,7 +524,7 @@ public class ServicioTimerTest {
     when(repositorioCategoriaMock.buscarPorId(2L)).thenReturn(categoriaDestino);
     when(repositorioTimerMock.existeTimerActivoEnCategoriaYGrupo(2L, "GROUP-01")).thenReturn(false);
 
-    CategoriaDto resultado = servicioTimer.importarTimer(1L, 2L);
+    CategoriaDto resultado = servicioTimer.importarTimer(1L, 2L, 1);
 
     assertNotNull(resultado);
     assertEquals("Isla", resultado.getNombre());
@@ -536,7 +545,8 @@ public class ServicioTimerTest {
       "GROUP-01",
       new Producto(),
       categoriaOrigen,
-      new ReglaVencimiento()
+      new ReglaVencimiento(),
+      1
     );
     timer.setId(1L);
 
@@ -544,7 +554,7 @@ public class ServicioTimerTest {
     when(repositorioCategoriaMock.buscarPorId(2L)).thenReturn(categoriaDestino);
     when(repositorioTimerMock.existeTimerActivoEnCategoriaYGrupo(2L, "GROUP-01")).thenReturn(false);
 
-    servicioTimer.importarTimer(1L, 2L);
+    servicioTimer.importarTimer(1L, 2L, 1);
 
     ArgumentCaptor<Timer> captor = ArgumentCaptor.forClass(Timer.class);
     verify(repositorioTimerMock).guardar(captor.capture());
@@ -566,7 +576,8 @@ public class ServicioTimerTest {
       "GROUP-01",
       new Producto(),
       categoriaOrigen,
-      new ReglaVencimiento()
+      new ReglaVencimiento(),
+      1
     );
     timer.setId(1L);
 
@@ -576,7 +587,7 @@ public class ServicioTimerTest {
 
     ValidacionException ex = assertThrows(
       ValidacionException.class,
-      () -> servicioTimer.importarTimer(1L, 2L)
+      () -> servicioTimer.importarTimer(1L, 2L, 1)
     );
     assertEquals("El timer ya fue importado a esta categoría", ex.getMessage());
     verify(repositorioTimerMock, never()).guardar(any());
@@ -595,7 +606,8 @@ public class ServicioTimerTest {
       "GROUP-01",
       new Producto(),
       categoria,
-      new ReglaVencimiento()
+      new ReglaVencimiento(),
+      1
     );
     timer.setId(1L);
 
@@ -604,7 +616,7 @@ public class ServicioTimerTest {
 
     ValidacionException ex = assertThrows(
       ValidacionException.class,
-      () -> servicioTimer.importarTimer(1L, 1L)
+      () -> servicioTimer.importarTimer(1L, 1L, 1)
     );
     assertEquals("El timer ya pertenece a esta categoría", ex.getMessage());
     verify(repositorioTimerMock, never()).guardar(any());
@@ -615,7 +627,7 @@ public class ServicioTimerTest {
   public void importarTimerInexistenteDeberiaLanzarExcepcion() {
     when(repositorioTimerMock.buscarPorId(99L)).thenReturn(null);
 
-    assertThrows(ValidacionException.class, () -> servicioTimer.importarTimer(99L, 2L));
+    assertThrows(ValidacionException.class, () -> servicioTimer.importarTimer(99L, 2L, 1));
     verify(repositorioTimerMock, never()).guardar(any());
   }
 
@@ -634,7 +646,8 @@ public class ServicioTimerTest {
       (String) null,
       new Producto(),
       categoriaOrigen,
-      new ReglaVencimiento()
+      new ReglaVencimiento(),
+      1
     );
     timer.setId(1L);
 
@@ -642,7 +655,7 @@ public class ServicioTimerTest {
     when(repositorioCategoriaMock.buscarPorId(2L)).thenReturn(categoriaDestino);
     when(repositorioTimerMock.existeTimerActivoEnCategoriaYGrupo(2L, null)).thenReturn(false);
 
-    CategoriaDto resultado = servicioTimer.importarTimer(1L, 2L);
+    CategoriaDto resultado = servicioTimer.importarTimer(1L, 2L, 1);
 
     assertNotNull(resultado);
     verify(repositorioTimerMock, times(1)).guardar(any(Timer.class));
@@ -657,7 +670,8 @@ public class ServicioTimerTest {
       "GROUP-01",
       new Producto(),
       new Categoria(),
-      new ReglaVencimiento()
+      new ReglaVencimiento(),
+      1
     );
     timer.setId(1L);
 

@@ -1,3 +1,38 @@
+function goToStep2() {
+  const step1 = document.getElementById("modal-step-1");
+  const step2 = document.getElementById("modal-step-2");
+  if (!step1 || !step2) return;
+  step2.style.transform = "translateX(0)";
+}
+
+function goToStep1() {
+  const step2 = document.getElementById("modal-step-2");
+  if (!step2) return;
+  step2.style.transform = "translateX(100%)";
+}
+
+function getSelectedCategoryId() {
+  const select = document.getElementById("modal-category-select");
+  return select?.value || null;
+}
+
+function showSelectError(show) {
+  const el = document.getElementById("modal-select-error");
+  if (!el) return;
+  el.classList.toggle("hidden", !show);
+}
+
+function showCantidadError(show, msg = null) {
+  const el = document.getElementById("modal-cantidad-error");
+  if (!el) return;
+  if (msg) el.textContent = msg;
+  el.classList.toggle("hidden", !show);
+}
+
+// ─────────────────────────────────────────────
+//  Cargar categorías al abrir el modal
+// ─────────────────────────────────────────────
+
 export async function importTimer(timerId, productName, location) {
   document.body.style.cursor = "wait";
 
@@ -6,16 +41,14 @@ export async function importTimer(timerId, productName, location) {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Accept": "application/json"
-      }
+        Accept: "application/json",
+      },
     });
 
     const data = await response.json();
-
     if (!response.ok) throw new Error("Error al cargar categorías");
 
-    openImportModal(timerId, data.categorias, productName, location);
-
+    openImportModal(timerId, data.categorias, productName, location, data.cantidad);
   } catch (error) {
     console.error(error);
     alert("Error al obtener las categorías disponibles.");
@@ -24,72 +57,128 @@ export async function importTimer(timerId, productName, location) {
   }
 }
 
-export function openImportModal(timerId, categories, productName, location) {
-  const listContainer = document.getElementById("modal-categories-list");
-  const modal = document.getElementById("import-modal");
-  const nameDisplay = document.getElementById("modal-product-name");
-  const locDisplay = document.getElementById("modal-product-location");
-  const hiddenInput = document.getElementById("modal-timer-id");
+// ─────────────────────────────────────────────
+//  Abrir modal y poblar select
+// ─────────────────────────────────────────────
+
+export function openImportModal(timerId, categories, productName, location, cantidadDisponible) {
+  const select       = document.getElementById("modal-category-select");
+  const modal        = document.getElementById("import-modal");
+  const nameDisplay  = document.getElementById("modal-product-name");
+  const locDisplay   = document.getElementById("modal-product-location");
+  const hiddenId     = document.getElementById("modal-timer-id");
+  const hiddenCant   = document.getElementById("modal-cantidad-disponible");
+  const cantBadge    = document.getElementById("modal-cantidad-badge");
 
   if (nameDisplay) nameDisplay.textContent = productName;
-  if (locDisplay) locDisplay.textContent = location;
-  if (hiddenInput) hiddenInput.value = timerId;
+  if (locDisplay)  locDisplay.textContent  = location;
+  if (hiddenId)    hiddenId.value          = timerId;
+  if (hiddenCant)  hiddenCant.value        = cantidadDisponible ?? 0;
+  if (cantBadge)   cantBadge.textContent   = cantidadDisponible ?? 0;
 
-  listContainer.innerHTML = "";
+  // Resetear al paso 1 al abrir
+  goToStep1();
+  showSelectError(false);
+  showCantidadError(false);
+
+  const cantInput = document.getElementById("modal-cantidad-input");
+  if (cantInput) cantInput.value = "";
+
+  // Limpiar y poblar el select
+  select.innerHTML = `<option value="">— Elegí una categoría —</option>`;
 
   if (categories && categories.length > 0) {
-    categories.forEach(cat => {
-      const btn = document.createElement("button");
-      const isDisabled = cat.estaPresente ?? false;
-
-      btn.className = `btn-action w-full flex items-center justify-between p-4 border-2 rounded-xl transition-all group text-left mb-2 text-sm
-        ${isDisabled
-    ? "bg-gray-100 border-gray-100 text-gray-400 cursor-not-allowed"
-    : "bg-white border-gray-200 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700"}`;
-
-      btn.disabled = isDisabled;
-
-      btn.innerHTML = `
-        <span class="font-black uppercase ${isDisabled ? "" : "group-hover:text-blue-700"}">
-          ${cat.nombre}
-          ${isDisabled ? "<span class=\"text-[10px] ml-2 bg-gray-200 px-2 py-0.5 rounded text-gray-500\">YA EXISTE</span>" : ""}
-        </span>
-        ${!isDisabled
-    ? "<svg class=\"w-5 h-5 text-gray-300 group-hover:text-blue-500\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M12 4v16m8-8H4\"></path></svg>"
-    : ""}
-      `;
-
-      if (!isDisabled) {
-        btn.dataset.action = "confirm-import";
-        btn.dataset.timerId = timerId;
-        btn.dataset.categoryId = cat.id;
+    categories.forEach((cat) => {
+      const option = document.createElement("option");
+      option.value = cat.id;
+      option.textContent = cat.nombre;
+      if (cat.estaPresente) {
+        option.disabled = true;
+        option.textContent += " (ya existe)";
       }
-
-      listContainer.appendChild(btn);
+      select.appendChild(option);
     });
   } else {
-    listContainer.innerHTML = `
-      <div class="text-center py-8 text-gray-400">
-        <p class="font-bold uppercase text-sm">Sin categorías disponibles</p>
-      </div>`;
+    const option = document.createElement("option");
+    option.disabled = true;
+    option.textContent = "Sin categorías disponibles";
+    select.appendChild(option);
   }
 
   modal.classList.remove("hidden");
+  initModalListeners();
 }
 
-export async function executeImport(timerId, categoryId) {
-  const listContainer = document.getElementById("modal-categories-list");
-  listContainer.style.opacity = "0.5";
-  listContainer.style.pointerEvents = "none";
+// ─────────────────────────────────────────────
+//  Listeners internos del modal (se registran
+//  una sola vez gracias al flag)
+// ─────────────────────────────────────────────
+
+let listenersInit = false;
+
+function initModalListeners() {
+  if (listenersInit) return;
+  listenersInit = true;
+
+  // Volver al paso 1
+  document.getElementById("btn-back-step1")?.addEventListener("click", () => {
+    goToStep1();
+    showCantidadError(false);
+  });
+
+  // Importar TOTALIDAD
+  document.getElementById("btn-import-total")?.addEventListener("click", () => {
+    const categoryId = getSelectedCategoryId();
+    if (!categoryId) { showSelectError(true); return; }
+    showSelectError(false);
+
+    const timerId  = document.getElementById("modal-timer-id")?.value;
+    const cantidad = parseInt(document.getElementById("modal-cantidad-disponible")?.value, 10);
+    executeImport(timerId, categoryId, cantidad);
+  });
+
+  // Ir al paso 2 (cantidad personalizada)
+  document.getElementById("btn-import-custom")?.addEventListener("click", () => {
+    const categoryId = getSelectedCategoryId();
+    if (!categoryId) { showSelectError(true); return; }
+    showSelectError(false);
+    goToStep2();
+  });
+
+  // Confirmar importación con cantidad personalizada
+  document.getElementById("btn-confirm-custom-import")?.addEventListener("click", () => {
+    const timerId    = document.getElementById("modal-timer-id")?.value;
+    const categoryId = getSelectedCategoryId();
+    const disponible = parseInt(document.getElementById("modal-cantidad-disponible")?.value, 10);
+    const cantidad   = parseInt(document.getElementById("modal-cantidad-input")?.value, 10);
+
+    if (!cantidad || cantidad <= 0) {
+      showCantidadError(true, "Ingresá una cantidad válida");
+      return;
+    }
+    if (cantidad > disponible) {
+      showCantidadError(true, `No podés importar más de ${disponible} unidades`);
+      return;
+    }
+    showCantidadError(false);
+    executeImport(timerId, categoryId, cantidad);
+  });
+}
+
+// ─────────────────────────────────────────────
+//  Ejecutar el import contra el backend
+// ─────────────────────────────────────────────
+
+export async function executeImport(timerId, categoryId, cantidad) {
   document.body.style.cursor = "wait";
 
   try {
-    const response = await fetch(`/import-timer/${timerId}/${categoryId}`, {
+    const response = await fetch(`/import-timer/${timerId}/${categoryId}/${cantidad}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Accept": "application/json"
-      }
+        Accept: "application/json",
+      },
     });
 
     const data = await response.json();
@@ -99,16 +188,17 @@ export async function executeImport(timerId, categoryId) {
     } else {
       throw new Error(data.message || "Error desconocido al importar");
     }
-
   } catch (error) {
     console.error(error);
     alert(error.message);
   } finally {
-    listContainer.style.opacity = "1";
-    listContainer.style.pointerEvents = "auto";
     document.body.style.cursor = "default";
   }
 }
+
+// ─────────────────────────────────────────────
+//  Cerrar modal
+// ─────────────────────────────────────────────
 
 export function closeImportModal() {
   const modal = document.getElementById("import-modal");

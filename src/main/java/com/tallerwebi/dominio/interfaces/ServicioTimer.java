@@ -9,7 +9,7 @@ import java.util.List;
 public interface ServicioTimer {
   List<TimerDTO> obtenerTimersActivos(Long categoriaId);
   void modificarEstado(Long timerId, EstadoTimer estado);
-  CategoriaDto importarTimer(Long timerId, Long categoriaId);
+  CategoriaDto importarTimer(Long timerId, Long categoriaId, Integer cantidad);
   Timer buscarPorId(Long id);
   TimerDTO renovarTimer(Timer timer);
 }

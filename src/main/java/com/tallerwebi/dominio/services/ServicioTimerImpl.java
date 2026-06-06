@@ -4,6 +4,7 @@ import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.dominio.entity.enums.EstadoTimer;
+import com.tallerwebi.dominio.excepcion.CantidadInvalidaException;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
@@ -65,8 +66,15 @@ public class ServicioTimerImpl implements ServicioTimer {
     repositorioTimer.guardar(timer);
   }
 
+  public void modificarCantidad(Long timerId, Integer cantidad) {
+    Timer timer = repositorioTimer.buscarPorId(timerId);
+    ValidacionHelper.queNoSeaNull(timer, TIMER);
+
+    timer.setCantidadProducto(-cantidad);
+  }
+
   @Override
-  public CategoriaDto importarTimer(Long timerId, Long categoriaId) {
+  public CategoriaDto importarTimer(Long timerId, Long categoriaId, Integer cantidad) {
     Timer timer = repositorioTimer.buscarPorId(timerId);
     ValidacionHelper.queNoSeaNull(timer, "timer");
 
@@ -81,16 +89,25 @@ public class ServicioTimerImpl implements ServicioTimer {
       throw new ValidacionException("El timer ya fue importado a esta categoría");
     }
 
-    Timer clon = new Timer(
-      timer.getFechaCreacion(),
-      timer.getFechaVencimiento(),
-      timer.getGroupId(),
-      timer.getProducto(),
-      categoriaDestino,
-      timer.getReglaVencimiento()
+    if (cantidad > timer.getCantidadProducto()) throw new CantidadInvalidaException(
+      "La cantidad a importar no puede ser mayor al stock actual del vencimiento"
     );
 
-    repositorioTimer.guardar(clon);
+    if (cantidad.equals(timer.getCantidadProducto())) {
+      Timer clon = new Timer(
+        timer.getFechaCreacion(),
+        timer.getFechaVencimiento(),
+        timer.getGroupId(),
+        timer.getProducto(),
+        categoriaDestino,
+        timer.getReglaVencimiento(),
+        cantidad
+      );
+      repositorioTimer.guardar(clon);
+      modificarEstado(timerId, EstadoTimer.IMPORTADO);
+      modificarCantidad(timerId, 0);
+    }
+
     return new CategoriaDto(categoriaDestino);
   }
 
@@ -144,7 +161,8 @@ public class ServicioTimerImpl implements ServicioTimer {
       timer.getGroupId(),
       formatearFecha(timer.getFechaCreacion()),
       formatearFecha(timer.getFechaVencimiento()),
-      obtenerUbicacion(timer)
+      obtenerUbicacion(timer),
+      timer.getCantidadProducto()
     );
   }
 }

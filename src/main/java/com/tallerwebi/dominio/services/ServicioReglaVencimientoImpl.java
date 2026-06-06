@@ -78,7 +78,8 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
       descongelamiento,
       producto,
       categoria,
-      regla
+      regla,
+      cantidadUsada
     );
     repositorioTimer.guardar(timer);
 

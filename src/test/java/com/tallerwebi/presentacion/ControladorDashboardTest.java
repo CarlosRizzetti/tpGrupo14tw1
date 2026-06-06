@@ -232,6 +232,7 @@ public class ControladorDashboardTest {
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       1L,
       99L,
+      1,
       sessionMock
     );
 
@@ -250,9 +251,9 @@ public class ControladorDashboardTest {
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
 
-    controladorDashboard.importarTimer(1L, 99L, sessionMock);
+    controladorDashboard.importarTimer(1L, 99L, 1, sessionMock);
 
-    verify(servicioTimerMock).importarTimer(1L, 99L);
+    verify(servicioTimerMock).importarTimer(1L, 99L, 1);
   }
 
   @Test
@@ -261,6 +262,7 @@ public class ControladorDashboardTest {
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       -1L,
       99L,
+      1,
       sessionMock
     );
 
@@ -274,6 +276,7 @@ public class ControladorDashboardTest {
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       1L,
       -1L,
+      1,
       sessionMock
     );
 
@@ -284,12 +287,13 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NEG-03 | importarTimer | Retorna 400 cuando el timer no existe")
   void importarTimer_deberiaRetornar400CuandoElTimerNoExiste() {
-    when(servicioTimerMock.importarTimer(1L, 99L))
+    when(servicioTimerMock.importarTimer(1L, 99L, 1))
       .thenThrow(new ValidacionException("timer no encontrado"));
 
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       1L,
       99L,
+      1,
       sessionMock
     );
 
@@ -300,12 +304,13 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NEG-04 | importarTimer | Retorna 400 cuando el timer ya pertenece a la categoria")
   void importarTimer_deberiaRetornar400CuandoElTimerYaPerteneceALaCategoria() {
-    when(servicioTimerMock.importarTimer(1L, 99L))
+    when(servicioTimerMock.importarTimer(1L, 99L, 1))
       .thenThrow(new ValidacionException("El timer ya pertenece a esta categoría"));
 
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       1L,
       99L,
+      1,
       sessionMock
     );
 
@@ -317,12 +322,13 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NEG-05 | importarTimer | Retorna 400 cuando la categoria del timer es null")
   void importarTimer_deberiaRetornar400CuandoLaCategoriaDelTimerEsNull() {
-    when(servicioTimerMock.importarTimer(1L, 99L))
+    when(servicioTimerMock.importarTimer(1L, 99L, 1))
       .thenThrow(new ValidacionException("categoria del timer no encontrada"));
 
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       1L,
       99L,
+      1,
       sessionMock
     );
 
@@ -338,11 +344,12 @@ public class ControladorDashboardTest {
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
     doThrow(new RuntimeException("Error inesperado"))
       .when(servicioTimerMock)
-      .importarTimer(1L, 99L);
+      .importarTimer(1L, 99L, 1);
 
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       1L,
       99L,
+      1,
       sessionMock
     );
 
@@ -359,11 +366,12 @@ public class ControladorDashboardTest {
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
     doThrow(new RuntimeException("password=1234 datos sensibles"))
       .when(servicioTimerMock)
-      .importarTimer(1L, 99L);
+      .importarTimer(1L, 99L, 1);
 
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       1L,
       99L,
+      1,
       sessionMock
     );
 
@@ -387,7 +395,8 @@ public class ControladorDashboardTest {
       "1AF34",
       fechaCreacionISo,
       fechaVencimientoISO,
-      ubicacion
+      ubicacion,
+      1
     );
     List<TimerDTO> timersActivos = List.of(timer);
     when(servicioTimerMock.obtenerTimersActivos(anyLong())).thenReturn(timersActivos);
