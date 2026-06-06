@@ -3,6 +3,7 @@ package com.tallerwebi.presentacion.controller;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.dominio.entity.enums.EstadoTimer;
+import com.tallerwebi.dominio.excepcion.CantidadInvalidaException;
 import com.tallerwebi.dominio.excepcion.IdInvalido;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
@@ -105,24 +106,26 @@ public class ControladorDashboard {
     }
   }
 
-  @PostMapping("/import-timer/{timerId}/{categoryId}")
+  @PostMapping("/import-timer/{timerId}/{categoryId}/{cantidad}")
   public ResponseEntity<ResponseDTO> importarTimer(
     @PathVariable Long timerId,
     @PathVariable Long categoryId,
+    @PathVariable Integer cantidad,
     HttpSession session
   ) {
     try {
       ValidacionHelper.validarId(timerId);
       ValidacionHelper.validarId(categoryId);
+      ValidacionHelper.validarCantidad(cantidad);
 
-      CategoriaDto categoriaDestino = servicioTimer.importarTimer(timerId, categoryId);
+      CategoriaDto categoriaDestino = servicioTimer.importarTimer(timerId, categoryId, cantidad);
 
       ResponseDTO response = new ResponseDTO();
       response.setSuccess(true);
       response.setMessage("Timer importado correctamente");
       session.setAttribute("categoria", categoriaDestino);
       return ResponseEntity.ok(response);
-    } catch (IdInvalido | ValidacionException e) {
+    } catch (IdInvalido | ValidacionException | CantidadInvalidaException e) {
       ResponseDTO response = new ResponseDTO();
       response.setSuccess(false);
       response.setMessage(e.getMessage());

@@ -4,5 +4,6 @@ public enum EstadoTimer {
   ACTIVO,
   VENCIDO,
   ELIMINADO,
+  IMPORTADO,
   RENOVADO,
 }

@@ -17,4 +17,5 @@ public class TimerDTO {
   private String fechaCreacion;
   private String fechaVencimiento;
   private String ubicacion;
+  private Integer cantidad;
 }
