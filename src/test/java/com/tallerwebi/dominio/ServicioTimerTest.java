@@ -516,7 +516,7 @@ public class ServicioTimerTest {
       new Producto(),
       categoriaOrigen,
       new ReglaVencimiento(),
-      1
+      2
     );
     timer.setId(1L);
 
@@ -546,7 +546,7 @@ public class ServicioTimerTest {
       new Producto(),
       categoriaOrigen,
       new ReglaVencimiento(),
-      1
+      2
     );
     timer.setId(1L);
 
@@ -647,7 +647,7 @@ public class ServicioTimerTest {
       new Producto(),
       categoriaOrigen,
       new ReglaVencimiento(),
-      1
+      2
     );
     timer.setId(1L);
 
@@ -752,7 +752,7 @@ public class ServicioTimerTest {
     )
       .thenReturn(nuevoTimer);
 
-    TimerDTO resultado = servicioTimer.renovarTimer(timer);
+    TimerDTO resultado = servicioTimer.renovarTimer(timer, 1);
 
     assertNotNull(resultado);
     assertEquals(99L, resultado.getId());
@@ -778,7 +778,7 @@ public class ServicioTimerTest {
     )
       .thenReturn(nuevoTimer);
 
-    servicioTimer.renovarTimer(timer);
+    servicioTimer.renovarTimer(timer, 1);
 
     verify(repositorioTimerMock).guardar(argThat(t -> t.getEstado() == EstadoTimer.RENOVADO));
   }
@@ -801,7 +801,7 @@ public class ServicioTimerTest {
     )
       .thenReturn(nuevoTimer);
 
-    servicioTimer.renovarTimer(timer);
+    servicioTimer.renovarTimer(timer, 1);
 
     verify(servicioReglaVencimientoMock)
       .generarVencimiento(timer.getProducto(), timer.getCategoria(), 1L, null, 1);
@@ -815,7 +815,7 @@ public class ServicioTimerTest {
     Timer timer = buildTimerCompleto(1L);
     timer.setReglaVencimiento(null);
 
-    assertThrows(ValidacionException.class, () -> servicioTimer.renovarTimer(timer));
+    assertThrows(ValidacionException.class, () -> servicioTimer.renovarTimer(timer, 1));
   }
 
   @Test
@@ -835,7 +835,7 @@ public class ServicioTimerTest {
     )
       .thenThrow(new IllegalArgumentException("El producto no tiene regla de vencimiento"));
 
-    assertThrows(IllegalArgumentException.class, () -> servicioTimer.renovarTimer(timer));
+    assertThrows(IllegalArgumentException.class, () -> servicioTimer.renovarTimer(timer, 1));
   }
 
   @Test
@@ -847,7 +847,7 @@ public class ServicioTimerTest {
 
     when(repositorioTimerMock.buscarPorId(1L)).thenReturn(null);
 
-    assertThrows(ValidacionException.class, () -> servicioTimer.renovarTimer(timer));
+    assertThrows(ValidacionException.class, () -> servicioTimer.renovarTimer(timer, 1));
   }
 
   // ─── EDGE CASES ───────────────────────────────────────────────
@@ -871,7 +871,7 @@ public class ServicioTimerTest {
     )
       .thenReturn(nuevoTimer);
 
-    servicioTimer.renovarTimer(timer);
+    servicioTimer.renovarTimer(timer, 1);
 
     verify(repositorioTimerMock).guardar(argThat(t -> t.getEstado() == EstadoTimer.VENCIDO));
   }
@@ -897,7 +897,7 @@ public class ServicioTimerTest {
     )
       .thenReturn(nuevoTimer);
 
-    servicioTimer.renovarTimer(timer);
+    servicioTimer.renovarTimer(timer, 1);
 
     verify(repositorioTimerMock).guardar(argThat(t -> t.getEstado() == EstadoTimer.VENCIDO));
   }
@@ -922,7 +922,7 @@ public class ServicioTimerTest {
     )
       .thenReturn(nuevoTimer);
 
-    TimerDTO resultado = servicioTimer.renovarTimer(timer);
+    TimerDTO resultado = servicioTimer.renovarTimer(timer, 1);
 
     OffsetDateTime fechaCreacionDTO = OffsetDateTime.parse(resultado.getFechaCreacion());
     assertTrue(fechaCreacionDTO.isAfter(timer.getFechaCreacion()));
@@ -950,7 +950,7 @@ public class ServicioTimerTest {
     )
       .thenThrow(new IllegalArgumentException("El producto no tiene regla de vencimiento"));
 
-    assertThrows(IllegalArgumentException.class, () -> servicioTimer.renovarTimer(timer));
+    assertThrows(IllegalArgumentException.class, () -> servicioTimer.renovarTimer(timer, 1));
   }
 
   @Test
@@ -973,7 +973,7 @@ public class ServicioTimerTest {
     )
       .thenReturn(nuevoTimer);
 
-    servicioTimer.renovarTimer(timer);
+    servicioTimer.renovarTimer(timer, 1);
 
     verify(servicioReglaVencimientoMock)
       .generarVencimiento(

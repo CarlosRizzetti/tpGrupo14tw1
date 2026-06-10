@@ -11,5 +11,5 @@ public interface ServicioTimer {
   void modificarEstado(Long timerId, EstadoTimer estado);
   CategoriaDto importarTimer(Long timerId, Long categoriaId, Integer cantidad);
   Timer buscarPorId(Long id);
-  TimerDTO renovarTimer(Timer timer);
+  TimerDTO renovarTimer(Timer timer, Integer cantidad);
 }

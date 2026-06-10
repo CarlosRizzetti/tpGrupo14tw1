@@ -1,6 +1,6 @@
 import { deleteTimer } from "./deleteTimer.js";
-import { renovarTimer } from "./renovarTimer.js";
 import { importTimer, executeImport, closeImportModal } from "./importarTimer.js";
+import {closeRenewModal, openRenewModal} from "./renovarTimer.js";
 
 document.addEventListener("click", (e) => {
   const btn = e.target.closest("[data-action]");
@@ -14,13 +14,14 @@ document.addEventListener("click", (e) => {
   case "delete":
     deleteTimer(timerId);
     break;
-
   case "renew":
-    renovarTimer(timerId, categoryId);
+    const cantidadRenovar = btn.dataset.cantidad;
+    openRenewModal(timerId, productName, location, cantidadRenovar);
     break;
 
   case "import":
-    importTimer(timerId, productName, location);
+    const cantidad = btn.dataset.cantidad;
+    importTimer(timerId, productName, location, cantidad);
     break;
 
   case "confirm-import":
@@ -30,7 +31,9 @@ document.addEventListener("click", (e) => {
   case "closeImportModal":
     closeImportModal();
     break;
-
+  case "closeRenewModal":
+    closeRenewModal();
+    break;
   default:
     console.warn("Acción no reconocida:", action);
   }
