@@ -106,9 +106,9 @@ public class ControladorDashboardTest {
     TimerDTO nuevoTimer = buildTimerDTO(2L);
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
-    when(servicioTimerMock.renovarTimer(timer)).thenReturn(nuevoTimer);
+    when(servicioTimerMock.renovarTimer(timer, 1)).thenReturn(nuevoTimer);
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1);
 
     assertEquals(HttpStatus.OK, respuesta.getStatusCode());
     assertNotNull(respuesta.getBody());
@@ -123,7 +123,7 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NP-01 | renovarTimer | Id nulo retorna 400")
   void renovarTimer_conIdNulo_deberiaRetornar400() {
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(null);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(null, 1);
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
     Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
@@ -133,7 +133,7 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NP-02 | renovarTimer | Id negativo retorna 400")
   void renovarTimer_conIdNegativo_deberiaRetornar400() {
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(-1L);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(-1L, 1);
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
     Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
@@ -145,7 +145,7 @@ public class ControladorDashboardTest {
   void renovarTimer_timerNoEncontrado_deberiaRetornar500() {
     when(servicioTimerMock.buscarPorId(1L)).thenThrow(new RuntimeException("Timer no encontrado"));
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
     Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
@@ -158,10 +158,10 @@ public class ControladorDashboardTest {
     Timer timer = buildTimerConRegla(1L);
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
-    when(servicioTimerMock.renovarTimer(timer))
+    when(servicioTimerMock.renovarTimer(timer, 1))
       .thenThrow(new RuntimeException("Error al generar vencimiento"));
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
   }
@@ -169,7 +169,7 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("EC-01 | renovarTimer | Id cero retorna 400")
   void renovarTimer_conIdCero_deberiaRetornar400() {
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(0L);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(0L, 1);
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
   }
@@ -181,9 +181,9 @@ public class ControladorDashboardTest {
     TimerDTO nuevoTimer = buildTimerDTO(2L);
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
-    when(servicioTimerMock.renovarTimer(timer)).thenReturn(nuevoTimer);
+    when(servicioTimerMock.renovarTimer(timer, 1)).thenReturn(nuevoTimer);
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1);
 
     assertEquals(HttpStatus.OK, respuesta.getStatusCode());
   }
@@ -198,9 +198,9 @@ public class ControladorDashboardTest {
     nuevoTimer.setFechaVencimiento(OffsetDateTime.MAX.toString());
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
-    when(servicioTimerMock.renovarTimer(timer)).thenReturn(nuevoTimer);
+    when(servicioTimerMock.renovarTimer(timer, 1)).thenReturn(nuevoTimer);
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1);
 
     assertEquals(HttpStatus.OK, respuesta.getStatusCode());
     Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
@@ -214,7 +214,7 @@ public class ControladorDashboardTest {
     when(servicioTimerMock.buscarPorId(Long.MAX_VALUE))
       .thenThrow(new RuntimeException("Timer no encontrado"));
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(Long.MAX_VALUE);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(Long.MAX_VALUE, 1);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
     Map<String, Object> body = (Map<String, Object>) respuesta.getBody();

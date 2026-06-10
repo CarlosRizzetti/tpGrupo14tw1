@@ -76,20 +76,24 @@ public class ControladorDashboard {
     }
   }
 
-  @PutMapping("/active-timers/renovarTimer/{timerId}")
-  public ResponseEntity<?> renovarTimer(@PathVariable Long timerId) {
-    if (logger.isInfoEnabled()) {
-      logger.info("Entrando a renovarTimer con id {}", timerId);
-    }
+  @PutMapping("/active-timers/renovarTimer/{timerId}/{cantidad}")
+  public ResponseEntity<?> renovarTimer(
+    @PathVariable Long timerId,
+    @PathVariable Integer cantidad
+  ) {
     try {
       ValidacionHelper.validarId(timerId);
       Timer timer = servicioTimer.buscarPorId(timerId);
-      TimerDTO nuevoTimer = servicioTimer.renovarTimer(timer);
+      ValidacionHelper.validarCantidad(cantidad);
+
+      TimerDTO nuevoTimer = servicioTimer.renovarTimer(timer, cantidad);
+
       Map<String, Object> response = new HashMap<>();
       response.put("status", "ok");
       response.put("nuevoTimerId", nuevoTimer.getId());
       response.put("fechaElaboracion", nuevoTimer.getFechaCreacion());
       response.put("fechaVencimiento", nuevoTimer.getFechaVencimiento());
+      response.put("cantidad", cantidad);
 
       return ResponseEntity.ok(response);
     } catch (IllegalArgumentException e) {
@@ -97,9 +101,6 @@ public class ControladorDashboard {
         .status(HttpStatus.BAD_REQUEST)
         .body(Map.of("status", "error", "mensaje", e.getMessage()));
     } catch (Exception e) {
-      if (logger.isErrorEnabled()) {
-        logger.error("Error al renovar el timer con id {}: {}", timerId, e.getMessage(), e);
-      }
       return ResponseEntity
         .status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
         .body(Map.of("status", "error", "mensaje", "Error al renovar el timer"));

@@ -70,7 +70,7 @@ public class ServicioTimerImpl implements ServicioTimer {
     Timer timer = repositorioTimer.buscarPorId(timerId);
     ValidacionHelper.queNoSeaNull(timer, TIMER);
 
-    timer.setCantidadProducto(-cantidad);
+    timer.setCantidadProducto(cantidad);
   }
 
   @Override
@@ -92,22 +92,14 @@ public class ServicioTimerImpl implements ServicioTimer {
     if (cantidad > timer.getCantidadProducto()) throw new CantidadInvalidaException(
       "La cantidad a importar no puede ser mayor al stock actual del vencimiento"
     );
-
+    Timer clon = crearTimerConCantidadYCategoria(timer, cantidad, categoriaDestino);
     if (cantidad.equals(timer.getCantidadProducto())) {
-      Timer clon = new Timer(
-        timer.getFechaCreacion(),
-        timer.getFechaVencimiento(),
-        timer.getGroupId(),
-        timer.getProducto(),
-        categoriaDestino,
-        timer.getReglaVencimiento(),
-        cantidad
-      );
-      repositorioTimer.guardar(clon);
       modificarEstado(timerId, EstadoTimer.IMPORTADO);
       modificarCantidad(timerId, 0);
+    } else {
+      modificarCantidad(timerId, timer.getCantidadProducto() - cantidad);
     }
-
+    repositorioTimer.guardar(clon);
     return new CategoriaDto(categoriaDestino);
   }
 
@@ -119,7 +111,7 @@ public class ServicioTimerImpl implements ServicioTimer {
   }
 
   @Override
-  public TimerDTO renovarTimer(Timer timer) {
+  public TimerDTO renovarTimer(Timer timer, Integer cantidad) {
     ReglaVencimiento regla = timer.getReglaVencimiento();
     ValidacionHelper.queNoSeaNull(regla, "Regla vencimiento");
 
@@ -129,7 +121,7 @@ public class ServicioTimerImpl implements ServicioTimer {
       timer.getCategoria(),
       regla.getId(),
       null,
-      1
+      cantidad
     );
 
     return mapearATimerDTO(nuevoTimer);
@@ -163,6 +155,22 @@ public class ServicioTimerImpl implements ServicioTimer {
       formatearFecha(timer.getFechaVencimiento()),
       obtenerUbicacion(timer),
       timer.getCantidadProducto()
+    );
+  }
+
+  private Timer crearTimerConCantidadYCategoria(
+    Timer timer,
+    Integer cantidad,
+    Categoria categoria
+  ) {
+    return new Timer(
+      timer.getFechaCreacion(),
+      timer.getFechaVencimiento(),
+      timer.getGroupId(),
+      timer.getProducto(),
+      categoria,
+      timer.getReglaVencimiento(),
+      cantidad
     );
   }
 }
