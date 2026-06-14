@@ -58,6 +58,7 @@ public class ControladorLogin {
       );
       if (usuarioBuscado != null) {
         request.getSession().setAttribute("ROL", usuarioBuscado.getRol());
+        request.getSession().setAttribute("EMAIL", usuarioBuscado.getEmail());
         return new ModelAndView("redirect:/home");
       } else {
         ModelMap model = new ModelMap();
@@ -69,6 +70,12 @@ public class ControladorLogin {
       model.put(ERROR, "El usuario está inactivo");
       return new ModelAndView("loginYRegistro/login", model);
     }
+  }
+
+  @RequestMapping(path = "/logout", method = RequestMethod.GET)
+  public ModelAndView logout(HttpSession session) {
+    session.invalidate();
+    return new ModelAndView("redirect:/");
   }
 
   @RequestMapping(path = "/registrarme", method = RequestMethod.POST)
@@ -98,11 +105,5 @@ public class ControladorLogin {
     ModelMap model = new ModelMap();
     model.put("usuario", new Usuario());
     return new ModelAndView(VISTA_NUEVO_USUARIO, model);
-  }
-
-  @RequestMapping(path = "/logout", method = RequestMethod.GET)
-  public ModelAndView logout(HttpSession session) {
-    session.removeAttribute("ROL");
-    return new ModelAndView("redirect:/home");
   }
 }
