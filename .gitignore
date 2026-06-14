@@ -32,3 +32,5 @@ src/main/webapp/resources/core/css/app.css
 node/node
 docker-compose.yml
 .env
+src/main/webapp/resources/core/css/app.css
+AGENTS.md
