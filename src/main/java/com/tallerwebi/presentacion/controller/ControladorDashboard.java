@@ -3,6 +3,7 @@ package com.tallerwebi.presentacion.controller;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.dominio.entity.enums.EstadoTimer;
+import com.tallerwebi.dominio.excepcion.CantidadInvalidaException;
 import com.tallerwebi.dominio.excepcion.IdInvalido;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
@@ -45,7 +46,7 @@ public class ControladorDashboard {
       return new ModelAndView("redirect:/home");
     }
 
-    ModelAndView mav = new ModelAndView("dashboard");
+    ModelAndView mav = new ModelAndView("dashboard/dashboard");
     mav.addObject("categoria", categoria);
     List<TimerDTO> timersActivos = servicioTimer.obtenerTimersActivos(categoria.getId());
 
@@ -75,20 +76,24 @@ public class ControladorDashboard {
     }
   }
 
-  @PutMapping("/active-timers/renovarTimer/{timerId}")
-  public ResponseEntity<?> renovarTimer(@PathVariable Long timerId) {
-    if (logger.isInfoEnabled()) {
-      logger.info("Entrando a renovarTimer con id {}", timerId);
-    }
+  @PutMapping("/active-timers/renovarTimer/{timerId}/{cantidad}")
+  public ResponseEntity<?> renovarTimer(
+    @PathVariable Long timerId,
+    @PathVariable Integer cantidad
+  ) {
     try {
       ValidacionHelper.validarId(timerId);
       Timer timer = servicioTimer.buscarPorId(timerId);
-      TimerDTO nuevoTimer = servicioTimer.renovarTimer(timer);
+      ValidacionHelper.validarCantidad(cantidad);
+
+      TimerDTO nuevoTimer = servicioTimer.renovarTimer(timer, cantidad);
+
       Map<String, Object> response = new HashMap<>();
       response.put("status", "ok");
       response.put("nuevoTimerId", nuevoTimer.getId());
       response.put("fechaElaboracion", nuevoTimer.getFechaCreacion());
       response.put("fechaVencimiento", nuevoTimer.getFechaVencimiento());
+      response.put("cantidad", cantidad);
 
       return ResponseEntity.ok(response);
     } catch (IllegalArgumentException e) {
@@ -96,33 +101,32 @@ public class ControladorDashboard {
         .status(HttpStatus.BAD_REQUEST)
         .body(Map.of("status", "error", "mensaje", e.getMessage()));
     } catch (Exception e) {
-      if (logger.isErrorEnabled()) {
-        logger.error("Error al renovar el timer con id {}: {}", timerId, e.getMessage(), e);
-      }
       return ResponseEntity
         .status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
         .body(Map.of("status", "error", "mensaje", "Error al renovar el timer"));
     }
   }
 
-  @PostMapping("/import-timer/{timerId}/{categoryId}")
+  @PostMapping("/import-timer/{timerId}/{categoryId}/{cantidad}")
   public ResponseEntity<ResponseDTO> importarTimer(
     @PathVariable Long timerId,
     @PathVariable Long categoryId,
+    @PathVariable Integer cantidad,
     HttpSession session
   ) {
     try {
       ValidacionHelper.validarId(timerId);
       ValidacionHelper.validarId(categoryId);
+      ValidacionHelper.validarCantidad(cantidad);
 
-      CategoriaDto categoriaDestino = servicioTimer.importarTimer(timerId, categoryId);
+      CategoriaDto categoriaDestino = servicioTimer.importarTimer(timerId, categoryId, cantidad);
 
       ResponseDTO response = new ResponseDTO();
       response.setSuccess(true);
       response.setMessage("Timer importado correctamente");
       session.setAttribute("categoria", categoriaDestino);
       return ResponseEntity.ok(response);
-    } catch (IdInvalido | ValidacionException e) {
+    } catch (IdInvalido | ValidacionException | CantidadInvalidaException e) {
       ResponseDTO response = new ResponseDTO();
       response.setSuccess(false);
       response.setMessage(e.getMessage());

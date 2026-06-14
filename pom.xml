@@ -12,13 +12,13 @@
         <jdk.version>11</jdk.version>
         <spring.version>5.2.22.RELEASE</spring.version>
         <servletapi.version>4.0.4</servletapi.version>
-        <thymeleaf.spring.version>3.0.15.RELEASE</thymeleaf.spring.version>
+        <thymeleaf.spring.version>3.1.5.RELEASE</thymeleaf.spring.version>
         <hamcrest.version>2.2</hamcrest.version>
         <junit.version>5.9.0</junit.version>
         <mockito.version>5.3.1</mockito.version>
         <hibernate.version>5.4.24.Final</hibernate.version>
         <playwright.version>1.36.0</playwright.version>
-        <hsqldb.version>2.3.2</hsqldb.version>
+        <hsqldb.version>2.7.1</hsqldb.version>
         <checkstyle.version>3.2.1</checkstyle.version>
         <skip.frontend>false</skip.frontend>
     </properties>
@@ -185,7 +185,7 @@
                             <goal>install-node-and-npm</goal>
                         </goals>
                         <configuration>
-                            <nodeVersion>v20.11.0</nodeVersion>
+                            <nodeVersion>v22.19.0</nodeVersion>
                             <npmVersion>11.15.0</npmVersion>
                         </configuration>
                     </execution>

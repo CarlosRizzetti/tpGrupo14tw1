@@ -66,7 +66,6 @@ public class ControladorDashboardTest {
     return dto;
   }
 
-
   @BeforeEach
   public void init() {
     sessionMock = mock(HttpSession.class);
@@ -107,9 +106,9 @@ public class ControladorDashboardTest {
     TimerDTO nuevoTimer = buildTimerDTO(2L);
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
-    when(servicioTimerMock.renovarTimer(timer)).thenReturn(nuevoTimer);
+    when(servicioTimerMock.renovarTimer(timer, 1)).thenReturn(nuevoTimer);
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1);
 
     assertEquals(HttpStatus.OK, respuesta.getStatusCode());
     assertNotNull(respuesta.getBody());
@@ -124,7 +123,7 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NP-01 | renovarTimer | Id nulo retorna 400")
   void renovarTimer_conIdNulo_deberiaRetornar400() {
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(null);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(null, 1);
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
     Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
@@ -134,7 +133,7 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NP-02 | renovarTimer | Id negativo retorna 400")
   void renovarTimer_conIdNegativo_deberiaRetornar400() {
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(-1L);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(-1L, 1);
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
     Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
@@ -144,17 +143,14 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NP-03 | renovarTimer | Timer no encontrado retorna 500")
   void renovarTimer_timerNoEncontrado_deberiaRetornar500() {
-    when(servicioTimerMock.buscarPorId(1L))
-            .thenThrow(new RuntimeException("Timer no encontrado"));
+    when(servicioTimerMock.buscarPorId(1L)).thenThrow(new RuntimeException("Timer no encontrado"));
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
     Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
     assertEquals("error", body.get("status"));
   }
-
-
 
   @Test
   @DisplayName("NP-04 | renovarTimer | Error en renovarTimer del servicio retorna 500")
@@ -162,10 +158,10 @@ public class ControladorDashboardTest {
     Timer timer = buildTimerConRegla(1L);
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
-    when(servicioTimerMock.renovarTimer(timer))
-            .thenThrow(new RuntimeException("Error al generar vencimiento"));
+    when(servicioTimerMock.renovarTimer(timer, 1))
+      .thenThrow(new RuntimeException("Error al generar vencimiento"));
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
   }
@@ -173,7 +169,7 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("EC-01 | renovarTimer | Id cero retorna 400")
   void renovarTimer_conIdCero_deberiaRetornar400() {
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(0L);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(0L, 1);
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
   }
@@ -185,9 +181,9 @@ public class ControladorDashboardTest {
     TimerDTO nuevoTimer = buildTimerDTO(2L);
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
-    when(servicioTimerMock.renovarTimer(timer)).thenReturn(nuevoTimer);
+    when(servicioTimerMock.renovarTimer(timer, 1)).thenReturn(nuevoTimer);
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1);
 
     assertEquals(HttpStatus.OK, respuesta.getStatusCode());
   }
@@ -202,9 +198,9 @@ public class ControladorDashboardTest {
     nuevoTimer.setFechaVencimiento(OffsetDateTime.MAX.toString());
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
-    when(servicioTimerMock.renovarTimer(timer)).thenReturn(nuevoTimer);
+    when(servicioTimerMock.renovarTimer(timer, 1)).thenReturn(nuevoTimer);
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1);
 
     assertEquals(HttpStatus.OK, respuesta.getStatusCode());
     Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
@@ -216,17 +212,15 @@ public class ControladorDashboardTest {
   @DisplayName("SC-01 | renovarTimer | Id Long.MAX_VALUE retorna 500 sin exponer stack trace")
   void renovarTimer_conIdMuyGrande_noDeberiaExponerStackTrace() {
     when(servicioTimerMock.buscarPorId(Long.MAX_VALUE))
-            .thenThrow(new RuntimeException("Timer no encontrado"));
+      .thenThrow(new RuntimeException("Timer no encontrado"));
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(Long.MAX_VALUE);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(Long.MAX_VALUE, 1);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
     Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
     // El mensaje no debe exponer detalles internos
     assertEquals("Error al renovar el timer", body.get("mensaje"));
   }
-
-
 
   @Test
   @DisplayName("HP-01 | importarTimer | Retorna 200 cuando el timer se importa correctamente")
@@ -238,6 +232,7 @@ public class ControladorDashboardTest {
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       1L,
       99L,
+      1,
       sessionMock
     );
 
@@ -256,9 +251,9 @@ public class ControladorDashboardTest {
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
 
-    controladorDashboard.importarTimer(1L, 99L, sessionMock);
+    controladorDashboard.importarTimer(1L, 99L, 1, sessionMock);
 
-    verify(servicioTimerMock).importarTimer(1L, 99L);
+    verify(servicioTimerMock).importarTimer(1L, 99L, 1);
   }
 
   @Test
@@ -267,6 +262,7 @@ public class ControladorDashboardTest {
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       -1L,
       99L,
+      1,
       sessionMock
     );
 
@@ -280,6 +276,7 @@ public class ControladorDashboardTest {
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       1L,
       -1L,
+      1,
       sessionMock
     );
 
@@ -290,12 +287,13 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NEG-03 | importarTimer | Retorna 400 cuando el timer no existe")
   void importarTimer_deberiaRetornar400CuandoElTimerNoExiste() {
-    when(servicioTimerMock.importarTimer(1L, 99L))
+    when(servicioTimerMock.importarTimer(1L, 99L, 1))
       .thenThrow(new ValidacionException("timer no encontrado"));
 
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       1L,
       99L,
+      1,
       sessionMock
     );
 
@@ -306,12 +304,13 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NEG-04 | importarTimer | Retorna 400 cuando el timer ya pertenece a la categoria")
   void importarTimer_deberiaRetornar400CuandoElTimerYaPerteneceALaCategoria() {
-    when(servicioTimerMock.importarTimer(1L, 99L))
+    when(servicioTimerMock.importarTimer(1L, 99L, 1))
       .thenThrow(new ValidacionException("El timer ya pertenece a esta categoría"));
 
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       1L,
       99L,
+      1,
       sessionMock
     );
 
@@ -323,12 +322,13 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NEG-05 | importarTimer | Retorna 400 cuando la categoria del timer es null")
   void importarTimer_deberiaRetornar400CuandoLaCategoriaDelTimerEsNull() {
-    when(servicioTimerMock.importarTimer(1L, 99L))
+    when(servicioTimerMock.importarTimer(1L, 99L, 1))
       .thenThrow(new ValidacionException("categoria del timer no encontrada"));
 
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       1L,
       99L,
+      1,
       sessionMock
     );
 
@@ -344,11 +344,12 @@ public class ControladorDashboardTest {
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
     doThrow(new RuntimeException("Error inesperado"))
       .when(servicioTimerMock)
-      .importarTimer(1L, 99L);
+      .importarTimer(1L, 99L, 1);
 
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       1L,
       99L,
+      1,
       sessionMock
     );
 
@@ -365,11 +366,12 @@ public class ControladorDashboardTest {
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
     doThrow(new RuntimeException("password=1234 datos sensibles"))
       .when(servicioTimerMock)
-      .importarTimer(1L, 99L);
+      .importarTimer(1L, 99L, 1);
 
     ResponseEntity<ResponseDTO> respuesta = controladorDashboard.importarTimer(
       1L,
       99L,
+      1,
       sessionMock
     );
 
@@ -393,7 +395,8 @@ public class ControladorDashboardTest {
       "1AF34",
       fechaCreacionISo,
       fechaVencimientoISO,
-      ubicacion
+      ubicacion,
+      1
     );
     List<TimerDTO> timersActivos = List.of(timer);
     when(servicioTimerMock.obtenerTimersActivos(anyLong())).thenReturn(timersActivos);
@@ -452,8 +455,6 @@ public class ControladorDashboardTest {
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
     assertEquals("Error al eliminar el timer", respuesta.getBody());
   }
-
-
 
   @Test
   @DisplayName(

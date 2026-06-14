@@ -155,7 +155,8 @@ public class ServicioReglaVencimientoTest {
       descongelamiento,
       producto,
       categoria,
-      regla
+      regla,
+      1
     );
 
     // ejecucion

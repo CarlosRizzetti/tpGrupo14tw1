@@ -64,11 +64,20 @@ public class RepositorioTimerTest {
     String groupId,
     Categoria categoria,
     Producto producto,
-    ReglaVencimiento regla
+    ReglaVencimiento regla,
+    Integer cantidad
   ) {
     OffsetDateTime fechaCreacion = OffsetDateTime.now();
     OffsetDateTime fechaVencimiento = fechaCreacion.plusHours(2);
-    Timer timer = new Timer(fechaCreacion, fechaVencimiento, groupId, producto, categoria, regla);
+    Timer timer = new Timer(
+      fechaCreacion,
+      fechaVencimiento,
+      groupId,
+      producto,
+      categoria,
+      regla,
+      cantidad
+    );
     sessionFactory.getCurrentSession().save(timer);
     return timer;
   }
@@ -84,8 +93,8 @@ public class RepositorioTimerTest {
     Producto producto = buildProducto();
     ReglaVencimiento regla = buildRegla();
 
-    Timer timer = buildTimer("group-1", categoria, producto, regla);
-    Timer timer2 = buildTimer("group-2", categoria, producto, regla);
+    Timer timer = buildTimer("group-1", categoria, producto, regla, 1);
+    Timer timer2 = buildTimer("group-2", categoria, producto, regla, 1);
     timer2.setEstado(EstadoTimer.ELIMINADO);
     sessionFactory.getCurrentSession().save(timer2);
 
@@ -109,7 +118,7 @@ public class RepositorioTimerTest {
     Producto producto = buildProducto();
     ReglaVencimiento regla = buildRegla();
 
-    Timer timer = buildTimer("group-1", categoria, producto, regla);
+    Timer timer = buildTimer("group-1", categoria, producto, regla, 1);
     timer.setEstado(EstadoTimer.ELIMINADO);
     sessionFactory.getCurrentSession().save(timer);
 
@@ -143,7 +152,7 @@ public class RepositorioTimerTest {
     Categoria categoria = buildCategoria();
     Producto producto = buildProducto();
     ReglaVencimiento regla = buildRegla();
-    Timer timer = buildTimer("group-1", categoria, producto, regla);
+    Timer timer = buildTimer("group-1", categoria, producto, regla, 1);
 
     Timer resultado = repositorioTimer.buscarPorId(timer.getId());
 
@@ -171,7 +180,7 @@ public class RepositorioTimerTest {
     Categoria categoria = buildCategoria();
     Producto producto = buildProducto();
     ReglaVencimiento regla = buildRegla();
-    Timer timer = buildTimer("group-1", categoria, producto, regla);
+    Timer timer = buildTimer("group-1", categoria, producto, regla, 1);
 
     Timer resultado = repositorioTimer.buscarPorId(timer.getId());
 
@@ -191,7 +200,7 @@ public class RepositorioTimerTest {
     Categoria categoria = buildCategoria();
     Producto producto = buildProducto();
     ReglaVencimiento regla = buildRegla();
-    buildTimer("group-uuid-test", categoria, producto, regla);
+    buildTimer("group-uuid-test", categoria, producto, regla, 1);
 
     boolean resultado = repositorioTimer.existeTimerActivoEnCategoriaYGrupo(
       categoria.getId(),
@@ -228,7 +237,7 @@ public class RepositorioTimerTest {
     Categoria categoria = buildCategoria();
     Producto producto = buildProducto();
     ReglaVencimiento regla = buildRegla();
-    Timer timer = buildTimer("group-uuid-test", categoria, producto, regla);
+    Timer timer = buildTimer("group-uuid-test", categoria, producto, regla, 1);
     timer.setEstado(EstadoTimer.ELIMINADO);
     sessionFactory.getCurrentSession().save(timer);
 
@@ -250,7 +259,7 @@ public class RepositorioTimerTest {
     Categoria categoria = buildCategoria();
     Producto producto = buildProducto();
     ReglaVencimiento regla = buildRegla();
-    buildTimer("group-correcto", categoria, producto, regla);
+    buildTimer("group-correcto", categoria, producto, regla, 1);
 
     boolean resultado = repositorioTimer.existeTimerActivoEnCategoriaYGrupo(
       categoria.getId(),
