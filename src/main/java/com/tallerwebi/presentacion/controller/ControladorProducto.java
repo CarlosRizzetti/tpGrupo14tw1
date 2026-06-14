@@ -49,7 +49,7 @@ public class ControladorProducto {
     if (!esAdministrador(session)) {
       return new ModelAndView(REDIRECT_DENEGADO);
     }
-    ModelAndView mav = new ModelAndView("producto/nuevo");
+    ModelAndView mav = new ModelAndView("funcionalidadesAdmin/producto/nuevo");
     List<CategoriaDto> categorias = servicioCategoria.obtenerLasCategoriasParaElMenu();
     mav.addObject("categorias", categorias);
     mav.addObject("datosProducto", new ProductoDto());
@@ -75,13 +75,13 @@ public class ControladorProducto {
       modelo.put("categorias", categorias);
       modelo.put("datosProducto", productoDto);
       modelo.put("error", e.getMessage());
-      return new ModelAndView("producto/nuevo", modelo);
+      return new ModelAndView("funcionalidadesAdmin/producto/nuevo", modelo);
     }
   }
 
   @RequestMapping("/producto/exito")
   public ModelAndView exito() {
-    return new ModelAndView("producto/exito");
+    return new ModelAndView("funcionalidadesAdmin/producto/exito");
   }
 
   @RequestMapping(value = "/admin/productos", method = RequestMethod.GET)
@@ -96,7 +96,7 @@ public class ControladorProducto {
     modelo.put("productos", servicioProducto.listarProductos(categoriaId));
     modelo.put("categorias", servicioCategoria.obtenerLasCategoriasParaElMenu());
     modelo.put("categoriaSeleccionada", categoriaId);
-    return new ModelAndView("producto/gestion", modelo);
+    return new ModelAndView("funcionalidadesAdmin/producto/gestion", modelo);
   }
 
   @RequestMapping(value = "/admin/productos/{id}/agregar-stock", method = RequestMethod.POST)
@@ -142,7 +142,7 @@ public class ControladorProducto {
 
     modelo.put(CATEGORIA, categoria);
     modelo.put("productos", productos);
-    return new ModelAndView("productos", modelo);
+    return new ModelAndView("listadoDeProductosYReglas/productos", modelo);
   }
 
   @RequestMapping(path = "/product/{id}", method = RequestMethod.GET)
@@ -156,7 +156,7 @@ public class ControladorProducto {
     modelo.put("reglas", reglas);
     modelo.put(CATEGORIA, categoriaDto);
 
-    return new ModelAndView("producto-vencimiento", modelo);
+    return new ModelAndView("listadoDeProductosYReglas/producto-vencimiento", modelo);
   }
 
   @RequestMapping(path = "/producto/{id}/generar", method = RequestMethod.POST)

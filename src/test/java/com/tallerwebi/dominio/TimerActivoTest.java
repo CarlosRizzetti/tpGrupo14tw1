@@ -40,7 +40,8 @@ public class TimerActivoTest {
       (OffsetDateTime) null,
       producto,
       categoria,
-      regla
+      regla,
+      1
     );
     sessionFactory.getCurrentSession().save(timer);
     assertNotNull(timer.getGroupId());
@@ -54,7 +55,7 @@ public class TimerActivoTest {
     Categoria categoria = new Categoria("mccafe.png", true, "mccafe");
     Producto producto = new Producto();
     ReglaVencimiento regla = new ReglaVencimiento();
-    Timer timer = new Timer(fechaCreacion, fechaVencimiento, "", producto, categoria, regla);
+    Timer timer = new Timer(fechaCreacion, fechaVencimiento, "", producto, categoria, regla, 1);
     sessionFactory.getCurrentSession().save(timer);
     assertNotNull(timer.getGroupId());
     assertNotEquals("", timer.getGroupId());
@@ -68,7 +69,15 @@ public class TimerActivoTest {
     Categoria categoria = new Categoria("mccafe.png", true, "mccafe");
     Producto producto = new Producto();
     ReglaVencimiento regla = new ReglaVencimiento();
-    Timer timer = new Timer(fechaCreacion, fechaVencimiento, "1AF34", producto, categoria, regla);
+    Timer timer = new Timer(
+      fechaCreacion,
+      fechaVencimiento,
+      "1AF34",
+      producto,
+      categoria,
+      regla,
+      1
+    );
     sessionFactory.getCurrentSession().save(timer);
     assertNotNull(timer.getGroupId());
     assertEquals("1AF34", timer.getGroupId());

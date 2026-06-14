@@ -95,7 +95,7 @@ public class ControladorProductoTest {
     ModelAndView mav = controladorProducto.mostrarFormulario(sessionMock);
 
     // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("producto/nuevo"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/producto/nuevo"));
   }
 
   @Test
@@ -176,7 +176,7 @@ public class ControladorProductoTest {
     ModelAndView mav = controladorProducto.crearProducto(datos, sessionMock);
 
     // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("producto/nuevo"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/producto/nuevo"));
     assertThat(
       mav.getModel().get("error").toString(),
       equalToIgnoringCase("El nombre del producto es obligatorio")
@@ -211,7 +211,7 @@ public class ControladorProductoTest {
     ModelAndView mav = controladorProducto.mostrarProductosPorCategoria(categoriaId, sessionMock);
 
     // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("productos"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("listadoDeProductosYReglas/productos"));
     assertThat(mav.getModel().get("productos"), notNullValue());
     assertThat((List<?>) mav.getModel().get("productos"), hasSize(1));
     verify(servicioProductoMock, times(1)).obtenerProductosPorCategoria(categoriaId);

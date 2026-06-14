@@ -19,7 +19,7 @@ public class RepositorioTimerImpl implements RepositorioTimer {
   @Override
   public List<Timer> obtenerTimersSegunEstado(Long id, EstadoTimer estado) {
     String hql =
-      "FROM Timer t JOIN FETCH t.producto JOIN FETCH t.categoria WHERE t.estado = :estado AND t.categoria.id = :idCat";
+      "FROM Timer t JOIN FETCH t.producto JOIN FETCH t.categoria WHERE t.estado = :estado AND t.categoria.id = :idCat ORDER BY t.fechaVencimiento ASC";
     return sessionFactory
       .getCurrentSession()
       .createQuery(hql, Timer.class)

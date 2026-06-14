@@ -145,6 +145,10 @@ class DashboardTimer {
   }
 }
 
+let timersInstancia;
 document.addEventListener("DOMContentLoaded", () => {
-  new DashboardTimer();
+  timersInstancia = new DashboardTimer();
 });
+export function getTimers(){
+  return timersInstancia;
+}

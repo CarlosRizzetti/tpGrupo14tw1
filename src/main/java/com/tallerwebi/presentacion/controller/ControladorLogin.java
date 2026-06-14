@@ -7,6 +7,7 @@ import com.tallerwebi.dominio.interfaces.ServicioLogin;
 import com.tallerwebi.dominio.interfaces.ServicioValidacionIdentidad;
 import com.tallerwebi.presentacion.dto.LoginDto;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -19,7 +20,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class ControladorLogin {
 
   private static final String ERROR = "error";
-  private static final String VISTA_NUEVO_USUARIO = "nuevo-usuario";
+  private static final String VISTA_NUEVO_USUARIO = "loginYRegistro/nuevo-usuario";
   private static final String REDIRECT_VALIDACION = "redirect:/validacion-identidad";
   private final ServicioLogin servicioLogin;
   private final ServicioValidacionIdentidad servicioValidacionIdentidad;
@@ -37,7 +38,7 @@ public class ControladorLogin {
   public ModelAndView irALogin() {
     ModelMap modelo = new ModelMap();
     modelo.put("loginDto", new LoginDto());
-    return new ModelAndView("login", modelo);
+    return new ModelAndView("loginYRegistro/login", modelo);
   }
 
   @RequestMapping("/login")
@@ -61,12 +62,12 @@ public class ControladorLogin {
       } else {
         ModelMap model = new ModelMap();
         model.put(ERROR, "Usuario o clave incorrecta");
-        return new ModelAndView("login", model);
+        return new ModelAndView("loginYRegistro/login", model);
       }
     } catch (UsuarioInactivo e) {
       ModelMap model = new ModelMap();
       model.put(ERROR, "El usuario está inactivo");
-      return new ModelAndView("login", model);
+      return new ModelAndView("loginYRegistro/login", model);
     }
   }
 
@@ -97,5 +98,11 @@ public class ControladorLogin {
     ModelMap model = new ModelMap();
     model.put("usuario", new Usuario());
     return new ModelAndView(VISTA_NUEVO_USUARIO, model);
+  }
+
+  @RequestMapping(path = "/logout", method = RequestMethod.GET)
+  public ModelAndView logout(HttpSession session) {
+    session.removeAttribute("ROL");
+    return new ModelAndView("redirect:/home");
   }
 }

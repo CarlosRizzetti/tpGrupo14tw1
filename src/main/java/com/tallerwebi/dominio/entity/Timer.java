@@ -22,6 +22,7 @@ public class Timer {
   private OffsetDateTime descongelamiento;
   private OffsetDateTime fechaCreacion;
   private OffsetDateTime fechaVencimiento;
+  private Integer cantidadProducto;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -33,7 +34,8 @@ public class Timer {
     String groupId,
     Producto producto,
     Categoria categoria,
-    ReglaVencimiento reglaVencimiento
+    ReglaVencimiento reglaVencimiento,
+    Integer cantidadProducto
   ) {
     this.fechaCreacion = fechaCreacion;
     this.fechaVencimiento = fechaVencimiento;
@@ -42,6 +44,7 @@ public class Timer {
     this.producto = producto;
     this.categoria = categoria;
     this.reglaVencimiento = reglaVencimiento;
+    this.cantidadProducto = cantidadProducto;
   }
 
   public Timer(
@@ -50,7 +53,8 @@ public class Timer {
     OffsetDateTime descongelamiento,
     Producto producto,
     Categoria categoria,
-    ReglaVencimiento reglaVencimiento
+    ReglaVencimiento reglaVencimiento,
+    Integer cantidadProducto
   ) {
     this.fechaCreacion = fechaCreacion;
     this.fechaVencimiento = fechaVencimiento;
@@ -59,6 +63,7 @@ public class Timer {
     this.categoria = categoria;
     this.reglaVencimiento = reglaVencimiento;
     this.estado = EstadoTimer.ACTIVO;
+    this.cantidadProducto = cantidadProducto;
   }
 
   @ManyToOne(fetch = FetchType.EAGER)

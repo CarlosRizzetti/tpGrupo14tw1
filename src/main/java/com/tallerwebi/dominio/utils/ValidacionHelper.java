@@ -1,5 +1,6 @@
 package com.tallerwebi.dominio.utils;
 
+import com.tallerwebi.dominio.excepcion.CantidadInvalidaException;
 import com.tallerwebi.dominio.excepcion.IdInvalido;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import java.util.List;
@@ -70,6 +71,11 @@ public final class ValidacionHelper {
     }
     return set;
   }
+
   // ---- Date validations ----
 
+  public static void validarCantidad(Integer cantidad) {
+    if (cantidad == null) throw new CantidadInvalidaException("La cantidad no puede ser nula");
+    if (cantidad <= 0) throw new CantidadInvalidaException("La cantidad no puede ser 0 o negativa");
+  }
 }

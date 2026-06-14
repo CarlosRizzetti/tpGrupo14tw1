@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, _, _, _)}">
+<head>
+  <title>Nuevo Producto</title>
+</head>
+<body>
+
+<div th:fragment="header_center">
+  <span class="text-puesto-header-text font-bold uppercase tracking-widest">Nuevo producto</span>
+</div>
+
+
+<div th:fragment="header_left" th:remove="tag">
+  <a href="/home" class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+    </svg>
+    Volver al menú
+  </a>
+</div>
+
+<div th:fragment="content" class="w-full flex justify-center mt-8">
+  <div class="w-full max-w-lg bg-white rounded-lg shadow-md p-8">
+    <form th:action="@{/producto/nuevo}" th:object="${datosProducto}" method="POST" class="space-y-6">
+      
+      <!-- Mensaje de Error -->
+      <div th:if="${error != null}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <span th:text="${error}" class="block sm:inline">Error genérico</span>
+      </div>
+
+      <!-- Nombre -->
+      <div>
+        <label for="nombre" class="block text-sm font-bold text-gray-700">Nombre del Producto</label>
+        <input type="text" id="nombre" th:field="*{nombre}" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-puesto focus:border-puesto" required>
+      </div>
+
+      <!-- Cantidad en stock -->
+      <div>
+        <label for="cantidad" class="block text-sm font-bold text-gray-700">Cantidad en Stock</label>
+        <input type="number" id="cantidad" th:field="*{cantidad}" min="0" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-puesto focus:border-puesto" placeholder="0">
+        <p class="text-xs text-gray-500 mt-1">Unidades disponibles al momento de crear el producto.</p>
+      </div>
+
+      <!-- Ubicación -->
+      <div>
+        <label for="ubicacion" class="block text-sm font-bold text-gray-700">Ubicación</label>
+        <input type="text" id="ubicacion" th:field="*{ubicacion}" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-puesto focus:border-puesto">
+      </div>
+
+      <!-- Duración -->
+      <div>
+        <label for="duracionMinutos" class="block text-sm font-bold text-gray-700">Duración (minutos)</label>
+        <input type="number" id="duracionMinutos" th:field="*{duracionMinutos}" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-puesto focus:border-puesto">
+      </div>
+      
+      <!-- Tiene Descongelamiento -->
+      <div>
+        <label class="inline-flex items-center mt-2">
+          <input type="checkbox" id="tieneDescongelamiento" th:field="*{tieneDescongelamiento}" class="form-checkbox h-4 w-4 text-puesto border-gray-300 rounded focus:ring-puesto">
+          <span class="ml-2 text-sm font-bold text-gray-700">¿Requiere descongelamiento?</span>
+        </label>
+      </div>
+
+      <!-- Tiempo de Descongelamiento -->
+      <div id="containerDescongelamiento" class="hidden">
+        <label for="descongelamientoMinutos" class="block text-sm font-bold text-gray-700">Tiempo de Descongelamiento (minutos)</label>
+        <input type="number" id="descongelamientoMinutos" th:field="*{descongelamientoMinutos}" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-puesto focus:border-puesto">
+      </div>
+
+      <!-- Categorías (N a N) -->
+      <div>
+        <label class="block text-sm font-bold text-gray-700 mb-2">Seleccionar Categorías</label>
+        <div class="grid grid-cols-2 gap-2 bg-gray-50 p-4 border border-gray-200 rounded-md">
+          <div th:each="categoria : ${categorias}">
+            <label class="inline-flex items-center">
+              <input type="checkbox" th:field="*{categoriasIds}" th:value="${categoria.id}" class="form-checkbox h-4 w-4 text-puesto border-gray-300 rounded focus:ring-puesto">
+              <span class="ml-2 text-gray-700" th:text="${categoria.nombre}">Categoría</span>
+            </label>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">Selecciona al menos una categoría para que el producto aparezca en ella.</p>
+      </div>
+
+      <!-- Botón Submit -->
+      <div class="pt-4">
+        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-puesto-btn hover:bg-puesto-btn-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-puesto">
+          CREAR PRODUCTO
+        </button>
+      </div>
+    </form>
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const checkbox = document.getElementById("tieneDescongelamiento");
+      const container = document.getElementById("containerDescongelamiento");
+
+      function toggleContainer() {
+        if (checkbox.checked) {
+          container.classList.remove("hidden");
+        } else {
+          container.classList.add("hidden");
+        }
+      }
+
+      checkbox.addEventListener("change", toggleContainer);
+      toggleContainer(); // Check initial state
+    });
+  </script>
+</div>
+
+</body>
+</html>

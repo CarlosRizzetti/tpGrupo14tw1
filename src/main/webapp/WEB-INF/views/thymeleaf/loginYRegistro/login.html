@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app :: layout(~{::content}, _, ~{::header_center}, _, _, _)}">
+<head>
+    <title>Login / MCD Vencimientos</title>
+</head>
+<body>
+
+<div th:fragment="header_center">
+    <span class="text-puesto-header-text font-bold uppercase tracking-widest">Iniciar Sesión</span>
+</div>
+
+<div th:fragment="content" class="p-6 flex flex-col items-center justify-center min-h-[calc(100vh-7rem)]">
+    <div class="w-full max-w-md bg-puesto-btn text-puesto-btn-text p-8 rounded-3xl border-b-[8px] border-puesto-btn-border shadow-2xl relative">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-black uppercase tracking-tighter mb-2">Bienvenido</h2>
+            <p class="text-sm opacity-80 font-medium">Control de Etiquetas</p>
+        </div>
+
+        <div th:if="${error != null}" class="mb-6 p-4 bg-red-100/90 border-l-4 border-red-500 text-red-800 rounded shadow-inner">
+            <span class="font-bold text-sm" th:text="${error}"></span>
+        </div>
+
+        <form th:action="@{/validar-login}" method="POST" th:object="${loginDto}" class="space-y-5">
+            <div>
+                <label for="email" class="block text-sm font-bold uppercase tracking-wider mb-2">Correo Electrónico</label>
+                <input th:field="*{email}" id="email" type="email"
+                       class="w-full px-5 py-4 rounded-xl text-black bg-white focus:ring-4 focus:ring-puesto-btn-border outline-none transition-shadow"
+                       placeholder="ejemplo@correo.com" required />
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-bold uppercase tracking-wider mb-2">Contraseña</label>
+                <input th:field="*{password}" type="password" id="password"
+                       class="w-full px-5 py-4 rounded-xl text-black bg-white focus:ring-4 focus:ring-puesto-btn-border outline-none transition-shadow"
+                       placeholder="********" required />
+            </div>
+
+            <button id="btn-login" type="submit"
+                    class="w-full py-4 mt-6 bg-puesto-header text-puesto-header-text font-black uppercase tracking-widest text-lg rounded-xl hover:opacity-90 transition-all border-b-4 border-black/20 hover:-translate-y-1 hover:shadow-xl">
+                Entrar
+            </button>
+        </form>
+
+        <div class="mt-8 text-center border-t border-white/20 pt-6">
+            <a id="btn-register" th:href="@{/nuevo-usuario}"
+               class="text-sm font-bold opacity-80 hover:opacity-100 hover:underline uppercase tracking-wider transition-opacity">
+                ¿No tienes cuenta? Regístrate aquí
+            </a>
+        </div>
+    </div>
+
+    <script type="module" th:src="@{/resources/core/js/login.js}"></script>
+</div>
+</body>
+
+</html>
