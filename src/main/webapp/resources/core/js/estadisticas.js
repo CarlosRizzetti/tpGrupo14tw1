@@ -64,6 +64,43 @@ const opcionesTorta = (etiquetas, valores) => ({
   tooltip: { theme: "light" },
 });
 
+const COLORES_ESTADO = ["#F05252", "#1A56DB", "#31C48D"];
+
+// radialBar espera porcentajes: convertimos los conteos a % sobre el total
+// y mostramos el conteo real en la leyenda.
+const opcionesRadial = (etiquetas, valores) => {
+  const total = valores.reduce((acc, valor) => acc + valor, 0);
+  const porcentajes = valores.map((valor) =>
+    total > 0 ? Math.round((valor / total) * 100) : 0
+  );
+
+  return {
+    chart: {
+      type: "radialBar",
+      height: 320,
+      fontFamily: "Figtree, sans-serif",
+    },
+    series: porcentajes,
+    labels: etiquetas,
+    colors: COLORES_ESTADO,
+    plotOptions: {
+      radialBar: {
+        hollow: { size: "35%" },
+        dataLabels: {
+          name: { fontSize: "13px" },
+          value: { formatter: (val) => `${val}%` },
+        },
+      },
+    },
+    legend: {
+      show: true,
+      position: "bottom",
+      formatter: (nombre, opts) => `${nombre}: ${valores[opts.seriesIndex]}`,
+    },
+    tooltip: { enabled: true },
+  };
+};
+
 const dibujar = (idContenedor, opciones) => {
   if (graficos[idContenedor]) {
     graficos[idContenedor].updateOptions(opciones);
@@ -132,12 +169,9 @@ const renderizar = (datos) => {
 
   dibujar(
     "grafico-estados",
-    opcionesBase(
+    opcionesRadial(
       obtenerEtiquetas(datos.vencimientosPorEstado),
-      "Vencimientos",
-      obtenerValores(datos.vencimientosPorEstado),
-      COLOR_PRIMARIO,
-      "bar"
+      obtenerValores(datos.vencimientosPorEstado)
     )
   );
 };
