@@ -1,6 +1,8 @@
 package com.tallerwebi.dominio.services;
 
-import com.tallerwebi.dominio.interfaces.RepositorioEstadistica;
+import com.tallerwebi.dominio.entity.enums.EstadoTimer;
+import com.tallerwebi.dominio.interfaces.RepositorioControlStock;
+import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioEstadistica;
 import com.tallerwebi.presentacion.dto.EstadisticasDTO;
 import com.tallerwebi.presentacion.dto.PuntoEstadisticoDTO;
@@ -21,8 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Implementación del servicio de estadísticas. Obtiene las marcas de tiempo del
- * repositorio y las agrupa por día, día de semana y hora para graficarlas.
+ * Implementación del servicio de estadísticas. Obtiene los datos crudos de los
+ * repositorios de Timer y ControlStock y los agrupa para graficarlos.
  */
 @Service("servicioEstadistica")
 @Transactional
@@ -40,12 +42,26 @@ public class ServicioEstadisticaImpl implements ServicioEstadistica {
     "Domingo",
   };
 
-  private final RepositorioEstadistica repositorioEstadistica;
+  private static final EstadoTimer[] ESTADOS_METRICA = {
+    EstadoTimer.VENCIDO,
+    EstadoTimer.IMPORTADO,
+    EstadoTimer.RENOVADO,
+  };
+
+  private static final String[] NOMBRES_ESTADO_METRICA = { "Vencidos", "Importados", "Renovados" };
+
+  private final RepositorioTimer repositorioTimer;
+  private final RepositorioControlStock repositorioControlStock;
   private final Clock clock;
 
   @Autowired
-  public ServicioEstadisticaImpl(RepositorioEstadistica repositorioEstadistica, Clock clock) {
-    this.repositorioEstadistica = repositorioEstadistica;
+  public ServicioEstadisticaImpl(
+    RepositorioTimer repositorioTimer,
+    RepositorioControlStock repositorioControlStock,
+    Clock clock
+  ) {
+    this.repositorioTimer = repositorioTimer;
+    this.repositorioControlStock = repositorioControlStock;
     this.clock = clock;
   }
 
@@ -60,14 +76,12 @@ public class ServicioEstadisticaImpl implements ServicioEstadistica {
     LocalDate desdeDia = hoy.minusDays((long) dias - 1);
     OffsetDateTime desde = desdeDia.atStartOfDay(zona).toOffsetDateTime();
 
-    List<OffsetDateTime> fechasVencimientos =
-      repositorioEstadistica.obtenerFechasCreacionVencimientos(desde);
+    List<OffsetDateTime> fechasVencimientos = repositorioTimer.obtenerFechasCreacionDesde(desde);
     List<OffsetDateTime> fechasModificaciones =
-      repositorioEstadistica.obtenerFechasModificacionesStock(desde);
-    List<OffsetDateTime> fechasDemanda = repositorioEstadistica.obtenerFechasDemanda(desde);
-    List<Object[]> conteoProductos = repositorioEstadistica.obtenerConteoVencimientosPorProducto(
-      desde
-    );
+      repositorioControlStock.obtenerFechasMovimientosDesde(desde);
+    List<OffsetDateTime> fechasDemanda = repositorioControlStock.obtenerFechasEgresosDesde(desde);
+    List<Object[]> conteoProductos = repositorioTimer.contarVencimientosPorProducto(desde);
+    List<Object[]> conteoEstados = repositorioTimer.contarPorEstado(desde);
 
     return EstadisticasDTO
       .builder()
@@ -76,6 +90,7 @@ public class ServicioEstadisticaImpl implements ServicioEstadistica {
       .demandaPorDiaSemana(agruparPorDiaSemana(fechasDemanda, zona))
       .demandaPorHora(agruparPorHora(fechasDemanda, zona))
       .productosMasUtilizados(mapearConteoProductos(conteoProductos))
+      .vencimientosPorEstado(mapearConteoPorEstado(conteoEstados))
       .build();
   }
 
@@ -89,6 +104,24 @@ public class ServicioEstadisticaImpl implements ServicioEstadistica {
         )
       )
       .collect(Collectors.toList());
+  }
+
+  private List<PuntoEstadisticoDTO> mapearConteoPorEstado(List<Object[]> filas) {
+    return IntStream
+      .range(0, ESTADOS_METRICA.length)
+      .mapToObj(i ->
+        new PuntoEstadisticoDTO(NOMBRES_ESTADO_METRICA[i], contarEstado(filas, ESTADOS_METRICA[i]))
+      )
+      .collect(Collectors.toList());
+  }
+
+  private long contarEstado(List<Object[]> filas, EstadoTimer estado) {
+    return filas
+      .stream()
+      .filter(fila -> fila[0] == estado)
+      .mapToLong(fila -> ((Number) fila[1]).longValue())
+      .findFirst()
+      .orElse(0L);
   }
 
   private List<PuntoEstadisticoDTO> agruparPorDia(
