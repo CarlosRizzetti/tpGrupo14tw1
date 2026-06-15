@@ -6,7 +6,6 @@ import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
 import com.tallerwebi.presentacion.dto.UsuarioDto;
 import java.util.List;
-import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -35,10 +34,7 @@ public class ControladorUsuario {
   }
 
   @RequestMapping(value = "/admin/usuarios", method = RequestMethod.GET)
-  public ModelAndView listarUsuarios(HttpSession session) {
-    if (!esAdministrador(session)) {
-      return new ModelAndView(REDIRECT_DENEGADO);
-    }
+  public ModelAndView listarUsuarios() {
     List<Usuario> usuarios = servicioUsuario.listarUsuarios();
     ModelMap modelo = new ModelMap();
     modelo.put("usuarios", usuarios);
@@ -46,23 +42,14 @@ public class ControladorUsuario {
   }
 
   @RequestMapping(value = "/admin/usuarios/nuevo", method = RequestMethod.GET)
-  public ModelAndView mostrarFormularioNuevo(HttpSession session) {
-    if (!esAdministrador(session)) {
-      return new ModelAndView(REDIRECT_DENEGADO);
-    }
+  public ModelAndView mostrarFormularioNuevo() {
     ModelMap modelo = new ModelMap();
     modelo.put(ATTR_DTO, new UsuarioDto());
     return new ModelAndView(VISTA_NUEVO, modelo);
   }
 
   @RequestMapping(value = "/admin/usuarios/nuevo", method = RequestMethod.POST)
-  public ModelAndView crearUsuario(
-    @ModelAttribute(ATTR_DTO) UsuarioDto usuarioDto,
-    HttpSession session
-  ) {
-    if (!esAdministrador(session)) {
-      return new ModelAndView(REDIRECT_DENEGADO);
-    }
+  public ModelAndView crearUsuario(@ModelAttribute(ATTR_DTO) UsuarioDto usuarioDto) {
     try {
       servicioUsuario.crearUsuario(usuarioDto);
       return new ModelAndView(REDIRECT_LISTA);
@@ -80,10 +67,7 @@ public class ControladorUsuario {
   }
 
   @RequestMapping(value = "/admin/usuarios/{id}/editar", method = RequestMethod.GET)
-  public ModelAndView mostrarFormularioEditar(@PathVariable Long id, HttpSession session) {
-    if (!esAdministrador(session)) {
-      return new ModelAndView(REDIRECT_DENEGADO);
-    }
+  public ModelAndView mostrarFormularioEditar(@PathVariable Long id) {
     Usuario usuario = servicioUsuario.obtenerUsuarioPorId(id);
     if (usuario == null) {
       return new ModelAndView(REDIRECT_LISTA);
@@ -100,12 +84,8 @@ public class ControladorUsuario {
   @RequestMapping(value = "/admin/usuarios/{id}/editar", method = RequestMethod.POST)
   public ModelAndView editarUsuario(
     @PathVariable Long id,
-    @ModelAttribute(ATTR_DTO) UsuarioDto usuarioDto,
-    HttpSession session
+    @ModelAttribute(ATTR_DTO) UsuarioDto usuarioDto
   ) {
-    if (!esAdministrador(session)) {
-      return new ModelAndView(REDIRECT_DENEGADO);
-    }
     try {
       servicioUsuario.editarUsuario(id, usuarioDto);
       return new ModelAndView(REDIRECT_LISTA);
@@ -125,26 +105,14 @@ public class ControladorUsuario {
   }
 
   @RequestMapping(value = "/admin/usuarios/{id}/reactivar", method = RequestMethod.POST)
-  public ModelAndView reactivar(@PathVariable Long id, HttpSession session) {
-    if (!esAdministrador(session)) {
-      return new ModelAndView(REDIRECT_DENEGADO);
-    }
+  public ModelAndView reactivar(@PathVariable Long id) {
     servicioUsuario.reactivar(id);
     return new ModelAndView(REDIRECT_LISTA);
   }
 
   @RequestMapping(value = "/admin/usuarios/{id}/dar-de-baja", method = RequestMethod.POST)
-  public ModelAndView darDeBaja(@PathVariable Long id, HttpSession session) {
-    if (!esAdministrador(session)) {
-      return new ModelAndView(REDIRECT_DENEGADO);
-    }
+  public ModelAndView darDeBaja(@PathVariable Long id) {
     servicioUsuario.darDeBaja(id);
     return new ModelAndView(REDIRECT_LISTA);
-  }
-
-  private boolean esAdministrador(HttpSession session) {
-    Object rol = session.getAttribute("ROL");
-    if (rol == null) return false;
-    return "ADMIN".equalsIgnoreCase(rol.toString());
   }
 }

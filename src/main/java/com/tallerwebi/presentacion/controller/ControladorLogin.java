@@ -2,13 +2,12 @@ package com.tallerwebi.presentacion.controller;
 
 import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
-import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
 import com.tallerwebi.dominio.interfaces.ServicioLogin;
 import com.tallerwebi.dominio.interfaces.ServicioValidacionIdentidad;
 import com.tallerwebi.presentacion.dto.LoginDto;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -35,40 +34,18 @@ public class ControladorLogin {
   }
 
   @RequestMapping("/")
-  public ModelAndView irALogin() {
-    ModelMap modelo = new ModelMap();
-    modelo.put("loginDto", new LoginDto());
-    return new ModelAndView("loginYRegistro/login", modelo);
+  public ModelAndView irALogin(Authentication authentication) {
+    if (authentication != null && authentication.isAuthenticated()) {
+      return new ModelAndView("redirect:/home");
+    }
+    return new ModelAndView("redirect:/login");
   }
 
   @RequestMapping("/login")
   public ModelAndView login() {
-    return new ModelAndView("redirect:/");
-  }
-
-  @RequestMapping(path = "/validar-login", method = RequestMethod.POST)
-  public ModelAndView validarLogin(
-    @ModelAttribute("loginDto") LoginDto loginDto,
-    HttpServletRequest request
-  ) {
-    try {
-      Usuario usuarioBuscado = servicioLogin.consultarUsuario(
-        loginDto.getEmail(),
-        loginDto.getPassword()
-      );
-      if (usuarioBuscado != null) {
-        request.getSession().setAttribute("ROL", usuarioBuscado.getRol());
-        return new ModelAndView("redirect:/home");
-      } else {
-        ModelMap model = new ModelMap();
-        model.put(ERROR, "Usuario o clave incorrecta");
-        return new ModelAndView("loginYRegistro/login", model);
-      }
-    } catch (UsuarioInactivo e) {
-      ModelMap model = new ModelMap();
-      model.put(ERROR, "El usuario está inactivo");
-      return new ModelAndView("loginYRegistro/login", model);
-    }
+    ModelMap modelo = new ModelMap();
+    modelo.put("loginDto", new LoginDto());
+    return new ModelAndView("loginYRegistro/login", modelo);
   }
 
   @RequestMapping(path = "/registrarme", method = RequestMethod.POST)
@@ -98,11 +75,5 @@ public class ControladorLogin {
     ModelMap model = new ModelMap();
     model.put("usuario", new Usuario());
     return new ModelAndView(VISTA_NUEVO_USUARIO, model);
-  }
-
-  @RequestMapping(path = "/logout", method = RequestMethod.GET)
-  public ModelAndView logout(HttpSession session) {
-    session.removeAttribute("ROL");
-    return new ModelAndView("redirect:/home");
   }
 }

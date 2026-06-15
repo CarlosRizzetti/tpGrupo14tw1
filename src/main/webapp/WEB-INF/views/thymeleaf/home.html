@@ -1,7 +1,4 @@
-<!-- Solo dejamos la estructura necesaria para que el IDE no tire error,
-     pero Thymeleaf solo usará los fragmentos -->
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, _, _)}">
 <head>
   <title>Categorías</title>
@@ -27,7 +24,7 @@
 
 <!-- FRAGMENTO 2 -->
 <div th:fragment="header_right">
-    <a th:if="${session.ROL == 'ADMIN'}"
+    <a sec:authorize="hasRole('ADMIN')"
        th:href="@{/dashboard/global}"
        class="md:flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg border border-white/20 transition text-xs font-bold uppercase tracking-wider">
         Dashboard Global
@@ -38,13 +35,13 @@
 
 <div th:fragment="content" class="p-6">
   <!-- Sección solo para ADMIN -->
-  <div th:if="${session.ROL == 'ADMIN'}" class="mb-8 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded-lg shadow-inner">
+  <div sec:authorize="hasRole('ADMIN')" class="mb-8 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded-lg shadow-inner">
       <h2 class="font-bold text-xl mb-2">Panel de Control de Administrador</h2>
       <p class="text-sm">Bienvenido, tienes acceso a funciones privilegiadas.</p>
       <div class="mt-4 flex gap-4">
           <a th:href="@{/admin/usuarios}" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition font-bold">Gestionar Usuarios</a>
           <a th:href="@{/admin/productos}" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition font-bold">Gestionar Productos</a>
-          <a th:href="@{/producto/nuevo}" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition font-bold">Crear Producto</a>
+          <a th:href="@{/admin/producto/nuevo}" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition font-bold">Crear Producto</a>
       </div>
   </div>
 

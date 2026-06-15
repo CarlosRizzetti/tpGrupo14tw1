@@ -6,6 +6,6 @@ import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
 
 public interface ServicioLogin {
-  Usuario consultarUsuario(String email, String password) throws UsuarioInactivo;
+  Usuario consultarUsuario(String email, String password) throws UsuarioInactivo, PasswordInvalida;
   void registrar(Usuario usuario) throws UsuarioExistente, PasswordInvalida;
 }
