@@ -1,0 +1,140 @@
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layouts/app :: layout(
+        ~{::content},
+        ~{::header_left},
+        ~{::header_center},
+        ~{},
+        ~{},
+        ~{::scripts}
+      )}">
+
+<head>
+    <title>Estadísticas</title>
+</head>
+
+<!-- HEADER CENTER -->
+<div th:fragment="header_center">
+    <h1 class="text-puesto-header-text font-bold uppercase tracking-widest">
+        Estadísticas
+    </h1>
+</div>
+
+<!-- HEADER LEFT -->
+<div th:fragment="header_left">
+    <a th:href="@{/dashboard/global}"
+        class="hidden md:flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg border border-white/20 transition text-xs font-bold uppercase tracking-wider">
+        Volver
+    </a>
+</div>
+
+<!-- CONTENT -->
+<div th:fragment="content" class="min-h-screen font-sans p-6 md:p-8 bg-gray-50">
+
+    <!-- FILTRO DE RANGO -->
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+        <div>
+            <h2 class="text-3xl font-black uppercase italic tracking-tight text-gray-800">
+                Panel de Estadísticas
+            </h2>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">
+                Vencimientos, stock y demanda
+            </p>
+        </div>
+        <div class="flex items-center gap-2">
+            <label for="filtro-dias"
+                class="text-xs font-bold text-gray-500 uppercase tracking-wider">Rango</label>
+            <select id="filtro-dias"
+                class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-bold text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400">
+                <option value="7">Últimos 7 días</option>
+                <option value="30" th:selected="${dias == 30}">Últimos 30 días</option>
+                <option value="90">Últimos 90 días</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- MENSAJE DE ERROR -->
+    <div id="estadisticas-error"
+        class="hidden mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-600">
+        No se pudieron cargar las estadísticas. Intente nuevamente.
+    </div>
+
+    <!-- GRID DE GRÁFICOS -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Vencimientos creados por día -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5">
+            <h3 class="text-lg font-black text-gray-800 uppercase tracking-tight mb-1">
+                Vencimientos creados por día
+            </h3>
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4">
+                Cantidad de timers generados
+            </p>
+            <div id="grafico-vencimientos"></div>
+        </div>
+
+        <!-- Modificaciones de stock por día -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5">
+            <h3 class="text-lg font-black text-gray-800 uppercase tracking-tight mb-1">
+                Modificaciones de stock por día
+            </h3>
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4">
+                Ingresos y egresos registrados
+            </p>
+            <div id="grafico-stock"></div>
+        </div>
+
+        <!-- Demanda por día de la semana -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5">
+            <h3 class="text-lg font-black text-gray-800 uppercase tracking-tight mb-1">
+                Demanda por día de la semana
+            </h3>
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4">
+                Egresos de stock por día
+            </p>
+            <div id="grafico-dia-semana"></div>
+        </div>
+
+        <!-- Demanda por horario -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5">
+            <h3 class="text-lg font-black text-gray-800 uppercase tracking-tight mb-1">
+                Demanda por horario
+            </h3>
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4">
+                Egresos de stock por hora del día
+            </p>
+            <div id="grafico-hora"></div>
+        </div>
+
+        <!-- Productos más utilizados (torta) -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5">
+            <h3 class="text-lg font-black text-gray-800 uppercase tracking-tight mb-1">
+                Productos más utilizados
+            </h3>
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4">
+                Por cantidad de vencimientos generados
+            </p>
+            <div id="grafico-productos"></div>
+        </div>
+
+        <!-- Vencimientos por estado -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5">
+            <h3 class="text-lg font-black text-gray-800 uppercase tracking-tight mb-1">
+                Vencimientos por estado
+            </h3>
+            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4">
+                Vencidos, importados y renovados
+            </p>
+            <div id="grafico-estados"></div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- SCRIPTS -->
+<div th:fragment="scripts">
+    <!-- ApexCharts: motor de gráficos usado por el plugin de charts de Flowbite -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script type="module" th:src="@{/resources/core/js/estadisticas.js}" defer></script>
+</div>
+
+</html>

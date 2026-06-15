@@ -12,6 +12,7 @@ import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.repositorio.config.HibernateInfraestructuraTestConfig;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import javax.transaction.Transactional;
 import org.hibernate.SessionFactory;
@@ -267,5 +268,106 @@ public class RepositorioTimerTest {
     );
 
     assertFalse(resultado);
+  }
+
+  // ===================== helpers estadísticas =====================
+
+  private Producto buildProducto(String nombre) {
+    Producto producto = new Producto();
+    producto.setNombre(nombre);
+    sessionFactory.getCurrentSession().save(producto);
+    return producto;
+  }
+
+  private OffsetDateTime fecha(int anio, int mes, int dia, int hora) {
+    return OffsetDateTime.of(anio, mes, dia, hora, 0, 0, 0, ZoneOffset.ofHours(-3));
+  }
+
+  private Timer buildTimerCreado(
+    OffsetDateTime fechaCreacion,
+    EstadoTimer estado,
+    Producto producto
+  ) {
+    Timer timer = new Timer(
+      fechaCreacion,
+      fechaCreacion.plusHours(2),
+      "grp-est",
+      producto,
+      null,
+      null,
+      1
+    );
+    timer.setEstado(estado);
+    sessionFactory.getCurrentSession().save(timer);
+    return timer;
+  }
+
+  private long contar(List<Object[]> filas, EstadoTimer estado) {
+    return filas
+      .stream()
+      .filter(fila -> fila[0] == estado)
+      .mapToLong(fila -> ((Number) fila[1]).longValue())
+      .findFirst()
+      .orElse(0L);
+  }
+
+  // ===================== obtenerFechasCreacionDesde =====================
+
+  @Test
+  @Transactional
+  @Rollback
+  @DisplayName("HP-06 | obtenerFechasCreacionDesde | Filtra por la fecha de inicio")
+  public void obtenerFechasCreacionDesde_deberiaFiltrarPorFecha() {
+    Producto producto = buildProducto("Hamburguesa");
+    buildTimerCreado(fecha(2026, 6, 10, 9), EstadoTimer.ACTIVO, producto);
+    buildTimerCreado(fecha(2026, 6, 1, 9), EstadoTimer.ACTIVO, producto);
+    sessionFactory.getCurrentSession().flush();
+
+    List<OffsetDateTime> resultado = repositorioTimer.obtenerFechasCreacionDesde(
+      fecha(2026, 6, 5, 0)
+    );
+
+    assertEquals(1, resultado.size());
+  }
+
+  // ===================== contarVencimientosPorProducto =====================
+
+  @Test
+  @Transactional
+  @Rollback
+  @DisplayName("HP-07 | contarVencimientosPorProducto | Agrupa y ordena por cantidad descendente")
+  public void contarVencimientosPorProducto_deberiaAgruparYOrdenar() {
+    Producto hamburguesa = buildProducto("Hamburguesa");
+    Producto cafe = buildProducto("Café");
+    buildTimerCreado(fecha(2026, 6, 10, 9), EstadoTimer.ACTIVO, hamburguesa);
+    buildTimerCreado(fecha(2026, 6, 11, 9), EstadoTimer.ACTIVO, hamburguesa);
+    buildTimerCreado(fecha(2026, 6, 10, 9), EstadoTimer.ACTIVO, cafe);
+    sessionFactory.getCurrentSession().flush();
+
+    List<Object[]> resultado = repositorioTimer.contarVencimientosPorProducto(fecha(2026, 6, 5, 0));
+
+    assertEquals(2, resultado.size());
+    assertEquals("Hamburguesa", resultado.get(0)[0]);
+    assertEquals(2L, ((Number) resultado.get(0)[1]).longValue());
+  }
+
+  // ===================== contarPorEstado =====================
+
+  @Test
+  @Transactional
+  @Rollback
+  @DisplayName("HP-08 | contarPorEstado | Agrupa los vencimientos por estado")
+  public void contarPorEstado_deberiaAgruparPorEstado() {
+    Producto producto = buildProducto("Hamburguesa");
+    buildTimerCreado(fecha(2026, 6, 10, 9), EstadoTimer.VENCIDO, producto);
+    buildTimerCreado(fecha(2026, 6, 11, 9), EstadoTimer.VENCIDO, producto);
+    buildTimerCreado(fecha(2026, 6, 12, 9), EstadoTimer.RENOVADO, producto);
+    sessionFactory.getCurrentSession().flush();
+
+    List<Object[]> resultado = repositorioTimer.contarPorEstado(fecha(2026, 6, 5, 0));
+
+    assertEquals(2L, contar(resultado, EstadoTimer.VENCIDO));
+    assertEquals(1L, contar(resultado, EstadoTimer.RENOVADO));
+    assertEquals(0L, contar(resultado, EstadoTimer.IMPORTADO));
   }
 }
