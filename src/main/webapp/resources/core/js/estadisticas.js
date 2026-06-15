@@ -185,7 +185,7 @@ const mostrarError = (mostrar) => {
 
 const cargar = async (dias) => {
   try {
-    const respuesta = await fetch(`/estadisticas/datos?dias=${dias}`, {
+    const respuesta = await fetch(`/admin/estadisticas/datos?dias=${dias}`, {
       headers: { Accept: "application/json" },
     });
     if (!respuesta.ok) {
