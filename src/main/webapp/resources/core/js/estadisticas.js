@@ -129,6 +129,17 @@ const renderizar = (datos) => {
       obtenerValores(datos.productosMasUtilizados)
     )
   );
+
+  dibujar(
+    "grafico-estados",
+    opcionesBase(
+      obtenerEtiquetas(datos.vencimientosPorEstado),
+      "Vencimientos",
+      obtenerValores(datos.vencimientosPorEstado),
+      COLOR_PRIMARIO,
+      "bar"
+    )
+  );
 };
 
 const mostrarError = (mostrar) => {

@@ -33,4 +33,7 @@ public class EstadisticasDTO {
 
   @Builder.Default
   private List<PuntoEstadisticoDTO> productosMasUtilizados = new ArrayList<>();
+
+  @Builder.Default
+  private List<PuntoEstadisticoDTO> vencimientosPorEstado = new ArrayList<>();
 }
