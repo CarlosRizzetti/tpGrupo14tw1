@@ -30,14 +30,14 @@ public class ControladorEstadisticas {
     this.servicioEstadistica = servicioEstadistica;
   }
 
-  @GetMapping("/estadisticas")
+  @GetMapping("/admin/estadisticas")
   public ModelAndView index() {
     ModelAndView mav = new ModelAndView("estadisticas/estadisticas");
     mav.addObject("dias", DIAS_POR_DEFECTO);
     return mav;
   }
 
-  @GetMapping("/estadisticas/datos")
+  @GetMapping("/admin/estadisticas/datos")
   @ResponseBody
   public ResponseEntity<EstadisticasDTO> obtenerDatos(
     @RequestParam(name = "dias", defaultValue = "30") int dias

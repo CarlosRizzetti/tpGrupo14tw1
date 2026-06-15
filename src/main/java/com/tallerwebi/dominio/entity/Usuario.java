@@ -1,7 +1,5 @@
 package com.tallerwebi.dominio.entity;
 
-import java.util.Set;
-import java.util.TreeSet;
 import javax.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
