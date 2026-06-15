@@ -21,17 +21,17 @@
             <span class="font-bold text-sm" th:text="${error}"></span>
         </div>
 
-        <form th:action="@{/validar-login}" method="POST" th:object="${loginDto}" class="space-y-5">
+        <form th:action="@{/login}" method="POST"  class="space-y-5">
             <div>
                 <label for="email" class="block text-sm font-bold uppercase tracking-wider mb-2">Correo Electrónico</label>
-                <input th:field="*{email}" id="email" type="email"
+                <input name="username" id="email" type="email"
                        class="w-full px-5 py-4 rounded-xl text-black bg-white focus:ring-4 focus:ring-puesto-btn-border outline-none transition-shadow"
                        placeholder="ejemplo@correo.com" required />
             </div>
 
             <div>
                 <label for="password" class="block text-sm font-bold uppercase tracking-wider mb-2">Contraseña</label>
-                <input th:field="*{password}" type="password" id="password"
+                <input name="password" type="password" id="password"
                        class="w-full px-5 py-4 rounded-xl text-black bg-white focus:ring-4 focus:ring-puesto-btn-border outline-none transition-shadow"
                        placeholder="********" required />
             </div>

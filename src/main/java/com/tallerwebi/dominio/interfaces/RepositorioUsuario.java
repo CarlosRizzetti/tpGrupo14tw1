@@ -4,7 +4,7 @@ import com.tallerwebi.dominio.entity.Usuario;
 import java.util.List;
 
 public interface RepositorioUsuario {
-  Usuario buscarUsuario(String email, String password);
+  Usuario buscarUsuario(String email);
   void guardar(Usuario usuario);
   Usuario buscar(String email);
   Usuario buscarPorTokenValidacion(String tokenValidacion);

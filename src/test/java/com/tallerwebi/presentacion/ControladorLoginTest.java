@@ -7,30 +7,28 @@ import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
-import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
 import com.tallerwebi.dominio.interfaces.ServicioLogin;
 import com.tallerwebi.dominio.interfaces.ServicioValidacionIdentidad;
 import com.tallerwebi.presentacion.controller.ControladorLogin;
-import com.tallerwebi.presentacion.dto.LoginDto;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.servlet.ModelAndView;
 
 public class ControladorLoginTest {
 
   private ControladorLogin controladorLogin;
   private Usuario usuarioMock;
-  private LoginDto loginDtoMock;
   private HttpServletRequest requestMock;
   private HttpSession sessionMock;
   private ServicioLogin servicioLoginMock;
   private ServicioValidacionIdentidad servicioValidacionIdentidadMock;
+  private Authentication authenticationMock;
 
   @BeforeEach
   public void init() {
-    loginDtoMock = new LoginDto("dami@unlam.com", "123");
     usuarioMock = mock(Usuario.class);
     when(usuarioMock.getEmail()).thenReturn("dami@unlam.com");
     requestMock = mock(HttpServletRequest.class);
@@ -38,59 +36,7 @@ public class ControladorLoginTest {
     servicioLoginMock = mock(ServicioLogin.class);
     servicioValidacionIdentidadMock = mock(ServicioValidacionIdentidad.class);
     controladorLogin = new ControladorLogin(servicioLoginMock, servicioValidacionIdentidadMock);
-  }
-
-  @Test
-  public void loginConUsuarioYPasswordInorrectosDeberiaLlevarALoginNuevamente()
-    throws UsuarioInactivo {
-    // preparacion
-    when(servicioLoginMock.consultarUsuario(anyString(), anyString())).thenReturn(null);
-
-    // ejecucion
-    ModelAndView modelAndView = controladorLogin.validarLogin(loginDtoMock, requestMock);
-
-    // validacion
-    assertThat(modelAndView.getViewName(), equalToIgnoringCase("loginYRegistro/login"));
-    assertThat(
-      modelAndView.getModel().get("error").toString(),
-      equalToIgnoringCase("Usuario o clave incorrecta")
-    );
-    verify(sessionMock, times(0)).setAttribute("ROL", "ADMIN");
-  }
-
-  @Test
-  public void loginConUsuarioYPasswordCorrectosDeberiaLLevarAHome() throws UsuarioInactivo {
-    // preparacion
-    Usuario usuarioEncontradoMock = mock(Usuario.class);
-    when(usuarioEncontradoMock.getRol()).thenReturn("ADMIN");
-
-    when(requestMock.getSession()).thenReturn(sessionMock);
-    when(servicioLoginMock.consultarUsuario(anyString(), anyString()))
-      .thenReturn(usuarioEncontradoMock);
-
-    // ejecucion
-    ModelAndView modelAndView = controladorLogin.validarLogin(loginDtoMock, requestMock);
-
-    // validacion
-    assertThat(modelAndView.getViewName(), equalToIgnoringCase("redirect:/home"));
-    verify(sessionMock, times(1)).setAttribute("ROL", usuarioEncontradoMock.getRol());
-  }
-
-  @Test
-  public void loginConUsuarioInactivoDeberiaLlevarALoginConError() throws UsuarioInactivo {
-    // preparacion
-    when(servicioLoginMock.consultarUsuario(anyString(), anyString()))
-      .thenThrow(UsuarioInactivo.class);
-
-    // ejecucion
-    ModelAndView modelAndView = controladorLogin.validarLogin(loginDtoMock, requestMock);
-
-    // validacion
-    assertThat(modelAndView.getViewName(), equalToIgnoringCase("loginYRegistro/login"));
-    assertThat(
-      modelAndView.getModel().get("error").toString(),
-      equalToIgnoringCase("El usuario está inactivo")
-    );
+    this.authenticationMock = mock(Authentication.class);
   }
 
   @Test
@@ -161,12 +107,12 @@ public class ControladorLoginTest {
 
   @Test
   public void irALoginDeberiaRetornarVistaLoginConDatosLogin() {
+    when(authenticationMock.isAuthenticated()).thenReturn(false);
     // ejecucion
-    ModelAndView modelAndView = controladorLogin.irALogin();
+    ModelAndView modelAndView = controladorLogin.irALogin(authenticationMock);
 
     // validacion
-    assertThat(modelAndView.getViewName(), equalToIgnoringCase("loginYRegistro/login"));
-    assertThat(modelAndView.getModel().get("loginDto"), instanceOf(LoginDto.class));
+    assertThat(modelAndView.getViewName(), equalToIgnoringCase("redirect:/login"));
   }
 
   @Test

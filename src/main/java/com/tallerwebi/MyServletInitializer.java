@@ -1,9 +1,6 @@
 package com.tallerwebi;
 
-import com.tallerwebi.config.DatabaseInitializationConfig;
-import com.tallerwebi.config.HibernateConfig;
-import com.tallerwebi.config.MailConfig;
-import com.tallerwebi.config.SpringWebConfig;
+import com.tallerwebi.config.*;
 import java.util.Collections;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -32,6 +29,7 @@ public class MyServletInitializer extends AbstractAnnotationConfigDispatcherServ
       HibernateConfig.class,
       DatabaseInitializationConfig.class,
       MailConfig.class,
+      SecurityConfig.class,
     };
   }
 

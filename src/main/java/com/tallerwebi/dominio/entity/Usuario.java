@@ -1,10 +1,15 @@
 package com.tallerwebi.dominio.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import java.util.Set;
+import java.util.TreeSet;
+import javax.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 public class Usuario {
 
@@ -16,6 +21,7 @@ public class Usuario {
   private String password;
   private String rol;
   private String tokenValidacion;
+
   private Boolean activo = false;
 
   public Long getId() {
