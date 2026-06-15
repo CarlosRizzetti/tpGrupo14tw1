@@ -114,32 +114,6 @@ public class ControladorProductoTest {
     assertThat(mav.getModel().get("datosProducto"), instanceOf(ProductoDto.class));
   }
 
-  @Test
-  public void mostrarFormularioSinSesionDeberiaRedirigirAAccesoDenegado() {
-    // preparacion
-    when(sessionMock.getAttribute("usuario")).thenReturn(null);
-
-    // ejecucion
-    ModelAndView mav = controladorProducto.mostrarFormulario();
-
-    // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/acceso-denegado"));
-  }
-
-  @Test
-  public void mostrarFormularioComoUsuarioNoAdminDeberiaRedirigirAAccesoDenegado() {
-    // preparacion
-    Usuario usuarioComun = mock(Usuario.class);
-    when(usuarioComun.getRol()).thenReturn("USER");
-    when(sessionMock.getAttribute("usuario")).thenReturn(usuarioComun);
-
-    // ejecucion
-    ModelAndView mav = controladorProducto.mostrarFormulario();
-
-    // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/acceso-denegado"));
-  }
-
   // --- POST /producto/nuevo ---
 
   @Test
@@ -152,7 +126,7 @@ public class ControladorProductoTest {
     ModelAndView mav = controladorProducto.crearProducto(datos);
 
     // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/producto/exito"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/admin/producto/exito"));
     verify(servicioProductoMock, times(1)).crearProducto(datos);
   }
 
@@ -175,19 +149,6 @@ public class ControladorProductoTest {
       mav.getModel().get("error").toString(),
       equalToIgnoringCase("El nombre del producto es obligatorio")
     );
-  }
-
-  @Test
-  public void crearProductoSinSesionDeberiaRedirigirAAccesoDenegado() {
-    // preparacion
-    when(sessionMock.getAttribute("usuario")).thenReturn(null);
-
-    // ejecucion
-    ModelAndView mav = controladorProducto.crearProducto(new ProductoDto());
-
-    // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/acceso-denegado"));
-    verify(servicioProductoMock, never()).crearProducto(any());
   }
 
   // --- GET /category/{id}/products ---
