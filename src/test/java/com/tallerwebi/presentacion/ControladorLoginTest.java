@@ -121,7 +121,7 @@ public class ControladorLoginTest {
     ModelAndView modelAndView = controladorLogin.login();
 
     // validacion
-    assertThat(modelAndView.getViewName(), equalToIgnoringCase("redirect:/"));
+    assertThat(modelAndView.getViewName(), equalToIgnoringCase("loginYRegistro/login"));
   }
 
   @Test
