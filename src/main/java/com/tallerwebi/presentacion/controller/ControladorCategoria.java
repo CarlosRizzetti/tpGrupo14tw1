@@ -2,8 +2,10 @@ package com.tallerwebi.presentacion.controller;
 
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -19,9 +21,29 @@ public class ControladorCategoria {
   }
 
   @RequestMapping("/home")
-  public ModelAndView index() {
+  public ModelAndView index(Authentication authentication) {
     ModelAndView mav = new ModelAndView("home");
-    List<CategoriaDto> categorias = this.servicioCategoria.obtenerLasCategoriasParaElMenu();
+    List<CategoriaDto> categorias;
+
+    if (authentication != null && authentication.isAuthenticated()) {
+      boolean isAdmin = authentication
+        .getAuthorities()
+        .stream()
+        .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+
+      if (isAdmin) {
+        categorias = this.servicioCategoria.obtenerLasCategoriasParaElMenu();
+      } else {
+        categorias = this.servicioCategoria.obtenerCategoriasPorUsuario(authentication.getName());
+      }
+    } else {
+      categorias = new ArrayList<>();
+    }
+
+    if (categorias == null || categorias.isEmpty()) {
+      mav.addObject("mensajeVacio", "Todavía no te asignaron una categoría");
+    }
+
     mav.addObject("categorias", categorias);
     return mav;
   }

@@ -40,10 +40,21 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     if (!usuario.getActivo()) {
       throw new UsuarioInactivo("El usuario está inactivo");
     }
+    verificarCategorias(usuario);
     return new User(
       usuario.getEmail(),
       usuario.getPassword(),
       Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + usuario.getRol()))
     );
+  }
+
+  private void verificarCategorias(Usuario usuario) {
+    boolean noEsAdmin = !"ADMIN".equalsIgnoreCase(usuario.getRol());
+    boolean sinCategorias = usuario.getCategorias() == null || usuario.getCategorias().isEmpty();
+    if (noEsAdmin && sinCategorias) {
+      throw new com.tallerwebi.dominio.excepcion.UsuarioSinCategorias(
+        "Todavía no te asignaron una categoría"
+      );
+    }
   }
 }
