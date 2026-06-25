@@ -22,7 +22,7 @@
 
 <div th:fragment="content" class="w-full flex justify-center mt-8">
   <div class="w-full max-w-lg bg-white rounded-lg shadow-md p-8">
-    <form th:action="@{/producto/nuevo}" th:object="${datosProducto}" method="POST" class="space-y-6">
+    <form th:action="@{/admin/producto/nuevo}" th:object="${datosProducto}" method="POST" class="space-y-6">
       
       <!-- Mensaje de Error -->
       <div th:if="${error != null}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">

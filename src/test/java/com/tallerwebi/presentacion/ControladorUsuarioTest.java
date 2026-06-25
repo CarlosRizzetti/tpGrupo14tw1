@@ -38,7 +38,7 @@ public class ControladorUsuarioTest {
     when(servicioUsuarioMock.listarUsuarios()).thenReturn(usuarios);
 
     // ejecucion
-    ModelAndView mav = controladorUsuario.listarUsuarios(sessionMock);
+    ModelAndView mav = controladorUsuario.listarUsuarios();
 
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/usuario/lista"));
@@ -46,21 +46,9 @@ public class ControladorUsuarioTest {
   }
 
   @Test
-  public void listarUsuariosSinRolAdminDeberiaRedirigirAAccesoDenegado() {
-    // preparacion
-    when(sessionMock.getAttribute("ROL")).thenReturn("USER");
-
-    // ejecucion
-    ModelAndView mav = controladorUsuario.listarUsuarios(sessionMock);
-
-    // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/acceso-denegado"));
-  }
-
-  @Test
   public void mostrarFormularioNuevoDeberiaRetornarVistaNuevoConDtoVacio() {
     // ejecucion
-    ModelAndView mav = controladorUsuario.mostrarFormularioNuevo(sessionMock);
+    ModelAndView mav = controladorUsuario.mostrarFormularioNuevo();
 
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/usuario/nuevo"));
@@ -73,7 +61,7 @@ public class ControladorUsuarioTest {
     UsuarioDto dto = new UsuarioDto();
 
     // ejecucion
-    ModelAndView mav = controladorUsuario.crearUsuario(dto, sessionMock);
+    ModelAndView mav = controladorUsuario.crearUsuario(dto);
 
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/admin/usuarios"));
@@ -87,7 +75,7 @@ public class ControladorUsuarioTest {
     doThrow(UsuarioExistente.class).when(servicioUsuarioMock).crearUsuario(dto);
 
     // ejecucion
-    ModelAndView mav = controladorUsuario.crearUsuario(dto, sessionMock);
+    ModelAndView mav = controladorUsuario.crearUsuario(dto);
 
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/usuario/nuevo"));
@@ -103,7 +91,7 @@ public class ControladorUsuarioTest {
       .crearUsuario(dto);
 
     // ejecucion
-    ModelAndView mav = controladorUsuario.crearUsuario(dto, sessionMock);
+    ModelAndView mav = controladorUsuario.crearUsuario(dto);
 
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/usuario/nuevo"));
@@ -119,7 +107,7 @@ public class ControladorUsuarioTest {
     when(servicioUsuarioMock.obtenerUsuarioPorId(1L)).thenReturn(usuario);
 
     // ejecucion
-    ModelAndView mav = controladorUsuario.mostrarFormularioEditar(1L, sessionMock);
+    ModelAndView mav = controladorUsuario.mostrarFormularioEditar(1L);
 
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/usuario/editar"));
@@ -132,7 +120,7 @@ public class ControladorUsuarioTest {
     when(servicioUsuarioMock.obtenerUsuarioPorId(99L)).thenReturn(null);
 
     // ejecucion
-    ModelAndView mav = controladorUsuario.mostrarFormularioEditar(99L, sessionMock);
+    ModelAndView mav = controladorUsuario.mostrarFormularioEditar(99L);
 
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/admin/usuarios"));
@@ -144,7 +132,7 @@ public class ControladorUsuarioTest {
     UsuarioDto dto = new UsuarioDto();
 
     // ejecucion
-    ModelAndView mav = controladorUsuario.editarUsuario(1L, dto, sessionMock);
+    ModelAndView mav = controladorUsuario.editarUsuario(1L, dto);
 
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/admin/usuarios"));
@@ -154,7 +142,7 @@ public class ControladorUsuarioTest {
   @Test
   public void darDeBajaDeberiaLlamarAlServicioYRedirigirALista() {
     // ejecucion
-    ModelAndView mav = controladorUsuario.darDeBaja(1L, sessionMock);
+    ModelAndView mav = controladorUsuario.darDeBaja(1L);
 
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/admin/usuarios"));
@@ -164,7 +152,7 @@ public class ControladorUsuarioTest {
   @Test
   public void reactivarDeberiaLlamarAlServicioYRedirigirALista() {
     // ejecucion
-    ModelAndView mav = controladorUsuario.reactivar(1L, sessionMock);
+    ModelAndView mav = controladorUsuario.reactivar(1L);
 
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/admin/usuarios"));

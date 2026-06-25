@@ -26,7 +26,7 @@ public class Producto {
 
   @ManyToMany
   @JoinTable(
-    name = "productosCategoria",
+    name = "ProductosCategoria",
     joinColumns = @JoinColumn(name = "idProducto"),
     inverseJoinColumns = @JoinColumn(name = "idCategoria")
   )

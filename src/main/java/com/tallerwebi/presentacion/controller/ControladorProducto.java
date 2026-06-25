@@ -28,7 +28,6 @@ public class ControladorProducto {
   private final ServicioTimer servicioTimer;
   private final ServicioReglaVencimiento servicioReglaVencimiento;
   private static final String CATEGORIA = "categoria";
-  private static final String REDIRECT_DENEGADO = "redirect:/acceso-denegado";
 
   @Autowired
   public ControladorProducto(
@@ -44,11 +43,8 @@ public class ControladorProducto {
   }
 
   // GET — mostrar el formulario
-  @RequestMapping(value = "/producto/nuevo", method = RequestMethod.GET)
-  public ModelAndView mostrarFormulario(HttpSession session) {
-    if (!esAdministrador(session)) {
-      return new ModelAndView(REDIRECT_DENEGADO);
-    }
+  @RequestMapping(value = "/admin/producto/nuevo", method = RequestMethod.GET)
+  public ModelAndView mostrarFormulario() {
     ModelAndView mav = new ModelAndView("funcionalidadesAdmin/producto/nuevo");
     List<CategoriaDto> categorias = servicioCategoria.obtenerLasCategoriasParaElMenu();
     mav.addObject("categorias", categorias);
@@ -57,15 +53,11 @@ public class ControladorProducto {
   }
 
   // POST — procesar el formulario
-  @RequestMapping(value = "/producto/nuevo", method = RequestMethod.POST)
-  public ModelAndView crearProducto(@ModelAttribute ProductoDto productoDto, HttpSession session) {
-    if (!esAdministrador(session)) {
-      return new ModelAndView(REDIRECT_DENEGADO);
-    }
-
+  @RequestMapping(value = "admin/producto/nuevo", method = RequestMethod.POST)
+  public ModelAndView crearProducto(@ModelAttribute ProductoDto productoDto) {
     try {
       servicioProducto.crearProducto(productoDto);
-      return new ModelAndView("redirect:/producto/exito");
+      return new ModelAndView("redirect:/admin/producto/exito");
     } catch (IllegalArgumentException e) {
       if (LOGGER.isLoggable(java.util.logging.Level.SEVERE)) {
         LOGGER.severe(">>> ERROR: " + e.getClass().getName() + " - " + e.getMessage());
@@ -79,19 +71,15 @@ public class ControladorProducto {
     }
   }
 
-  @RequestMapping("/producto/exito")
+  @RequestMapping("/admin/producto/exito")
   public ModelAndView exito() {
     return new ModelAndView("funcionalidadesAdmin/producto/exito");
   }
 
   @RequestMapping(value = "/admin/productos", method = RequestMethod.GET)
   public ModelAndView gestionProductos(
-    @RequestParam(name = "categoriaId", required = false) Long categoriaId,
-    HttpSession session
+    @RequestParam(name = "categoriaId", required = false) Long categoriaId
   ) {
-    if (!esAdministrador(session)) {
-      return new ModelAndView(REDIRECT_DENEGADO);
-    }
     ModelMap modelo = new ModelMap();
     modelo.put("productos", servicioProducto.listarProductos(categoriaId));
     modelo.put("categorias", servicioCategoria.obtenerLasCategoriasParaElMenu());
@@ -103,12 +91,8 @@ public class ControladorProducto {
   public String agregarStock(
     @PathVariable Long id,
     @RequestParam("cantidad") Integer cantidad,
-    @RequestParam(name = "categoriaId", required = false) Long categoriaId,
-    HttpSession session
+    @RequestParam(name = "categoriaId", required = false) Long categoriaId
   ) {
-    if (!esAdministrador(session)) {
-      return REDIRECT_DENEGADO;
-    }
     servicioProducto.agregarStock(id, cantidad);
     if (categoriaId != null) {
       return "redirect:/admin/productos?categoriaId=" + categoriaId;
@@ -120,12 +104,8 @@ public class ControladorProducto {
   public String quitarStock(
     @PathVariable Long id,
     @RequestParam("cantidad") Integer cantidad,
-    @RequestParam(name = "categoriaId", required = false) Long categoriaId,
-    HttpSession session
+    @RequestParam(name = "categoriaId", required = false) Long categoriaId
   ) {
-    if (!esAdministrador(session)) {
-      return REDIRECT_DENEGADO;
-    }
     servicioProducto.quitarStock(id, cantidad);
     if (categoriaId != null) {
       return "redirect:/admin/productos?categoriaId=" + categoriaId;
@@ -192,11 +172,5 @@ public class ControladorProducto {
       }
     }
     return producto.getCategorias().stream().findFirst().orElse(null);
-  }
-
-  private boolean esAdministrador(HttpSession session) {
-    Object rol = session.getAttribute("ROL");
-    if (rol == null) return false;
-    return "ADMIN".equalsIgnoreCase(rol.toString());
   }
 }

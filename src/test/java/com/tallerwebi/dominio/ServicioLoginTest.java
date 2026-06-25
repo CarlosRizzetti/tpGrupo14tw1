@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
@@ -13,20 +14,24 @@ import com.tallerwebi.dominio.interfaces.ServicioLogin;
 import com.tallerwebi.dominio.services.ServicioLoginImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class ServicioLoginTest {
 
   private ServicioLogin servicioLogin;
   private RepositorioUsuario repositorioUsuarioMock;
+  private BCryptPasswordEncoder passwordEncoderMock;
 
   @BeforeEach
   public void init() {
     this.repositorioUsuarioMock = mock(RepositorioUsuario.class);
-    this.servicioLogin = new ServicioLoginImpl(this.repositorioUsuarioMock);
+    this.passwordEncoderMock = mock(BCryptPasswordEncoder.class);
+    this.servicioLogin = new ServicioLoginImpl(this.repositorioUsuarioMock, passwordEncoderMock);
   }
 
   @Test
-  public void consultarUsuarioDeberiaLlamarAlRepositorio() throws UsuarioInactivo {
+  public void consultarUsuarioDeberiaLlamarAlRepositorio()
+    throws UsuarioInactivo, PasswordInvalida {
     // preparacion
     String email = "test@test.com";
     String password = "Valida123"; // Cumple con los nuevos requisitos
@@ -34,29 +39,29 @@ public class ServicioLoginTest {
     usuarioEsperado.setEmail(email);
     usuarioEsperado.setPassword(password);
     usuarioEsperado.setActivo(true);
-    when(this.repositorioUsuarioMock.buscarUsuario(email, password)).thenReturn(usuarioEsperado);
-
+    when(this.repositorioUsuarioMock.buscarUsuario(email)).thenReturn(usuarioEsperado);
+    when(this.passwordEncoderMock.matches(any(), anyString())).thenReturn(true);
     // ejecucion
     Usuario usuarioObtenido = this.servicioLogin.consultarUsuario(email, password);
 
     // validacion
     assertThat(usuarioObtenido, equalTo(usuarioEsperado));
-    verify(this.repositorioUsuarioMock, times(1)).buscarUsuario(email, password);
+    verify(this.repositorioUsuarioMock, times(1)).buscarUsuario(email);
   }
 
   @Test
-  public void consultarUsuarioDeberiaRetornarNullSiElRepositorioNoEncuentraAlUsuario()
-    throws UsuarioInactivo {
+  public void consultarUsuarioDeberialanzarExcepcionPasswordInvalidaSiElRepositorioNoEncuentraAlUsuario()
+    throws UsuarioInactivo, PasswordInvalida {
     // preparacion
     String email = "noexiste@test.com";
     String password = "Password123";
-    when(this.repositorioUsuarioMock.buscarUsuario(email, password)).thenReturn(null);
-
-    // ejecucion
-    Usuario usuarioObtenido = this.servicioLogin.consultarUsuario(email, password);
+    when(this.repositorioUsuarioMock.buscarUsuario(email)).thenReturn(null);
 
     // validacion
-    assertThat(usuarioObtenido, is(org.hamcrest.Matchers.nullValue()));
+    assertThrows(
+      PasswordInvalida.class,
+      () -> this.servicioLogin.consultarUsuario(email, password)
+    );
   }
 
   @Test
@@ -65,9 +70,10 @@ public class ServicioLoginTest {
     String email = "test@test.com";
     String password = "password";
     Usuario usuarioEsperado = new Usuario();
+    usuarioEsperado.setPassword(password);
     usuarioEsperado.setActivo(false);
-    when(this.repositorioUsuarioMock.buscarUsuario(email, password)).thenReturn(usuarioEsperado);
-
+    when(this.repositorioUsuarioMock.buscarUsuario(email)).thenReturn(usuarioEsperado);
+    when(this.passwordEncoderMock.matches(anyString(), anyString())).thenReturn(true);
     // ejecucion y validacion
     assertThrows(UsuarioInactivo.class, () -> this.servicioLogin.consultarUsuario(email, password));
   }
