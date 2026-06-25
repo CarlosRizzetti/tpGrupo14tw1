@@ -137,7 +137,7 @@ public class RepositorioUsuarioTest {
   }
 
   private Usuario cuandoBuscoUnUsuario(String email, String password) {
-    return repositorioUsuario.buscarUsuario(email, password);
+    return repositorioUsuario.buscarUsuario(email);
   }
 
   private Usuario cuandoObtengoUnUsuarioPorEmail(String email) {

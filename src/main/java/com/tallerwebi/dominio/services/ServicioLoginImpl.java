@@ -9,6 +9,7 @@ import com.tallerwebi.dominio.interfaces.ServicioLogin;
 import com.tallerwebi.dominio.utils.ValidadorPassword;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service("servicioLogin")
@@ -16,18 +17,27 @@ import org.springframework.stereotype.Service;
 public class ServicioLoginImpl implements ServicioLogin {
 
   private RepositorioUsuario repositorioUsuario;
+  private BCryptPasswordEncoder passwordEncoder;
 
   @Autowired
-  public ServicioLoginImpl(RepositorioUsuario repositorioUsuario) {
+  public ServicioLoginImpl(
+    RepositorioUsuario repositorioUsuario,
+    BCryptPasswordEncoder passwordEncoder
+  ) {
     this.repositorioUsuario = repositorioUsuario;
+    this.passwordEncoder = passwordEncoder;
   }
 
   @Override
-  public Usuario consultarUsuario(String email, String password) throws UsuarioInactivo {
-    Usuario usuario = repositorioUsuario.buscarUsuario(email, password);
-    if (usuario != null && !usuario.getActivo()) {
-      throw new UsuarioInactivo();
+  public Usuario consultarUsuario(String email, String password)
+    throws UsuarioInactivo, PasswordInvalida {
+    Usuario usuario = repositorioUsuario.buscarUsuario(email);
+
+    if (usuario == null || !passwordEncoder.matches(password, usuario.getPassword())) {
+      throw new PasswordInvalida("Usuario o clave incorrecta");
     }
+    if (!usuario.getActivo()) throw new UsuarioInactivo("El usuario está inactivo");
+
     return usuario;
   }
 
@@ -43,6 +53,7 @@ public class ServicioLoginImpl implements ServicioLogin {
     }
     usuario.setRol("USER");
     usuario.setActivo(false);
+    usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
     repositorioUsuario.guardar(usuario);
   }
 }

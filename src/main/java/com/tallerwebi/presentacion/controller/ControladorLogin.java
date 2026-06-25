@@ -1,6 +1,7 @@
 package com.tallerwebi.presentacion.controller;
 
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
 import com.tallerwebi.dominio.interfaces.ServicioLogin;
@@ -8,7 +9,9 @@ import com.tallerwebi.dominio.interfaces.ServicioValidacionIdentidad;
 import com.tallerwebi.presentacion.dto.LoginDto;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -35,15 +38,18 @@ public class ControladorLogin {
   }
 
   @RequestMapping("/")
-  public ModelAndView irALogin() {
-    ModelMap modelo = new ModelMap();
-    modelo.put("loginDto", new LoginDto());
-    return new ModelAndView("loginYRegistro/login", modelo);
+  public ModelAndView irALogin(Authentication authentication) {
+    if (authentication != null && authentication.isAuthenticated()) {
+      return new ModelAndView("redirect:/home");
+    }
+    return new ModelAndView("redirect:/login");
   }
 
   @RequestMapping("/login")
   public ModelAndView login() {
-    return new ModelAndView("redirect:/");
+    ModelMap modelo = new ModelMap();
+    modelo.put("loginDto", new LoginDto());
+    return new ModelAndView("loginYRegistro/login", modelo);
   }
 
   @RequestMapping(path = "/validar-login", method = RequestMethod.POST)
@@ -69,6 +75,8 @@ public class ControladorLogin {
       ModelMap model = new ModelMap();
       model.put(ERROR, "El usuario está inactivo");
       return new ModelAndView("loginYRegistro/login", model);
+    } catch (PasswordInvalida e) {
+        throw new RuntimeException(e);
     }
   }
 

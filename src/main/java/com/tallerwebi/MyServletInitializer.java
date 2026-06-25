@@ -3,6 +3,7 @@ package com.tallerwebi;
 import com.tallerwebi.config.DatabaseInitializationConfig;
 import com.tallerwebi.config.HibernateConfig;
 import com.tallerwebi.config.MailConfig;
+import com.tallerwebi.config.SecurityConfig;
 import com.tallerwebi.config.SpringWebConfig;
 import java.util.Collections;
 import javax.servlet.ServletContext;
@@ -32,6 +33,7 @@ public class MyServletInitializer extends AbstractAnnotationConfigDispatcherServ
       HibernateConfig.class,
       DatabaseInitializationConfig.class,
       MailConfig.class,
+      SecurityConfig.class,
     };
   }
 
