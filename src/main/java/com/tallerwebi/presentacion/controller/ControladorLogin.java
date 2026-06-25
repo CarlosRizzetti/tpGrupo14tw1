@@ -9,7 +9,6 @@ import com.tallerwebi.dominio.interfaces.ServicioValidacionIdentidad;
 import com.tallerwebi.presentacion.dto.LoginDto;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -76,7 +75,7 @@ public class ControladorLogin {
       model.put(ERROR, "El usuario está inactivo");
       return new ModelAndView("loginYRegistro/login", model);
     } catch (PasswordInvalida e) {
-        throw new RuntimeException(e);
+      throw new RuntimeException(e);
     }
   }
 
