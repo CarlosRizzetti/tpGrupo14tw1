@@ -4,6 +4,7 @@ import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.entity.enums.TipoMovimientoStock;
 import com.tallerwebi.dominio.interfaces.RepositorioReglaVencimiento;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
@@ -58,7 +59,8 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
     Categoria categoria,
     Long reglaId,
     Integer offsetMinutos,
-    Integer cantidadUsada
+    Integer cantidadUsada,
+    Usuario usuario
   ) {
     ReglaVencimiento regla = repositorioReglaVencimiento.obtenerReglaVencimientoPorId(reglaId);
     if (regla == null) {
@@ -79,7 +81,8 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
       producto,
       categoria,
       regla,
-      cantidadUsada
+      cantidadUsada,
+      usuario
     );
     repositorioTimer.guardar(timer);
 

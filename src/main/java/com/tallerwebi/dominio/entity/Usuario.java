@@ -1,7 +1,7 @@
 package com.tallerwebi.dominio.entity;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.io.Serializable;
+import java.util.List;
 import javax.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +11,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-public class Usuario {
+public class Usuario implements Serializable {
+
+  private static final long serialVersionUID = 1L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,8 +21,12 @@ public class Usuario {
 
   private String email;
   private String password;
+  private String nombre;
   private String rol;
   private String tokenValidacion;
+
+  @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<Timer> timers;
 
   private Boolean activo = false;
 

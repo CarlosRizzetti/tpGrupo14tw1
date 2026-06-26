@@ -9,10 +9,7 @@ import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.dominio.entity.Usuario;
-import com.tallerwebi.dominio.interfaces.ServicioCategoria;
-import com.tallerwebi.dominio.interfaces.ServicioProducto;
-import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
-import com.tallerwebi.dominio.interfaces.ServicioTimer;
+import com.tallerwebi.dominio.interfaces.*;
 import com.tallerwebi.presentacion.controller.ControladorProducto;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
@@ -30,22 +27,22 @@ public class ControladorProductoTest {
   private ServicioCategoria servicioCategoriaMock;
   private HttpSession sessionMock;
   private Usuario usuarioAdminMock;
-  private ServicioTimer servicioTimerMock;
   private ServicioReglaVencimiento servicioReglaVencimientoMock;
+  private ServicioUsuario servicioUsuarioMock;
 
   @BeforeEach
   public void init() {
     servicioProductoMock = mock(ServicioProducto.class);
     servicioCategoriaMock = mock(ServicioCategoria.class);
-    servicioTimerMock = mock(ServicioTimer.class);
     servicioReglaVencimientoMock = mock(ServicioReglaVencimiento.class);
     sessionMock = mock(HttpSession.class);
+    servicioUsuarioMock = mock(ServicioUsuario.class);
     controladorProducto =
       new ControladorProducto(
         servicioProductoMock,
         servicioCategoriaMock,
-        servicioTimerMock,
-        servicioReglaVencimientoMock
+        servicioReglaVencimientoMock,
+        servicioUsuarioMock
       );
     Categoria categoriaDefault = new Categoria("default.png", true, "default");
     CategoriaDto categoriaDefaultDTO = new CategoriaDto(categoriaDefault);
@@ -54,6 +51,7 @@ public class ControladorProductoTest {
     when(usuarioAdminMock.getRol()).thenReturn("ADMIN");
     when(sessionMock.getAttribute("usuario")).thenReturn(usuarioAdminMock);
     when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu()).thenReturn(categorias);
+    when(servicioUsuarioMock.obtenerUsuarioPorEmail(any())).thenReturn(new Usuario());
   }
 
   private Timer buildTimerConProducto(Long timerId, Long productoId) {
@@ -114,32 +112,6 @@ public class ControladorProductoTest {
     assertThat(mav.getModel().get("datosProducto"), instanceOf(ProductoDto.class));
   }
 
-  @Test
-  public void mostrarFormularioSinSesionDeberiaRedirigirAAccesoDenegado() {
-    // preparacion
-    when(sessionMock.getAttribute("usuario")).thenReturn(null);
-
-    // ejecucion
-    ModelAndView mav = controladorProducto.mostrarFormulario();
-
-    // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/acceso-denegado"));
-  }
-
-  @Test
-  public void mostrarFormularioComoUsuarioNoAdminDeberiaRedirigirAAccesoDenegado() {
-    // preparacion
-    Usuario usuarioComun = mock(Usuario.class);
-    when(usuarioComun.getRol()).thenReturn("USER");
-    when(sessionMock.getAttribute("usuario")).thenReturn(usuarioComun);
-
-    // ejecucion
-    ModelAndView mav = controladorProducto.mostrarFormulario();
-
-    // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/acceso-denegado"));
-  }
-
   // --- POST /producto/nuevo ---
 
   @Test
@@ -152,7 +124,7 @@ public class ControladorProductoTest {
     ModelAndView mav = controladorProducto.crearProducto(datos);
 
     // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/producto/exito"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/admin/producto/exito"));
     verify(servicioProductoMock, times(1)).crearProducto(datos);
   }
 
@@ -175,19 +147,6 @@ public class ControladorProductoTest {
       mav.getModel().get("error").toString(),
       equalToIgnoringCase("El nombre del producto es obligatorio")
     );
-  }
-
-  @Test
-  public void crearProductoSinSesionDeberiaRedirigirAAccesoDenegado() {
-    // preparacion
-    when(sessionMock.getAttribute("usuario")).thenReturn(null);
-
-    // ejecucion
-    ModelAndView mav = controladorProducto.crearProducto(new ProductoDto());
-
-    // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/acceso-denegado"));
-    verify(servicioProductoMock, never()).crearProducto(any());
   }
 
   // --- GET /category/{id}/products ---

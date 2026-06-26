@@ -1,6 +1,10 @@
 package com.tallerwebi;
 
-import com.tallerwebi.config.*;
+import com.tallerwebi.config.DatabaseInitializationConfig;
+import com.tallerwebi.config.HibernateConfig;
+import com.tallerwebi.config.MailConfig;
+import com.tallerwebi.config.SecurityConfig;
+import com.tallerwebi.config.SpringWebConfig;
 import java.util.Collections;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
