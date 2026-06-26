@@ -5,6 +5,7 @@ import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import java.util.List;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 
 @Repository("RepositorioTimer")
@@ -19,13 +20,47 @@ public class RepositorioTimerImpl implements RepositorioTimer {
   @Override
   public List<Timer> obtenerTimersSegunEstado(Long id, EstadoTimer estado) {
     String hql =
-      "FROM Timer t JOIN FETCH t.producto JOIN FETCH t.categoria WHERE t.estado = :estado AND t.categoria.id = :idCat ORDER BY t.fechaVencimiento ASC";
+      "FROM Timer t JOIN FETCH t.producto JOIN FETCH t.categoria WHERE t.estado = :estado AND t.categoria.id = :idCat ORDER BY t.cicloVida.fechaVencimiento ASC";
     return sessionFactory
       .getCurrentSession()
       .createQuery(hql, Timer.class)
       .setParameter("estado", estado)
       .setParameter("idCat", id)
       .list();
+  }
+
+  @Override
+  public List<Timer> obtenerTodosLosTimers() {
+    String hql = "FROM Timer t ORDER BY t.cicloVida.fechaCreacion";
+    return sessionFactory.getCurrentSession().createQuery(hql, Timer.class).list();
+  }
+
+  @Override
+  public List<Timer> obtenerTimersConFiltro(EstadoTimer estado, Long categoriaId) {
+    StringBuilder hql = new StringBuilder("FROM Timer t WHERE 1=1");
+
+    if (estado != null) {
+      hql.append(" AND t.estado = :estado");
+    }
+
+    if (categoriaId != null) {
+      hql.append(" AND t.categoria.id = :categoriaId");
+    }
+    hql.append(" ORDER BY t.cicloVida.fechaCreacion DESC");
+
+    Query<Timer> query = sessionFactory
+      .getCurrentSession()
+      .createQuery(hql.toString(), Timer.class);
+
+    if (estado != null) {
+      query.setParameter("estado", estado);
+    }
+
+    if (categoriaId != null) {
+      query.setParameter("categoriaId", categoriaId);
+    }
+
+    return query.list();
   }
 
   @Override
