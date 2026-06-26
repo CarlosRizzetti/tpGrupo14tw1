@@ -1,7 +1,5 @@
 package com.tallerwebi.dominio.entity;
 
-import java.io.Serializable;
-import java.util.List;
 import javax.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,9 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Entity
-public class Usuario implements Serializable {
-
-  private static final long serialVersionUID = 1L;
+public class Usuario {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
