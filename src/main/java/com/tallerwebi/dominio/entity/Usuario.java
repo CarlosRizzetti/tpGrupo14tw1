@@ -1,5 +1,6 @@
 package com.tallerwebi.dominio.entity;
 
+import java.util.List;
 import javax.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
