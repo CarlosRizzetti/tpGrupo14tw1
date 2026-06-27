@@ -3,10 +3,11 @@ package com.tallerwebi.presentacion.controller;
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
+import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
-import com.tallerwebi.dominio.interfaces.ServicioTimer;
+import com.tallerwebi.dominio.interfaces.ServicioUsuario;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.List;
@@ -14,6 +15,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -25,21 +28,21 @@ public class ControladorProducto {
   private static final Logger LOGGER = Logger.getLogger(ControladorProducto.class.getName());
   private final ServicioProducto servicioProducto;
   private final ServicioCategoria servicioCategoria;
-  private final ServicioTimer servicioTimer;
   private final ServicioReglaVencimiento servicioReglaVencimiento;
   private static final String CATEGORIA = "categoria";
+  private final ServicioUsuario servicioUsuario;
 
   @Autowired
   public ControladorProducto(
     ServicioProducto servicioProducto,
     ServicioCategoria servicioCategoria,
-    ServicioTimer servicioTimer,
-    ServicioReglaVencimiento servicioReglaVencimiento
+    ServicioReglaVencimiento servicioReglaVencimiento,
+    ServicioUsuario servicioUsuario
   ) {
     this.servicioProducto = servicioProducto;
     this.servicioCategoria = servicioCategoria;
-    this.servicioTimer = servicioTimer;
     this.servicioReglaVencimiento = servicioReglaVencimiento;
+    this.servicioUsuario = servicioUsuario;
   }
 
   // GET — mostrar el formulario
@@ -145,16 +148,19 @@ public class ControladorProducto {
     @RequestParam("offset_minutes") Integer offsetMinutes,
     @RequestParam(name = "categoryId", required = false) Long categoryId,
     @RequestParam(name = "reglaId") Long reglaId,
-    @RequestParam(name = "cantidad") Integer cantidad
+    @RequestParam(name = "cantidad") Integer cantidad,
+    @AuthenticationPrincipal User usuarioLogueado
   ) {
     Producto producto = servicioProducto.obtenerProductoConReglas(id);
     Categoria categoria = determinarCategoria(producto, categoryId);
+    Usuario usuario = servicioUsuario.obtenerUsuarioPorEmail(usuarioLogueado.getUsername());
     servicioReglaVencimiento.generarVencimiento(
       producto,
       categoria,
       reglaId,
       offsetMinutes,
-      cantidad
+      cantidad,
+      usuario
     );
 
     return "redirect:/dashboard";

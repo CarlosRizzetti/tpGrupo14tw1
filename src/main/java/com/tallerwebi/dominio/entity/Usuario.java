@@ -1,5 +1,6 @@
 package com.tallerwebi.dominio.entity;
 
+import java.util.List;
 import javax.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,8 +18,12 @@ public class Usuario {
 
   private String email;
   private String password;
+  private String nombre;
   private String rol;
   private String tokenValidacion;
+
+  @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<Timer> timers;
 
   private Boolean activo = false;
 

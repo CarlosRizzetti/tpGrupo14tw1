@@ -4,6 +4,7 @@ import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.entity.Usuario;
 
 public interface ServicioReglaVencimiento {
   void guardarReglaVencimiento(ReglaVencimiento reglaVencimiento);
@@ -13,6 +14,7 @@ public interface ServicioReglaVencimiento {
     Categoria categoria,
     Long reglaId,
     Integer offsetMinutos,
-    Integer cantidadUsada
+    Integer cantidadUsada,
+    Usuario usuario
   );
 }

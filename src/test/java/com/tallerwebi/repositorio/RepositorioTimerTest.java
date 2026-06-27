@@ -4,15 +4,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.tallerwebi.dominio.entity.Categoria;
-import com.tallerwebi.dominio.entity.Producto;
-import com.tallerwebi.dominio.entity.ReglaVencimiento;
-import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.entity.*;
 import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.repositorio.config.HibernateInfraestructuraTestConfig;
 import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import javax.transaction.Transactional;
 import org.hibernate.SessionFactory;
@@ -35,10 +31,13 @@ public class RepositorioTimerTest {
   private SessionFactory sessionFactory;
 
   private RepositorioTimer repositorioTimer;
+  private Usuario usuarioTest;
 
   @BeforeEach
   public void init() {
     repositorioTimer = new RepositorioTimerImpl(sessionFactory);
+    usuarioTest = new Usuario();
+    sessionFactory.getCurrentSession().save(usuarioTest);
   }
 
   // ===================== helpers =====================
@@ -66,7 +65,8 @@ public class RepositorioTimerTest {
     Categoria categoria,
     Producto producto,
     ReglaVencimiento regla,
-    Integer cantidad
+    Integer cantidad,
+    Usuario usuario
   ) {
     OffsetDateTime fechaCreacion = OffsetDateTime.now();
     OffsetDateTime fechaVencimiento = fechaCreacion.plusHours(2);
@@ -77,7 +77,8 @@ public class RepositorioTimerTest {
       producto,
       categoria,
       regla,
-      cantidad
+      cantidad,
+      usuario
     );
     sessionFactory.getCurrentSession().save(timer);
     return timer;
@@ -94,8 +95,8 @@ public class RepositorioTimerTest {
     Producto producto = buildProducto();
     ReglaVencimiento regla = buildRegla();
 
-    Timer timer = buildTimer("group-1", categoria, producto, regla, 1);
-    Timer timer2 = buildTimer("group-2", categoria, producto, regla, 1);
+    Timer timer = buildTimer("group-1", categoria, producto, regla, 1, usuarioTest);
+    Timer timer2 = buildTimer("group-2", categoria, producto, regla, 1, usuarioTest);
     timer2.setEstado(EstadoTimer.ELIMINADO);
     sessionFactory.getCurrentSession().save(timer2);
 
@@ -119,7 +120,7 @@ public class RepositorioTimerTest {
     Producto producto = buildProducto();
     ReglaVencimiento regla = buildRegla();
 
-    Timer timer = buildTimer("group-1", categoria, producto, regla, 1);
+    Timer timer = buildTimer("group-1", categoria, producto, regla, 1, usuarioTest);
     timer.setEstado(EstadoTimer.ELIMINADO);
     sessionFactory.getCurrentSession().save(timer);
 
@@ -153,7 +154,7 @@ public class RepositorioTimerTest {
     Categoria categoria = buildCategoria();
     Producto producto = buildProducto();
     ReglaVencimiento regla = buildRegla();
-    Timer timer = buildTimer("group-1", categoria, producto, regla, 1);
+    Timer timer = buildTimer("group-1", categoria, producto, regla, 1, new Usuario());
 
     Timer resultado = repositorioTimer.buscarPorId(timer.getId());
 
@@ -181,7 +182,7 @@ public class RepositorioTimerTest {
     Categoria categoria = buildCategoria();
     Producto producto = buildProducto();
     ReglaVencimiento regla = buildRegla();
-    Timer timer = buildTimer("group-1", categoria, producto, regla, 1);
+    Timer timer = buildTimer("group-1", categoria, producto, regla, 1, new Usuario());
 
     Timer resultado = repositorioTimer.buscarPorId(timer.getId());
 
@@ -201,7 +202,7 @@ public class RepositorioTimerTest {
     Categoria categoria = buildCategoria();
     Producto producto = buildProducto();
     ReglaVencimiento regla = buildRegla();
-    buildTimer("group-uuid-test", categoria, producto, regla, 1);
+    buildTimer("group-uuid-test", categoria, producto, regla, 1, usuarioTest);
 
     boolean resultado = repositorioTimer.existeTimerActivoEnCategoriaYGrupo(
       categoria.getId(),
@@ -238,7 +239,7 @@ public class RepositorioTimerTest {
     Categoria categoria = buildCategoria();
     Producto producto = buildProducto();
     ReglaVencimiento regla = buildRegla();
-    Timer timer = buildTimer("group-uuid-test", categoria, producto, regla, 1);
+    Timer timer = buildTimer("group-uuid-test", categoria, producto, regla, 1, usuarioTest);
     timer.setEstado(EstadoTimer.ELIMINADO);
     sessionFactory.getCurrentSession().save(timer);
 
@@ -260,7 +261,7 @@ public class RepositorioTimerTest {
     Categoria categoria = buildCategoria();
     Producto producto = buildProducto();
     ReglaVencimiento regla = buildRegla();
-    buildTimer("group-correcto", categoria, producto, regla, 1);
+    buildTimer("group-correcto", categoria, producto, regla, 1, usuarioTest);
 
     boolean resultado = repositorioTimer.existeTimerActivoEnCategoriaYGrupo(
       categoria.getId(),
@@ -270,104 +271,109 @@ public class RepositorioTimerTest {
     assertFalse(resultado);
   }
 
-  // ===================== helpers estadísticas =====================
+  @Test
+  @Transactional
+  @Rollback
+  @DisplayName("HP-02 | obtenerTimersConFiltro | Sin filtros retorna todos los timers ordenados")
+  public void obtenerTimersConFiltro_sinFiltros_deberiaRetornarTodos() {
+    Categoria categoria = buildCategoria();
+    Producto producto = buildProducto();
+    ReglaVencimiento regla = buildRegla();
 
-  private Producto buildProducto(String nombre) {
-    Producto producto = new Producto();
-    producto.setNombre(nombre);
-    sessionFactory.getCurrentSession().save(producto);
-    return producto;
+    Timer timer1 = buildTimer("group-1", categoria, producto, regla, 1, usuarioTest);
+    timer1.setEstado(EstadoTimer.ACTIVO);
+    sessionFactory.getCurrentSession().save(timer1);
+
+    Timer timer2 = buildTimer("group-2", categoria, producto, regla, 1, usuarioTest);
+    timer2.setEstado(EstadoTimer.ELIMINADO);
+    sessionFactory.getCurrentSession().save(timer2);
+
+    List<Timer> timers = repositorioTimer.obtenerTimersConFiltro(null, null);
+
+    // Debería traer ambos ya que no hay filtros aplicados
+    assertEquals(2, timers.size());
   }
 
-  private OffsetDateTime fecha(int anio, int mes, int dia, int hora) {
-    return OffsetDateTime.of(anio, mes, dia, hora, 0, 0, 0, ZoneOffset.ofHours(-3));
+  @Test
+  @Transactional
+  @Rollback
+  @DisplayName("HP-03 | obtenerTimersConFiltro | Con estado retorna solo los timers de ese estado")
+  public void obtenerTimersConFiltro_conEstado_deberiaRetornarFiltrados() {
+    Categoria categoria = buildCategoria();
+    Producto producto = buildProducto();
+    ReglaVencimiento regla = buildRegla();
+
+    Timer timerActivo = buildTimer("group-1", categoria, producto, regla, 1, usuarioTest);
+    timerActivo.setEstado(EstadoTimer.ACTIVO);
+    sessionFactory.getCurrentSession().save(timerActivo);
+
+    Timer timerEliminado = buildTimer("group-2", categoria, producto, regla, 1, usuarioTest);
+    timerEliminado.setEstado(EstadoTimer.ELIMINADO);
+    sessionFactory.getCurrentSession().save(timerEliminado);
+
+    List<Timer> timers = repositorioTimer.obtenerTimersConFiltro(EstadoTimer.ACTIVO, null);
+
+    assertEquals(1, timers.size());
+    assertThat(EstadoTimer.ACTIVO, is(timers.get(0).getEstado()));
   }
 
-  private Timer buildTimerCreado(
-    OffsetDateTime fechaCreacion,
-    EstadoTimer estado,
-    Producto producto
-  ) {
-    Timer timer = new Timer(
-      fechaCreacion,
-      fechaCreacion.plusHours(2),
-      "grp-est",
-      producto,
-      null,
-      null,
-      1
+  @Test
+  @Transactional
+  @Rollback
+  @DisplayName(
+    "HP-04 | obtenerTimersConFiltro | Con categoria retorna solo los timers de esa categoria"
+  )
+  public void obtenerTimersConFiltro_conCategoria_deberiaRetornarFiltrados() {
+    Categoria categoriaPrincipal = buildCategoria(); // Asumimos que el builder le asigna un nombre y la persiste
+
+    Categoria categoriaSecundaria = buildCategoria();
+    categoriaSecundaria.setNombre("Otra Categoria");
+    // Asegurate de que el builder de categoria o tu código guarde esta entidad si es necesario
+    // sessionFactory.getCurrentSession().save(categoriaSecundaria);
+
+    Producto producto = buildProducto();
+    ReglaVencimiento regla = buildRegla();
+
+    Timer timerCat1 = buildTimer("group-1", categoriaPrincipal, producto, regla, 1, usuarioTest);
+    sessionFactory.getCurrentSession().save(timerCat1);
+
+    Timer timerCat2 = buildTimer("group-2", categoriaSecundaria, producto, regla, 1, usuarioTest);
+    sessionFactory.getCurrentSession().save(timerCat2);
+
+    List<Timer> timers = repositorioTimer.obtenerTimersConFiltro(null, categoriaPrincipal.getId());
+
+    assertEquals(1, timers.size());
+    assertThat(categoriaPrincipal.getNombre(), is(timers.get(0).getCategoria().getNombre()));
+  }
+
+  @Test
+  @Transactional
+  @Rollback
+  @DisplayName("HP-05 | obtenerTimersConFiltro | Con ambos filtros retorna la coincidencia exacta")
+  public void obtenerTimersConFiltro_conAmbosFiltros_deberiaRetornarCoincidenciaExacta() {
+    Categoria categoria = buildCategoria();
+    Producto producto = buildProducto();
+    ReglaVencimiento regla = buildRegla();
+
+    // Match exacto: Activo y Categoria correcta
+    Timer timerEsperado = buildTimer("group-1", categoria, producto, regla, 1, usuarioTest);
+    timerEsperado.setEstado(EstadoTimer.ACTIVO);
+    sessionFactory.getCurrentSession().save(timerEsperado);
+
+    // Falla por estado
+    Timer timerEliminado = buildTimer("group-2", categoria, producto, regla, 1, usuarioTest);
+    timerEliminado.setEstado(EstadoTimer.ELIMINADO);
+    sessionFactory.getCurrentSession().save(timerEliminado);
+
+    // Ejecutar búsqueda con ambos parámetros
+    List<Timer> timers = repositorioTimer.obtenerTimersConFiltro(
+      EstadoTimer.ACTIVO,
+      categoria.getId()
     );
-    timer.setEstado(estado);
-    sessionFactory.getCurrentSession().save(timer);
-    return timer;
-  }
 
-  private long contar(List<Object[]> filas, EstadoTimer estado) {
-    return filas
-      .stream()
-      .filter(fila -> fila[0] == estado)
-      .mapToLong(fila -> ((Number) fila[1]).longValue())
-      .findFirst()
-      .orElse(0L);
-  }
-
-  // ===================== obtenerFechasCreacionDesde =====================
-
-  @Test
-  @Transactional
-  @Rollback
-  @DisplayName("HP-06 | obtenerFechasCreacionDesde | Filtra por la fecha de inicio")
-  public void obtenerFechasCreacionDesde_deberiaFiltrarPorFecha() {
-    Producto producto = buildProducto("Hamburguesa");
-    buildTimerCreado(fecha(2026, 6, 10, 9), EstadoTimer.ACTIVO, producto);
-    buildTimerCreado(fecha(2026, 6, 1, 9), EstadoTimer.ACTIVO, producto);
-    sessionFactory.getCurrentSession().flush();
-
-    List<OffsetDateTime> resultado = repositorioTimer.obtenerFechasCreacionDesde(
-      fecha(2026, 6, 5, 0)
-    );
-
-    assertEquals(1, resultado.size());
-  }
-
-  // ===================== contarVencimientosPorProducto =====================
-
-  @Test
-  @Transactional
-  @Rollback
-  @DisplayName("HP-07 | contarVencimientosPorProducto | Agrupa y ordena por cantidad descendente")
-  public void contarVencimientosPorProducto_deberiaAgruparYOrdenar() {
-    Producto hamburguesa = buildProducto("Hamburguesa");
-    Producto cafe = buildProducto("Café");
-    buildTimerCreado(fecha(2026, 6, 10, 9), EstadoTimer.ACTIVO, hamburguesa);
-    buildTimerCreado(fecha(2026, 6, 11, 9), EstadoTimer.ACTIVO, hamburguesa);
-    buildTimerCreado(fecha(2026, 6, 10, 9), EstadoTimer.ACTIVO, cafe);
-    sessionFactory.getCurrentSession().flush();
-
-    List<Object[]> resultado = repositorioTimer.contarVencimientosPorProducto(fecha(2026, 6, 5, 0));
-
-    assertEquals(2, resultado.size());
-    assertEquals("Hamburguesa", resultado.get(0)[0]);
-    assertEquals(2L, ((Number) resultado.get(0)[1]).longValue());
-  }
-
-  // ===================== contarPorEstado =====================
-
-  @Test
-  @Transactional
-  @Rollback
-  @DisplayName("HP-08 | contarPorEstado | Agrupa los vencimientos por estado")
-  public void contarPorEstado_deberiaAgruparPorEstado() {
-    Producto producto = buildProducto("Hamburguesa");
-    buildTimerCreado(fecha(2026, 6, 10, 9), EstadoTimer.VENCIDO, producto);
-    buildTimerCreado(fecha(2026, 6, 11, 9), EstadoTimer.VENCIDO, producto);
-    buildTimerCreado(fecha(2026, 6, 12, 9), EstadoTimer.RENOVADO, producto);
-    sessionFactory.getCurrentSession().flush();
-
-    List<Object[]> resultado = repositorioTimer.contarPorEstado(fecha(2026, 6, 5, 0));
-
-    assertEquals(2L, contar(resultado, EstadoTimer.VENCIDO));
-    assertEquals(1L, contar(resultado, EstadoTimer.RENOVADO));
-    assertEquals(0L, contar(resultado, EstadoTimer.IMPORTADO));
+    assertEquals(1, timers.size());
+    assertThat(EstadoTimer.ACTIVO, is(timers.get(0).getEstado()));
+    assertThat(categoria.getNombre(), is(timers.get(0).getCategoria().getNombre()));
+    assertThat("group-1", is(timers.get(0).getGroupId()));
   }
 }

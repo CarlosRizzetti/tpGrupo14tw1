@@ -13,4 +13,5 @@ public interface ServicioUsuario {
   void editarUsuario(Long id, UsuarioDto dto) throws PasswordInvalida;
   void darDeBaja(Long id);
   void reactivar(Long id);
+  Usuario obtenerUsuarioPorEmail(String email);
 }
