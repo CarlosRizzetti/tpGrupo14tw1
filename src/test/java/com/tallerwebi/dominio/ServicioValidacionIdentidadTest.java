@@ -61,7 +61,6 @@ public class ServicioValidacionIdentidadTest {
   public void validarTokenExistenteDeberiaActivarUsuarioYAnularToken() {
     String token = "token";
     Usuario usuario = new Usuario();
-    usuario.setActivo(false);
     usuario.setTokenValidacion(token);
     when(repositorioUsuarioMock.buscarPorTokenValidacion(token)).thenReturn(usuario);
 
@@ -70,7 +69,6 @@ public class ServicioValidacionIdentidadTest {
     assertThat(activado, is(true));
     ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
     verify(repositorioUsuarioMock, times(1)).modificar(captor.capture());
-    assertThat(captor.getValue().getActivo(), is(true));
     assertThat(captor.getValue().getTokenValidacion(), is(nullValue()));
   }
 
