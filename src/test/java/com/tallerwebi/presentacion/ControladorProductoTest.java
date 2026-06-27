@@ -1,8 +1,12 @@
 package com.tallerwebi.presentacion;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Categoria;
@@ -16,6 +20,7 @@ import com.tallerwebi.dominio.interfaces.ServicioTimer;
 import com.tallerwebi.presentacion.controller.ControladorProducto;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpSession;
@@ -171,4 +176,68 @@ public class ControladorProductoTest {
     assertThat((List<?>) mav.getModel().get("productos"), hasSize(1));
     verify(servicioProductoMock, times(1)).obtenerProductosPorCategoria(categoriaId);
   }
+
+  @Test
+  public void deberiaRetornarVistaExito() {
+    ModelAndView modelAndView = controladorProducto.exito();
+
+    assertNotNull(modelAndView);
+    assertEquals("funcionalidadesAdmin/producto/exito", modelAndView.getViewName());
+  }
+
+  @Test
+  public void deberiaMostrarLaPantallaDeGestionDeProductos() {
+    Long categoriaId = 1L;
+
+    List<Producto> productos = Arrays.asList(new Producto(), new Producto());
+
+    List<CategoriaDto> categorias = Arrays.asList(new CategoriaDto(), new CategoriaDto());
+
+    when(servicioProductoMock.listarProductos(categoriaId)).thenReturn(productos);
+
+    when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu()).thenReturn(categorias);
+
+    // when
+    ModelAndView modelAndView = controladorProducto.gestionProductos(categoriaId);
+
+    // then
+    assertEquals("funcionalidadesAdmin/producto/gestion", modelAndView.getViewName());
+
+    assertEquals(productos, modelAndView.getModel().get("productos"));
+
+    assertEquals(categorias, modelAndView.getModel().get("categorias"));
+
+    assertEquals(categoriaId, modelAndView.getModel().get("categoriaSeleccionada"));
+
+    verify(servicioProductoMock).listarProductos(categoriaId);
+    verify(servicioCategoriaMock).obtenerLasCategoriasParaElMenu();
+  }
+  /*
+  @Test
+  public void deberiaGenerarUnVencimientoYRedirigir() {
+    Long productoId = 1L;
+    Integer offSetMinutes = 5;
+    Long categoriaId = 2L;
+    Long reglaId = 4L;
+    Integer cantidad = 20;
+
+    // when
+    Producto producto = servicioProductoMock.obtenerProductoPorId(productoId);
+
+    Categoria categoria1 = new Categoria();
+
+    servicioReglaVencimientoMock.generarVencimiento(
+      producto,
+      categoria1,
+      reglaId,
+      offSetMinutes,
+      cantidad
+    );
+
+    // then
+    //  assertEquals("redirect:/admin/productos?categoriaId=" + categoriaId, redirectUrl);
+    verify(servicioProductoMock).agregarStock(productoId, cantidad);
+  }
+
+ */
 }

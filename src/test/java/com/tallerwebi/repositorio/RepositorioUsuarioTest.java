@@ -178,4 +178,36 @@ public class RepositorioUsuarioTest {
       }
     );
   }
+
+  @Test
+  @Transactional
+  @Rollback
+  public void deberiaListarUsuariosPorCategoria() {
+    // 1. Create a category
+    com.tallerwebi.dominio.entity.Categoria categoria =
+      new com.tallerwebi.dominio.entity.Categoria();
+    categoria.setNombre("Prueba");
+    categoria.setEstaActiva(true);
+    sessionFactory.getCurrentSession().save(categoria);
+
+    // 2. Create users and assign category
+    Usuario u1 = dadoQueTengoUnUsuario("u1@test.com", "123", "USER");
+    u1.getCategorias().add(categoria);
+    repositorioUsuario.guardar(u1);
+
+    Usuario u2 = dadoQueTengoUnUsuario("u2@test.com", "123", "USER");
+    u2.getCategorias().add(categoria);
+    repositorioUsuario.guardar(u2);
+
+    Usuario u3 = dadoQueTengoUnUsuario("u3@test.com", "123", "USER");
+    repositorioUsuario.guardar(u3);
+
+    // 3. Execute
+    java.util.List<Usuario> usuarios = repositorioUsuario.listarLosUsuariosDeLasCategorias(
+      categoria.getId()
+    );
+
+    // 4. Validate
+    assertThat(usuarios.size(), is(2));
+  }
 }
