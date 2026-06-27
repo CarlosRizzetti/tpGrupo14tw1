@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Usuario;
-import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
 import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
@@ -134,14 +133,14 @@ public class ServicioUsuarioTest {
   public void darDeBajaDeberiaDesactivarElUsuario() {
     // preparacion
     Usuario usuario = new Usuario();
-    usuario.setEstado(EstadoUsuario.ACTIVO);
+    usuario.setActivo(true);
     when(repositorioUsuarioMock.obtenerPorId(1L)).thenReturn(usuario);
 
     // ejecucion
     servicioUsuario.darDeBaja(1L);
 
     // validacion
-    assertThat(usuario.getEstado(), is(EstadoUsuario.BAJA));
+    assertThat(usuario.getActivo(), is(false));
     verify(repositorioUsuarioMock, times(1)).modificar(usuario);
   }
 
@@ -215,14 +214,14 @@ public class ServicioUsuarioTest {
   public void reactivarDeberiaActivarElUsuario() {
     // preparacion
     Usuario usuario = new Usuario();
-    usuario.setEstado(EstadoUsuario.BAJA);
+    usuario.setActivo(false);
     when(repositorioUsuarioMock.obtenerPorId(1L)).thenReturn(usuario);
 
     // ejecucion
     servicioUsuario.reactivar(1L);
 
     // validacion
-    assertThat(usuario.getEstado(), is(EstadoUsuario.ACTIVO));
+    assertThat(usuario.getActivo(), is(true));
     verify(repositorioUsuarioMock, times(1)).modificar(usuario);
   }
 

@@ -28,9 +28,6 @@ public class Categoria implements Comparable<Categoria> {
   @ManyToMany(mappedBy = "categorias")
   private List<Producto> productos = new ArrayList<>();
 
-  @ManyToMany(mappedBy = "categorias")
-  private List<Usuario> usuarios = new ArrayList<>();
-
   public Categoria(String icono, Boolean estaActiva, String nombre) {
     this.icono = icono;
     this.nombre = nombre;

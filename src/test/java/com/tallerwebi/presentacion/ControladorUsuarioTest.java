@@ -7,7 +7,6 @@ import static org.mockito.Mockito.*;
 import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
-import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
 import com.tallerwebi.presentacion.controller.ControladorUsuario;
 import com.tallerwebi.presentacion.dto.UsuarioDto;
@@ -22,15 +21,13 @@ public class ControladorUsuarioTest {
 
   private ControladorUsuario controladorUsuario;
   private ServicioUsuario servicioUsuarioMock;
-  private ServicioCategoria servicioCategoriaMock;
   private HttpSession sessionMock;
 
   @BeforeEach
   public void init() {
     servicioUsuarioMock = mock(ServicioUsuario.class);
-    servicioCategoriaMock = mock(ServicioCategoria.class);
     sessionMock = mock(HttpSession.class);
-    controladorUsuario = new ControladorUsuario(servicioUsuarioMock, servicioCategoriaMock);
+    controladorUsuario = new ControladorUsuario(servicioUsuarioMock);
     when(sessionMock.getAttribute("ROL")).thenReturn("ADMIN");
   }
 
