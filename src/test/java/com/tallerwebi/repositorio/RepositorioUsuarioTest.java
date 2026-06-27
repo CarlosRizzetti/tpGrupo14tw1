@@ -7,7 +7,6 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.tallerwebi.dominio.entity.Usuario;
-import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import com.tallerwebi.repositorio.config.HibernateInfraestructuraTestConfig;
 import javax.persistence.Query;
@@ -101,7 +100,7 @@ public class RepositorioUsuarioTest {
     this.dadoQueExisteElUsuario(usuario);
 
     usuario.setPassword("4567");
-    usuario.setEstado(EstadoUsuario.ACTIVO);
+    usuario.setActivo(true);
     usuario.setRol("ADMIN");
 
     this.cuandoModificoUnUsuario(usuario);
@@ -126,7 +125,6 @@ public class RepositorioUsuarioTest {
     usuario.setEmail(email);
     usuario.setPassword(password);
     usuario.setRol(rol);
-    usuario.setEstado(EstadoUsuario.ACTIVO);
     return usuario;
   }
 
@@ -164,7 +162,7 @@ public class RepositorioUsuarioTest {
   ) {
     assertThat(usuarioObtenido.getEmail(), is(equalTo(usuarioEsperado.getEmail())));
     assertThat(usuarioObtenido.getPassword(), is(equalTo(usuarioEsperado.getPassword())));
-    assertThat(usuarioObtenido.getEstado(), is(equalTo(usuarioEsperado.getEstado())));
+    assertThat(usuarioObtenido.getActivo(), is(equalTo(usuarioEsperado.getActivo())));
     assertThat(usuarioObtenido.getRol(), is(equalTo(usuarioEsperado.getRol())));
   }
 

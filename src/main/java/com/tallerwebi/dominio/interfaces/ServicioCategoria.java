@@ -6,5 +6,4 @@ import java.util.List;
 public interface ServicioCategoria {
   List<CategoriaDto> obtenerLasCategoriasParaElMenu();
   CategoriaDto obtenerCategoriaPorId(Long id);
-  List<CategoriaDto> obtenerCategoriasPorUsuario(String email);
 }
