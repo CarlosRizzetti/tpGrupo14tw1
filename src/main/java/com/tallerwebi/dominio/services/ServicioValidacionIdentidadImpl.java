@@ -55,7 +55,7 @@ public class ServicioValidacionIdentidadImpl implements ServicioValidacionIdenti
     if (usuario == null) {
       return false;
     }
-    usuario.setActivo(true);
+    // usuario.setActivo(true);
     usuario.setTokenValidacion(null);
     repositorioUsuario.modificar(usuario);
     return true;
