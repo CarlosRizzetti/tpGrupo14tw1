@@ -1,6 +1,7 @@
 package com.tallerwebi.dominio.services;
 
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
 import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
@@ -36,7 +37,9 @@ public class ServicioLoginImpl implements ServicioLogin {
     if (usuario == null || !passwordEncoder.matches(password, usuario.getPassword())) {
       throw new PasswordInvalida("Usuario o clave incorrecta");
     }
-    if (!usuario.getActivo()) throw new UsuarioInactivo("El usuario está inactivo");
+    if (usuario.getEstado() != EstadoUsuario.ACTIVO) throw new UsuarioInactivo(
+      "El usuario está inactivo"
+    );
 
     return usuario;
   }
@@ -52,7 +55,7 @@ public class ServicioLoginImpl implements ServicioLogin {
       throw new UsuarioExistente();
     }
     usuario.setRol("USER");
-    usuario.setActivo(false);
+    usuario.setEstado(EstadoUsuario.PENDIENTE);
     usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
     repositorioUsuario.guardar(usuario);
   }
