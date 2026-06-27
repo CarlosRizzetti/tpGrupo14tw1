@@ -95,9 +95,9 @@ public class RepositorioTimerImpl implements RepositorioTimer {
     return sessionFactory
       .getCurrentSession()
       .createQuery(
-        "SELECT t.fechaCreacion FROM Timer t " +
-        "WHERE t.fechaCreacion IS NOT NULL AND t.fechaCreacion >= :desde " +
-        "ORDER BY t.fechaCreacion ASC",
+        "SELECT t.cicloVida.fechaCreacion FROM Timer t " +
+        "WHERE t.cicloVida.fechaCreacion IS NOT NULL AND t.cicloVida.fechaCreacion >= :desde " +
+        "ORDER BY t.cicloVida.fechaCreacion ASC",
         OffsetDateTime.class
       )
       .setParameter(PARAM_DESDE, desde)
@@ -110,7 +110,7 @@ public class RepositorioTimerImpl implements RepositorioTimer {
       .getCurrentSession()
       .createQuery(
         "SELECT t.producto.nombre, COUNT(t) FROM Timer t " +
-        "WHERE t.producto IS NOT NULL AND t.fechaCreacion >= :desde " +
+        "WHERE t.producto IS NOT NULL AND t.cicloVida.fechaCreacion >= :desde " +
         "GROUP BY t.producto.nombre ORDER BY COUNT(t) DESC",
         Object[].class
       )
@@ -124,7 +124,7 @@ public class RepositorioTimerImpl implements RepositorioTimer {
       .getCurrentSession()
       .createQuery(
         "SELECT t.estado, COUNT(t) FROM Timer t " +
-        "WHERE t.fechaCreacion >= :desde " +
+        "WHERE t.cicloVida.fechaCreacion >= :desde " +
         "GROUP BY t.estado",
         Object[].class
       )
