@@ -3,9 +3,12 @@ package com.tallerwebi.dominio;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
 import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
@@ -38,7 +41,7 @@ public class ServicioLoginTest {
     Usuario usuarioEsperado = new Usuario();
     usuarioEsperado.setEmail(email);
     usuarioEsperado.setPassword(password);
-    usuarioEsperado.setActivo(true);
+    usuarioEsperado.setEstado(EstadoUsuario.ACTIVO);
     when(this.repositorioUsuarioMock.buscarUsuario(email)).thenReturn(usuarioEsperado);
     when(this.passwordEncoderMock.matches(any(), anyString())).thenReturn(true);
     // ejecucion
@@ -71,7 +74,7 @@ public class ServicioLoginTest {
     String password = "password";
     Usuario usuarioEsperado = new Usuario();
     usuarioEsperado.setPassword(password);
-    usuarioEsperado.setActivo(false);
+    usuarioEsperado.setEstado(EstadoUsuario.PENDIENTE);
     when(this.repositorioUsuarioMock.buscarUsuario(email)).thenReturn(usuarioEsperado);
     when(this.passwordEncoderMock.matches(anyString(), anyString())).thenReturn(true);
     // ejecucion y validacion
@@ -90,7 +93,7 @@ public class ServicioLoginTest {
     this.servicioLogin.registrar(usuario);
 
     // validacion
-    assertThat(usuario.getActivo(), is(false));
+    assertThat(usuario.getEstado(), is(EstadoUsuario.PENDIENTE));
     verify(this.repositorioUsuarioMock, times(1)).guardar(usuario);
   }
 
