@@ -4,6 +4,8 @@ import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -19,10 +21,26 @@ public class ControladorCategoria {
   }
 
   @RequestMapping("/home")
-  public ModelAndView index() {
+  public ModelAndView index(Authentication authentication) {
     ModelAndView mav = new ModelAndView("home");
     List<CategoriaDto> categorias = this.servicioCategoria.obtenerLasCategoriasParaElMenu();
     mav.addObject("categorias", categorias);
+
+    if (authentication != null && authentication.isAuthenticated()) {
+      String email = authentication.getName();
+      mav.addObject("userEmail", email);
+
+      String rol = authentication
+        .getAuthorities()
+        .stream()
+        .map(GrantedAuthority::getAuthority)
+        .filter(a -> a.startsWith("ROLE_"))
+        .map(a -> a.substring(5))
+        .findFirst()
+        .orElse(null);
+      mav.addObject("userRol", rol);
+    }
+
     return mav;
   }
 }
