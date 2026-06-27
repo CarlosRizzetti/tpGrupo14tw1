@@ -50,6 +50,11 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
   }
 
   @Override
+  public Usuario obtenerUsuarioPorEmail(String email) {
+    return repositorioUsuario.buscarUsuario(email);
+  }
+
+  @Override
   public void editarUsuario(Long id, UsuarioDto dto) throws PasswordInvalida {
     Usuario usuario = repositorioUsuario.obtenerPorId(id);
     if (usuario == null) {

@@ -2,10 +2,7 @@ package com.tallerwebi.dominio;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.tallerwebi.dominio.entity.Categoria;
-import com.tallerwebi.dominio.entity.Producto;
-import com.tallerwebi.dominio.entity.ReglaVencimiento;
-import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.entity.*;
 import com.tallerwebi.repositorio.config.HibernateInfraestructuraTestConfig;
 import java.time.OffsetDateTime;
 import javax.transaction.Transactional;
@@ -41,7 +38,8 @@ public class TimerActivoTest {
       producto,
       categoria,
       regla,
-      1
+      1,
+      new Usuario()
     );
     sessionFactory.getCurrentSession().save(timer);
     assertNotNull(timer.getGroupId());
@@ -55,7 +53,16 @@ public class TimerActivoTest {
     Categoria categoria = new Categoria("mccafe.png", true, "mccafe");
     Producto producto = new Producto();
     ReglaVencimiento regla = new ReglaVencimiento();
-    Timer timer = new Timer(fechaCreacion, fechaVencimiento, "", producto, categoria, regla, 1);
+    Timer timer = new Timer(
+      fechaCreacion,
+      fechaVencimiento,
+      "",
+      producto,
+      categoria,
+      regla,
+      1,
+      new Usuario()
+    );
     sessionFactory.getCurrentSession().save(timer);
     assertNotNull(timer.getGroupId());
     assertNotEquals("", timer.getGroupId());
@@ -76,7 +83,8 @@ public class TimerActivoTest {
       producto,
       categoria,
       regla,
-      1
+      1,
+      new Usuario()
     );
     sessionFactory.getCurrentSession().save(timer);
     assertNotNull(timer.getGroupId());

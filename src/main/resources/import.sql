@@ -24,8 +24,8 @@ INSERT INTO ProductosCategoria (idProducto, idCategoria) VALUES (3, 4); -- Helad
 INSERT INTO ProductosCategoria (idProducto, idCategoria) VALUES (4, 3); -- Cafe -> McCafe
 
 
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, idCategoria, idProducto, idReglaVencimiento) VALUES ('ACTIVO', NOW(6), '2026-05-24 20:00:59', 'GRP-100', 3, 1, 1);
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, idCategoria, idProducto, idReglaVencimiento) VALUES ('ACTIVO', NOW(6), '2026-05-23 20:00:59', 'GRP-100', 3, 1, 1);
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, idCategoria, idProducto, idReglaVencimiento) VALUES ('ACTIVO', NOW(6), '2026-05-23 19:00:59', 'GRP-100', 3, 1, 1);
+INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidad ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('VENCIDO', NOW(6), '2026-05-24 20:00:59', 'GRP-100', 2,3, 1, 3, 1);
+INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidad ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('RENOVADO', NOW(6), '2026-05-23 20:00:59', 'GRP-100', 10,3, 1, 3, 1);
+INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidad ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('IMPORTADO', NOW(6), '2026-05-23 19:00:59', 'GRP-100', 5,3, 1, 3, 1);
 
 SET FOREIGN_KEY_CHECKS = 1;
