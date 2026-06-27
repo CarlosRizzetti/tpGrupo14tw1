@@ -59,7 +59,10 @@ public class RepositorioUsuarioImpl implements RepositorioUsuario {
   public List<Usuario> listarTodos() {
     return sessionFactory
       .getCurrentSession()
-      .createQuery("FROM Usuario ORDER BY id", Usuario.class)
+      .createQuery(
+        "SELECT DISTINCT u FROM Usuario u LEFT JOIN FETCH u.categorias ORDER BY u.id",
+        Usuario.class
+      )
       .list();
   }
 
