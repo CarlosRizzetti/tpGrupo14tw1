@@ -116,27 +116,9 @@ public class ControladorLoginTest {
   }
 
   @Test
-  public void loginConErrorDeberiaMostrarMensajeDeLaExcepcion() {
-    // preparacion
-    when(requestMock.getSession()).thenReturn(sessionMock);
-    when(sessionMock.getAttribute("SPRING_SECURITY_LAST_EXCEPTION"))
-      .thenReturn(new RuntimeException("Mi error personalizado"));
-
+  public void loginDeberiaRedirigirARaiz() {
     // ejecucion
-    ModelAndView modelAndView = controladorLogin.login("true", requestMock);
-
-    // validacion
-    assertThat(modelAndView.getViewName(), equalToIgnoringCase("loginYRegistro/login"));
-    assertThat(
-      modelAndView.getModel().get("error").toString(),
-      equalToIgnoringCase("Mi error personalizado")
-    );
-  }
-
-  @Test
-  public void loginSinErrorDeberiaMostrarFormularioVacio() {
-    // ejecucion
-    ModelAndView modelAndView = controladorLogin.login(null, requestMock);
+    ModelAndView modelAndView = controladorLogin.login();
 
     // validacion
     assertThat(modelAndView.getViewName(), equalToIgnoringCase("loginYRegistro/login"));

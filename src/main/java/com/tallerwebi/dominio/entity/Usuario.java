@@ -2,13 +2,13 @@ package com.tallerwebi.dominio.entity;
 
 import java.util.List;
 import javax.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Entity
 public class Usuario {
 
@@ -16,9 +16,7 @@ public class Usuario {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(unique = true)
   private String email;
-
   private String password;
   private String nombre;
   private String rol;
