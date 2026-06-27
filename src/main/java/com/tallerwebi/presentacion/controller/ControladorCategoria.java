@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -45,6 +46,22 @@ public class ControladorCategoria {
     }
 
     mav.addObject("categorias", categorias);
+
+    if (authentication != null && authentication.isAuthenticated()) {
+      String email = authentication.getName();
+      mav.addObject("userEmail", email);
+
+      String rol = authentication
+        .getAuthorities()
+        .stream()
+        .map(GrantedAuthority::getAuthority)
+        .filter(a -> a.startsWith("ROLE_"))
+        .map(a -> a.substring(5))
+        .findFirst()
+        .orElse(null);
+      mav.addObject("userRol", rol);
+    }
+
     return mav;
   }
 }

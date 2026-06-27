@@ -4,12 +4,9 @@ import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.entity.enums.TipoMovimientoStock;
-import com.tallerwebi.dominio.interfaces.RepositorioReglaVencimiento;
-import com.tallerwebi.dominio.interfaces.RepositorioTimer;
-import com.tallerwebi.dominio.interfaces.ServicioControlStock;
-import com.tallerwebi.dominio.interfaces.ServicioProducto;
-import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
+import com.tallerwebi.dominio.interfaces.*;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +22,7 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
   private final ServicioProducto servicioProducto;
   private final ServicioControlStock servicioControlStock;
   private final Clock clock;
+  private final ServicioImpresion servicioImpresion;
 
   @Autowired
   public ServicioReglaVencimientoImpl(
@@ -32,13 +30,15 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
     RepositorioTimer repositorioTimer,
     ServicioProducto servicioProducto,
     ServicioControlStock servicioControlStock,
-    Clock clock
+    Clock clock,
+    ServicioImpresion servicioImpresion
   ) {
     this.repositorioReglaVencimiento = repositorioReglaVencimiento;
     this.repositorioTimer = repositorioTimer;
     this.servicioProducto = servicioProducto;
     this.servicioControlStock = servicioControlStock;
     this.clock = clock;
+    this.servicioImpresion = servicioImpresion;
   }
 
   @Override
@@ -58,7 +58,8 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
     Categoria categoria,
     Long reglaId,
     Integer offsetMinutos,
-    Integer cantidadUsada
+    Integer cantidadUsada,
+    Usuario usuario
   ) {
     ReglaVencimiento regla = repositorioReglaVencimiento.obtenerReglaVencimientoPorId(reglaId);
     if (regla == null) {
@@ -79,7 +80,8 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
       producto,
       categoria,
       regla,
-      cantidadUsada
+      cantidadUsada,
+      usuario
     );
     repositorioTimer.guardar(timer);
 
@@ -88,6 +90,14 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
       timer,
       cantidadUsada,
       TipoMovimientoStock.EGRESO
+    );
+
+    servicioImpresion.imprimirTicketVencimiento(
+      producto,
+      regla,
+      fechaElaboracion,
+      vencimiento,
+      descongelamiento
     );
 
     return timer;

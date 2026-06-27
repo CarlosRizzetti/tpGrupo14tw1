@@ -23,6 +23,12 @@
 
         <form id="form-registrarme" th:action="@{/registrarme}" method="POST" th:object="${usuario}" class="space-y-5">
             <div>
+                <label for="nombre" class="block text-sm font-bold uppercase tracking-wider mb-2">Nombre</label>
+                <input th:field="*{nombre}" id="nombre" type="text"
+                       class="w-full px-5 py-4 rounded-xl text-black bg-white focus:ring-4 focus:ring-puesto-app outline-none transition-shadow"
+                       placeholder="Juan García" required />
+            </div>
+            <div>
                 <label for="email" class="block text-sm font-bold uppercase tracking-wider mb-2">Correo Electrónico</label>
                 <input th:field="*{email}" id="email" type="email"
                        class="w-full px-5 py-4 rounded-xl text-black bg-white focus:ring-4 focus:ring-puesto-app outline-none transition-shadow"

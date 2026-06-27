@@ -1,11 +1,14 @@
 package com.tallerwebi.presentacion.controller;
 
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
+import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
 import com.tallerwebi.dominio.interfaces.ServicioLogin;
 import com.tallerwebi.dominio.interfaces.ServicioValidacionIdentidad;
 import com.tallerwebi.presentacion.dto.LoginDto;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -62,6 +65,40 @@ public class ControladorLogin {
     }
     modelo.put("loginDto", new LoginDto());
     return new ModelAndView("loginYRegistro/login", modelo);
+  }
+
+  @RequestMapping(path = "/validar-login", method = RequestMethod.POST)
+  public ModelAndView validarLogin(
+    @ModelAttribute("loginDto") LoginDto loginDto,
+    HttpServletRequest request
+  ) {
+    try {
+      Usuario usuarioBuscado = servicioLogin.consultarUsuario(
+        loginDto.getEmail(),
+        loginDto.getPassword()
+      );
+      if (usuarioBuscado != null) {
+        request.getSession().setAttribute("ROL", usuarioBuscado.getRol());
+        request.getSession().setAttribute("EMAIL", usuarioBuscado.getEmail());
+        return new ModelAndView("redirect:/home");
+      } else {
+        ModelMap model = new ModelMap();
+        model.put(ERROR, "Usuario o clave incorrecta");
+        return new ModelAndView("loginYRegistro/login", model);
+      }
+    } catch (UsuarioInactivo e) {
+      ModelMap model = new ModelMap();
+      model.put(ERROR, "El usuario está inactivo");
+      return new ModelAndView("loginYRegistro/login", model);
+    } catch (PasswordInvalida e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @RequestMapping(path = "/logout", method = RequestMethod.GET)
+  public ModelAndView logout(HttpSession session) {
+    session.invalidate();
+    return new ModelAndView("redirect:/");
   }
 
   @RequestMapping(path = "/registrarme", method = RequestMethod.POST)

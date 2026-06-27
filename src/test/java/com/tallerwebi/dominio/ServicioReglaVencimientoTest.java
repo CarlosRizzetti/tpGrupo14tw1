@@ -6,14 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
-import com.tallerwebi.dominio.entity.Categoria;
-import com.tallerwebi.dominio.entity.Producto;
-import com.tallerwebi.dominio.entity.ReglaVencimiento;
-import com.tallerwebi.dominio.entity.Timer;
-import com.tallerwebi.dominio.interfaces.RepositorioReglaVencimiento;
-import com.tallerwebi.dominio.interfaces.RepositorioTimer;
-import com.tallerwebi.dominio.interfaces.ServicioControlStock;
-import com.tallerwebi.dominio.interfaces.ServicioProducto;
+import com.tallerwebi.dominio.entity.*;
+import com.tallerwebi.dominio.interfaces.*;
 import com.tallerwebi.dominio.services.ServicioReglaVencimientoImpl;
 import java.time.Clock;
 import java.time.Instant;
@@ -30,6 +24,7 @@ public class ServicioReglaVencimientoTest {
   private ServicioProducto servicioProductoMock;
   private ServicioControlStock servicioControlStockMock;
   private Clock clock;
+  private ServicioImpresion servicioImpresionMock;
 
   @BeforeEach
   public void init() {
@@ -38,13 +33,15 @@ public class ServicioReglaVencimientoTest {
     repositorioTimerMock = mock(RepositorioTimer.class);
     servicioProductoMock = mock(ServicioProducto.class);
     servicioControlStockMock = mock(ServicioControlStock.class);
+    servicioImpresionMock = mock(ServicioImpresion.class);
     servicioReglaVencimiento =
       new ServicioReglaVencimientoImpl(
         repositorioReglaVencimientoMock,
         repositorioTimerMock,
         servicioProductoMock,
         servicioControlStockMock,
-        clock
+        clock,
+        servicioImpresionMock
       );
   }
 
@@ -156,7 +153,8 @@ public class ServicioReglaVencimientoTest {
       producto,
       categoria,
       regla,
-      1
+      1,
+      new Usuario()
     );
 
     // ejecucion
@@ -165,12 +163,19 @@ public class ServicioReglaVencimientoTest {
       categoria,
       2L,
       0,
-      1
+      1,
+      new Usuario()
     );
 
     // validacion
-    assertEquals(timerEsperado.getFechaVencimiento(), timerGenerado.getFechaVencimiento());
-    assertEquals(timerEsperado.getFechaCreacion(), timerGenerado.getFechaCreacion());
+    assertEquals(
+      timerEsperado.getCicloVida().getFechaVencimiento(),
+      timerGenerado.getCicloVida().getFechaVencimiento()
+    );
+    assertEquals(
+      timerEsperado.getCicloVida().getFechaCreacion(),
+      timerGenerado.getCicloVida().getFechaCreacion()
+    );
     assertEquals(timerEsperado.getReglaVencimiento(), timerGenerado.getReglaVencimiento());
   }
 
