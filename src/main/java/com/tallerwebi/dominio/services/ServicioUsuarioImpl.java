@@ -1,6 +1,7 @@
 package com.tallerwebi.dominio.services;
 
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
 import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
@@ -40,7 +41,7 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
     usuario.setEmail(dto.getEmail());
     usuario.setPassword(dto.getPassword());
     usuario.setRol(dto.getRol() != null ? dto.getRol() : "USER");
-    usuario.setActivo(true);
+    usuario.setEstado(EstadoUsuario.PENDIENTE);
     repositorioUsuario.guardar(usuario);
   }
 
@@ -74,7 +75,7 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
     if (usuario == null) {
       throw new IllegalArgumentException("Usuario no encontrado");
     }
-    usuario.setActivo(false);
+    usuario.setEstado(EstadoUsuario.BAJA);
     repositorioUsuario.modificar(usuario);
   }
 
@@ -84,7 +85,7 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
     if (usuario == null) {
       throw new IllegalArgumentException("Usuario no encontrado");
     }
-    usuario.setActivo(true);
+    usuario.setEstado(EstadoUsuario.ACTIVO);
     repositorioUsuario.modificar(usuario);
   }
 }

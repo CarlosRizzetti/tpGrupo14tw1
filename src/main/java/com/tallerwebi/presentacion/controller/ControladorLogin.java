@@ -42,8 +42,24 @@ public class ControladorLogin {
   }
 
   @RequestMapping("/login")
-  public ModelAndView login() {
+  public ModelAndView login(
+    @org.springframework.web.bind.annotation.RequestParam(
+      value = "error",
+      required = false
+    ) String errorParam,
+    HttpServletRequest request
+  ) {
     ModelMap modelo = new ModelMap();
+    if (errorParam != null) {
+      Exception exception = (Exception) request
+        .getSession()
+        .getAttribute("SPRING_SECURITY_LAST_EXCEPTION");
+      if (exception != null) {
+        modelo.put(ERROR, exception.getMessage());
+      } else {
+        modelo.put(ERROR, "Usuario o clave incorrecta");
+      }
+    }
     modelo.put("loginDto", new LoginDto());
     return new ModelAndView("loginYRegistro/login", modelo);
   }
