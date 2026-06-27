@@ -3,6 +3,7 @@ package com.tallerwebi.dominio.services;
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.excepcion.CantidadInvalidaException;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
@@ -53,11 +54,23 @@ public class ServicioTimerImpl implements ServicioTimer {
   }
 
   @Override
+  public List<TimerDTO> obtenerTodosLosTimers() {
+    List<Timer> timers = repositorioTimer.obtenerTodosLosTimers();
+    return timers.stream().map(this::mapearATimerDTO).collect(Collectors.toList());
+  }
+
+  @Override
+  public List<TimerDTO> obtenerTimersConFiltro(EstadoTimer estado, Long categoriaId) {
+    List<Timer> timers = repositorioTimer.obtenerTimersConFiltro(estado, categoriaId);
+    return timers.stream().map(this::mapearATimerDTO).collect(Collectors.toList());
+  }
+
+  @Override
   public void modificarEstado(Long timerId, EstadoTimer estado) {
     Timer timer = repositorioTimer.buscarPorId(timerId);
     ValidacionHelper.queNoSeaNull(timer, TIMER);
 
-    if (timer.getFechaVencimiento().isBefore(OffsetDateTime.now())) {
+    if (timer.getCicloVida().getFechaVencimiento().isBefore(OffsetDateTime.now())) {
       timer.setEstado(EstadoTimer.VENCIDO);
     } else {
       timer.setEstado(estado);
@@ -74,7 +87,12 @@ public class ServicioTimerImpl implements ServicioTimer {
   }
 
   @Override
-  public CategoriaDto importarTimer(Long timerId, Long categoriaId, Integer cantidad) {
+  public CategoriaDto importarTimer(
+    Long timerId,
+    Long categoriaId,
+    Integer cantidad,
+    Usuario usuario
+  ) {
     Timer timer = repositorioTimer.buscarPorId(timerId);
     ValidacionHelper.queNoSeaNull(timer, "timer");
 
@@ -92,7 +110,7 @@ public class ServicioTimerImpl implements ServicioTimer {
     if (cantidad > timer.getCantidadProducto()) throw new CantidadInvalidaException(
       "La cantidad a importar no puede ser mayor al stock actual del vencimiento"
     );
-    Timer clon = crearTimerConCantidadYCategoria(timer, cantidad, categoriaDestino);
+    Timer clon = crearTimerConCantidadYCategoria(timer, cantidad, categoriaDestino, usuario);
     if (cantidad.equals(timer.getCantidadProducto())) {
       modificarEstado(timerId, EstadoTimer.IMPORTADO);
       modificarCantidad(timerId, 0);
@@ -111,7 +129,7 @@ public class ServicioTimerImpl implements ServicioTimer {
   }
 
   @Override
-  public TimerDTO renovarTimer(Timer timer, Integer cantidad) {
+  public TimerDTO renovarTimer(Timer timer, Integer cantidad, Usuario usuario) {
     ReglaVencimiento regla = timer.getReglaVencimiento();
     ValidacionHelper.queNoSeaNull(regla, "Regla vencimiento");
 
@@ -121,7 +139,8 @@ public class ServicioTimerImpl implements ServicioTimer {
       timer.getCategoria(),
       regla.getId(),
       null,
-      cantidad
+      cantidad,
+      usuario
     );
 
     return mapearATimerDTO(nuevoTimer);
@@ -147,30 +166,36 @@ public class ServicioTimerImpl implements ServicioTimer {
 
   private TimerDTO mapearATimerDTO(Timer timer) {
     ValidacionHelper.queNoSeaNull(timer, TIMER);
+    CategoriaDto categoria = new CategoriaDto(timer.getCategoria());
     return new TimerDTO(
       timer.getId(),
+      timer.getEstado(),
       obtenerNombreProducto(timer),
       timer.getGroupId(),
-      formatearFecha(timer.getFechaCreacion()),
-      formatearFecha(timer.getFechaVencimiento()),
+      formatearFecha(timer.getCicloVida().getFechaCreacion()),
+      formatearFecha(timer.getCicloVida().getFechaVencimiento()),
       obtenerUbicacion(timer),
-      timer.getCantidadProducto()
+      timer.getCantidadProducto(),
+      timer.getUsuario().getNombre(),
+      categoria
     );
   }
 
   private Timer crearTimerConCantidadYCategoria(
     Timer timer,
     Integer cantidad,
-    Categoria categoria
+    Categoria categoria,
+    Usuario usuario
   ) {
     return new Timer(
-      timer.getFechaCreacion(),
-      timer.getFechaVencimiento(),
+      timer.getCicloVida().getFechaCreacion(),
+      timer.getCicloVida().getFechaVencimiento(),
       timer.getGroupId(),
       timer.getProducto(),
       categoria,
       timer.getReglaVencimiento(),
-      cantidad
+      cantidad,
+      usuario
     );
   }
 }
