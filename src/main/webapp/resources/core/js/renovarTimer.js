@@ -52,7 +52,7 @@ const resetRenewModal = () => {
 
 export const openRenewModal = (timerId, productName, location, cantidadTimer) => {
   const cantidad = cantidadTimer ?? 0;
-console.log(cantidadTimer)
+  console.log(cantidadTimer)
   RENEW.productName().textContent = productName;
   RENEW.productLoc().textContent  = location;
   RENEW.timerId().value           = timerId;
@@ -230,15 +230,15 @@ const updateCardDOM = (card, oldId, data) => {
 // ─────────────────────────────────────────────
 
 const formatearFecha = (isoString) =>
-    new Date(isoString)
-        .toLocaleDateString("es-AR", {
-          day:    "2-digit",
-          month:  "2-digit",
-          hour:   "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })
-        .replace(",", "");
+  new Date(isoString)
+    .toLocaleDateString("es-AR", {
+      day:    "2-digit",
+      month:  "2-digit",
+      hour:   "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })
+    .replace(",", "");
 
 // ─────────────────────────────────────────────
 //  Cerrar modal
