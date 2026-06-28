@@ -70,14 +70,12 @@ public class ControladorEstadisticas {
     HttpServletResponse response
   ) {
     try {
-      // 1. Configuramos cabeceras antes de abrir archivos
       response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
       response.setHeader(
         "Content-Disposition",
         "attachment; filename=\"reporte_estadisticas_" + dias + "_dias.xlsx\""
       );
 
-      // 2. Abrimos la plantilla de Excel en un try-with-resources
       try (
         InputStream plantillaIn = getClass().getResourceAsStream("/plantilla_estadisticas.xlsx")
       ) {
@@ -87,13 +85,9 @@ public class ControladorEstadisticas {
           );
         }
 
-        // 3. Instanciamos el libro
         try (Workbook workbook = new XSSFWorkbook(plantillaIn)) {
-          // 4. SOLUCIÓN PMD (DU-anomaly): Pedimos los datos JUSTO antes de usarlos.
-          // Si el archivo fallaba antes, esta línea nunca se ejecuta, ahorrando recursos.
           EstadisticasDTO estadisticas = servicioEstadistica.obtenerEstadisticas(dias);
 
-          // 5. Llenamos las hojas
           llenarHojaEstadistica(
             workbook,
             "Productos Más Utilizados",
@@ -142,13 +136,11 @@ public class ControladorEstadisticas {
         }
       }
     } catch (IllegalArgumentException e) {
-      // 6. SOLUCIÓN PMD (GuardLogStatement): Protegemos el logger con un 'if'
       if (logger.isWarnEnabled()) {
         logger.warn("DEBUG (Validación de fechas al exportar): {}", e.getMessage());
       }
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     } catch (Exception e) {
-      // 7. SOLUCIÓN PMD (GuardLogStatement): Protegemos el error log
       if (logger.isErrorEnabled()) {
         logger.error("Error al exportar estadísticas a Excel usando plantilla", e);
       }
@@ -166,27 +158,23 @@ public class ControladorEstadisticas {
     String col2,
     List<PuntoEstadisticoDTO> datos
   ) {
-    // A diferencia de createSheet(), getSheet() busca una pestaña ya existente
     Sheet sheet = workbook.getSheet(nombreHoja);
 
-    // Patrón de diseño Defensivo: Si alguien borra la hoja de la plantilla, la creamos para que no explote con NullPointerException
     if (sheet == null) {
       sheet = workbook.createSheet(nombreHoja);
     }
 
-    // Mantenemos la lógica de poner la cabecera en negrita
     CellStyle estiloCabecera = workbook.createCellStyle();
     Font font = workbook.createFont();
     font.setBold(true);
     estiloCabecera.setFont(font);
 
-    Row header = sheet.createRow(0); // Fila 1 en Excel
+    Row header = sheet.createRow(0);
     header.createCell(0).setCellValue(col1);
     header.getCell(0).setCellStyle(estiloCabecera);
     header.createCell(1).setCellValue(col2);
     header.getCell(1).setCellStyle(estiloCabecera);
 
-    // Iteramos los datos y los inyectamos desde la fila 2 en adelante
     for (int i = 0; i < datos.size(); i++) {
       Row row = sheet.createRow(i + 1);
       PuntoEstadisticoDTO punto = datos.get(i);
@@ -194,7 +182,6 @@ public class ControladorEstadisticas {
       row.createCell(1).setCellValue(punto.getValor());
     }
 
-    // Le damos formato al ancho para que quede prolijo
     sheet.autoSizeColumn(0);
     sheet.autoSizeColumn(1);
   }

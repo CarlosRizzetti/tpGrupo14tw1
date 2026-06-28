@@ -211,13 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.getElementById('btnExportarExcel').addEventListener('click', function() {
-  // Suponiendo que tienes una variable 'diasActuales' o un select de días
   const selectElement = document.getElementById('filtro-dias');
-
-  // Obtenemos su valor; si por alguna razón no existe, usamos 30 por defecto
   const dias = selectElement ? selectElement.value : 30;
-  // Al cambiar el location.href, el navegador hace un GET.
-  // Como el server responde con un attachment, la página actual NO se recarga,
-  // simplemente se descarga el archivo. ¡Es mágico!
   window.location.href = `/admin/estadisticas/exportar/excel?dias=${dias}`;
 });
