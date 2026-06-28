@@ -2,6 +2,7 @@ package com.tallerwebi.presentacion;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.interfaces.ServicioValidacionIdentidad;
@@ -64,6 +65,18 @@ public class ControladorValidacionIdentidadTest {
   }
 
   @Test
+  public void mostrarValidacionConTokenVacioNoDeberiaValidarNada() {
+    ModelAndView mav = controladorValidacionIdentidad.mostrarValidacion("");
+
+    verify(servicioValidacionIdentidadMock, never()).validarToken(anyString());
+
+    assertThat(mav.getViewName(), is("loginYRegistro/validacion-identidad"));
+
+    assertThat(mav.getModel().containsKey("success"), is(false));
+    assertThat(mav.getModel().containsKey("message"), is(false));
+  }
+
+  @Test
   public void mostrarValidacionConTokenValidoDeberiaMostrarExitoYRedirect() {
     when(servicioValidacionIdentidadMock.validarToken("token")).thenReturn(true);
 
@@ -74,5 +87,43 @@ public class ControladorValidacionIdentidadTest {
     assertThat(mav.getModel().get("message").toString(), containsString("Cuenta activada"));
     assertThat(mav.getModel().get("redirectUrl").toString(), equalToIgnoringCase("/login"));
     assertThat(mav.getModel().get("redirectDelayMs"), is(3000));
+  }
+
+  @Test
+  public void mostrarValidacionConTokenInvalidoDeberiaMostrarMensajeDeError() {
+    // Arrange
+    when(servicioValidacionIdentidadMock.validarToken("tokenInvalido")).thenReturn(false);
+
+    // Act
+    ModelAndView mav = controladorValidacionIdentidad.mostrarValidacion("tokenInvalido");
+
+    // Assert
+    assertThat(mav.getViewName(), is("loginYRegistro/validacion-identidad"));
+    assertThat(mav.getModel().get("success"), is(false));
+    assertThat(mav.getModel().get("message"), is("Token inválido o expirado"));
+
+    verify(servicioValidacionIdentidadMock).validarToken("tokenInvalido");
+  }
+
+  @Test
+  public void validarIdentidadManualConTokenValidoDeberiaMostrarVistaExitosa() {
+    when(servicioValidacionIdentidadMock.validarToken("token")).thenReturn(true);
+
+    ModelAndView mav = controladorValidacionIdentidad.validarIdentidadManual("token");
+
+    assertThat(mav.getViewName(), is("loginYRegistro/validacion-identidad"));
+    assertThat(mav.getModel().get("success"), is(true));
+    assertThat(mav.getModel().get("message"), is("Cuenta activada correctamente"));
+  }
+
+  @Test
+  public void validarIdentidadManualConTokenInvalidoDeberiaMostrarError() {
+    when(servicioValidacionIdentidadMock.validarToken("token")).thenReturn(false);
+
+    ModelAndView mav = controladorValidacionIdentidad.validarIdentidadManual("token");
+
+    assertThat(mav.getViewName(), is("loginYRegistro/validacion-identidad"));
+    assertThat(mav.getModel().get("success"), is(false));
+    assertThat(mav.getModel().get("message"), is("Token inválido o expirado"));
   }
 }

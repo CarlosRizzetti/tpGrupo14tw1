@@ -2,12 +2,14 @@ package com.tallerwebi.presentacion.controller;
 
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.excepcion.CantidadInvalidaException;
 import com.tallerwebi.dominio.excepcion.IdInvalido;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioTimer;
+import com.tallerwebi.dominio.interfaces.ServicioUsuario;
 import com.tallerwebi.dominio.utils.ValidacionHelper;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ResponseDTO;
@@ -21,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -29,13 +33,19 @@ import org.springframework.web.servlet.ModelAndView;
 public class ControladorDashboard {
 
   private static final Logger logger = LoggerFactory.getLogger(ControladorDashboard.class);
+  private final ServicioUsuario servicioUsuario;
   private ServicioProducto servicioProducto;
   public ServicioTimer servicioTimer;
 
   @Autowired
-  public ControladorDashboard(ServicioTimer servicioTimer, ServicioProducto servicioProducto) {
+  public ControladorDashboard(
+    ServicioTimer servicioTimer,
+    ServicioProducto servicioProducto,
+    ServicioUsuario servicioUsuario
+  ) {
     this.servicioTimer = servicioTimer;
     this.servicioProducto = servicioProducto;
+    this.servicioUsuario = servicioUsuario;
   }
 
   @GetMapping("/dashboard")
@@ -79,14 +89,16 @@ public class ControladorDashboard {
   @PutMapping("/active-timers/renovarTimer/{timerId}/{cantidad}")
   public ResponseEntity<?> renovarTimer(
     @PathVariable Long timerId,
-    @PathVariable Integer cantidad
+    @PathVariable Integer cantidad,
+    @AuthenticationPrincipal User usuarioLogueado
   ) {
     try {
+      Usuario usuario = servicioUsuario.obtenerUsuarioPorEmail(usuarioLogueado.getUsername());
       ValidacionHelper.validarId(timerId);
       Timer timer = servicioTimer.buscarPorId(timerId);
       ValidacionHelper.validarCantidad(cantidad);
 
-      TimerDTO nuevoTimer = servicioTimer.renovarTimer(timer, cantidad);
+      TimerDTO nuevoTimer = servicioTimer.renovarTimer(timer, cantidad, usuario);
 
       Map<String, Object> response = new HashMap<>();
       response.put("status", "ok");
@@ -112,14 +124,21 @@ public class ControladorDashboard {
     @PathVariable Long timerId,
     @PathVariable Long categoryId,
     @PathVariable Integer cantidad,
-    HttpSession session
+    HttpSession session,
+    @AuthenticationPrincipal User usuarioLogueado
   ) {
     try {
+      Usuario usuario = servicioUsuario.obtenerUsuarioPorEmail(usuarioLogueado.getUsername());
       ValidacionHelper.validarId(timerId);
       ValidacionHelper.validarId(categoryId);
       ValidacionHelper.validarCantidad(cantidad);
 
-      CategoriaDto categoriaDestino = servicioTimer.importarTimer(timerId, categoryId, cantidad);
+      CategoriaDto categoriaDestino = servicioTimer.importarTimer(
+        timerId,
+        categoryId,
+        cantidad,
+        usuario
+      );
 
       ResponseDTO response = new ResponseDTO();
       response.setSuccess(true);

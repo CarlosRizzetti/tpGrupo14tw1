@@ -1,8 +1,6 @@
 package com.tallerwebi.dominio.entity;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.List;
 import javax.persistence.*;
 import lombok.*;
 
@@ -22,10 +20,13 @@ public class Usuario {
   private String email;
 
   private String password;
+  private String nombre;
   private String rol;
   private String tokenValidacion;
 
-  @Column(columnDefinition = "boolean default false")
+  @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<Timer> timers;
+
   private Boolean activo = false;
 
   @ManyToMany

@@ -1,14 +1,12 @@
 package com.tallerwebi.presentacion;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.presentacion.controller.ControladorCategoria;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,75 +18,69 @@ import org.springframework.web.servlet.ModelAndView;
 
 public class ControladorCategoriaTest {
 
-  private ServicioCategoria servicioCategoria;
-  private ControladorCategoria controladorCategoria;
+  private ControladorCategoria controlador;
+  private ServicioCategoria servicioCategoriaMock;
+  private Authentication authenticationMock;
 
   @BeforeEach
   public void init() {
-    servicioCategoria = mock(ServicioCategoria.class);
-    controladorCategoria = new ControladorCategoria(servicioCategoria);
+    servicioCategoriaMock = mock(ServicioCategoria.class);
+    authenticationMock = mock(Authentication.class);
+
+    controlador = new ControladorCategoria(servicioCategoriaMock);
   }
 
   @Test
-  public void siEsAdminDebeTraerTodasLasCategorias() {
-    Authentication auth = mock(Authentication.class);
-    when(auth.isAuthenticated()).thenReturn(true);
-    List<GrantedAuthority> authorities = Collections.singletonList(
-      new SimpleGrantedAuthority("ROLE_ADMIN")
-    );
-    doReturn(authorities).when(auth).getAuthorities();
+  public void queSinUsuarioAutenticadoRetorneLaVistaHomeConCategorias() {
+    List<CategoriaDto> categorias = List.of(new CategoriaDto());
 
-    List<CategoriaDto> categorias = new ArrayList<>();
-    categorias.add(new CategoriaDto());
-    when(servicioCategoria.obtenerLasCategoriasParaElMenu()).thenReturn(categorias);
+    when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu()).thenReturn(categorias);
 
-    ModelAndView mav = controladorCategoria.index(auth);
+    ModelAndView mav = controlador.index(null);
 
-    verify(servicioCategoria, times(1)).obtenerLasCategoriasParaElMenu();
-    assertThat(mav.getViewName(), equalTo("home"));
-    assertThat(mav.getModel().get("categorias"), equalTo(categorias));
+    assertEquals("home", mav.getViewName());
+    assertEquals(categorias, mav.getModel().get("categorias"));
+    assertNull(mav.getModel().get("userEmail"));
+    assertNull(mav.getModel().get("userRol"));
   }
 
   @Test
-  public void siNoEsAdminDebeTraerCategoriasPorUsuario() {
-    Authentication auth = mock(Authentication.class);
-    when(auth.isAuthenticated()).thenReturn(true);
-    when(auth.getName()).thenReturn("test@test.com");
-    List<GrantedAuthority> authorities = Collections.singletonList(
-      new SimpleGrantedAuthority("ROLE_USER")
-    );
-    doReturn(authorities).when(auth).getAuthorities();
+  public void queConUsuarioAutenticadoAgregueEmailYRolAlModelo() {
+    List<CategoriaDto> categorias = List.of(new CategoriaDto());
 
-    List<CategoriaDto> categorias = new ArrayList<>();
-    categorias.add(new CategoriaDto());
-    when(servicioCategoria.obtenerCategoriasPorUsuario("test@test.com")).thenReturn(categorias);
+    doReturn(categorias).when(servicioCategoriaMock).obtenerLasCategoriasParaElMenu();
 
-    ModelAndView mav = controladorCategoria.index(auth);
+    doReturn(true).when(authenticationMock).isAuthenticated();
 
-    verify(servicioCategoria, times(1)).obtenerCategoriasPorUsuario("test@test.com");
-    assertThat(mav.getViewName(), equalTo("home"));
-    assertThat(mav.getModel().get("categorias"), equalTo(categorias));
+    doReturn("admin@test.com").when(authenticationMock).getName();
+
+    doAnswer(invocation -> List.of(new SimpleGrantedAuthority("ROLE_ADMIN")))
+      .when(authenticationMock)
+      .getAuthorities();
+
+    ModelAndView mav = controlador.index(authenticationMock);
+
+    assertEquals("home", mav.getViewName());
+    assertEquals(categorias, mav.getModel().get("categorias"));
+    assertEquals("admin@test.com", mav.getModel().get("userEmail"));
+    assertEquals("ADMIN", mav.getModel().get("userRol"));
   }
 
   @Test
-  public void siLaListaDeCategoriasEstaVaciaDebeMostrarMensaje() {
-    Authentication auth = mock(Authentication.class);
-    when(auth.isAuthenticated()).thenReturn(true);
-    when(auth.getName()).thenReturn("test@test.com");
-    List<GrantedAuthority> authorities = Collections.singletonList(
-      new SimpleGrantedAuthority("ROLE_USER")
-    );
-    doReturn(authorities).when(auth).getAuthorities();
+  public void queSiNoExisteUnRolConPrefijoRoleElRolSeaNull() {
+    doReturn(Collections.emptyList()).when(servicioCategoriaMock).obtenerLasCategoriasParaElMenu();
 
-    when(servicioCategoria.obtenerCategoriasPorUsuario("test@test.com"))
-      .thenReturn(new ArrayList<>());
+    doReturn(true).when(authenticationMock).isAuthenticated();
 
-    ModelAndView mav = controladorCategoria.index(auth);
+    doReturn("usuario@test.com").when(authenticationMock).getName();
 
-    assertTrue(mav.getModel().containsKey("mensajeVacio"));
-    assertThat(
-      mav.getModel().get("mensajeVacio"),
-      equalTo("Todavía no te asignaron una categoría")
-    );
+    doAnswer(invocation -> List.of(new SimpleGrantedAuthority("ADMIN")))
+      .when(authenticationMock)
+      .getAuthorities();
+
+    ModelAndView mav = controlador.index(authenticationMock);
+
+    assertEquals("usuario@test.com", mav.getModel().get("userEmail"));
+    assertNull(mav.getModel().get("userRol"));
   }
 }

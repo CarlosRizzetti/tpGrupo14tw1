@@ -28,13 +28,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
   @Override
   public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
     Usuario usuario = repositorioUsuario.buscar(email);
-    if (logger.isDebugEnabled()) {
-      logger.debug("Buscando usuario con email: {}", email);
-    }
+
     if (usuario == null) {
-      if (logger.isWarnEnabled()) {
-        logger.warn("Usuario no encontrado: {}", email);
-      }
       throw new UsernameNotFoundException("Usuario no encontrado: " + email);
     }
     if (!usuario.getActivo()) {

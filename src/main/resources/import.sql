@@ -11,6 +11,7 @@ INSERT INTO Producto (id, cantidad, estaActivo, nombre) VALUES (3, 100, 1, 'Hela
 INSERT INTO Producto (id, cantidad, estaActivo, nombre) VALUES (4, 100, 1, 'Cafe');
 
 INSERT INTO Usuario(id, email, password, rol, activo) VALUES(3, 'tahielrecchia05@gmail.com', '$2a$10$pKxNbg5qcYqoRCxKvU0t8e8dMAWZ8QBl5clkQD9KHcIsgBFcnz9Ei', 'USER', true);
+INSERT INTO Usuario(id, email, password, rol, activo) VALUES(6, 'santi2@mail.com', '$2a$10$aHZnx5KAVlbHi52kmBYWDO0eD23FBux7ucIUeTR9rUOFaBlDKLz7C', 'ADMIN', true);
 
 INSERT INTO ReglaVencimiento (descongelamientoMinutos, duracionMinutos, tieneDescongelamiento, ubicacion, idProducto) VALUES (120, 4000, 1, 'Mesa de Producción', 1 );
 INSERT INTO ReglaVencimiento (descongelamientoMinutos, duracionMinutos, tieneDescongelamiento, ubicacion, idProducto) VALUES (0, 120, 0, 'Línea de Servicio', 1);
@@ -23,8 +24,8 @@ INSERT INTO ProductosCategoria (idProducto, idCategoria) VALUES (3, 4); -- Helad
 INSERT INTO ProductosCategoria (idProducto, idCategoria) VALUES (4, 3); -- Cafe -> McCafe
 
 
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, idCategoria, idProducto, idReglaVencimiento) VALUES ('ACTIVO', NOW(6), '2026-05-24 20:00:59', 'GRP-100', 3, 1, 1);
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, idCategoria, idProducto, idReglaVencimiento) VALUES ('ACTIVO', NOW(6), '2026-05-23 20:00:59', 'GRP-100', 3, 1, 1);
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, idCategoria, idProducto, idReglaVencimiento) VALUES ('ACTIVO', NOW(6), '2026-05-23 19:00:59', 'GRP-100', 3, 1, 1);
+INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidad ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('VENCIDO', NOW(6), '2026-05-24 20:00:59', 'GRP-100', 2,3, 1, 3, 1);
+INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidad ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('RENOVADO', NOW(6), '2026-05-23 20:00:59', 'GRP-100', 10,3, 1, 3, 1);
+INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidad ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('IMPORTADO', NOW(6), '2026-05-23 19:00:59', 'GRP-100', 5,3, 1, 3, 1);
 
 SET FOREIGN_KEY_CHECKS = 1;

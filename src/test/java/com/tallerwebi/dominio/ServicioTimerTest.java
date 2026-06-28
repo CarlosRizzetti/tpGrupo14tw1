@@ -4,10 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.times;
 
-import com.tallerwebi.dominio.entity.Categoria;
-import com.tallerwebi.dominio.entity.Producto;
-import com.tallerwebi.dominio.entity.ReglaVencimiento;
-import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.dominio.entity.*;
+import com.tallerwebi.dominio.entity.embeddables.CicloVida;
 import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.excepcion.IdInvalido;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
@@ -33,6 +31,7 @@ public class ServicioTimerTest {
   public RepositorioCategoria repositorioCategoriaMock;
   public ServicioTimerImpl servicioTimer;
   public ServicioReglaVencimiento servicioReglaVencimientoMock;
+  private Usuario usuarioTest;
 
   @BeforeEach
   public void init() {
@@ -45,6 +44,7 @@ public class ServicioTimerTest {
         repositorioCategoriaMock,
         servicioReglaVencimientoMock
       );
+    usuarioTest = new Usuario();
   }
 
   private Timer buildTimerCompleto(Long timerId) {
@@ -56,23 +56,38 @@ public class ServicioTimerTest {
 
     Categoria categoria = new Categoria();
     categoria.setId(5L);
-
+    categoria.setNombre("Cocina");
+    CicloVida fechas = new CicloVida(
+      OffsetDateTime.now().minusHours(1),
+      OffsetDateTime.now().plusDays(3)
+    );
+    Usuario usuario = new Usuario();
+    usuario.setNombre("Tatiel");
+    usuario.setId(1L);
     Timer timer = new Timer();
     timer.setId(timerId);
     timer.setProducto(producto);
     timer.setCategoria(categoria);
     timer.setReglaVencimiento(regla);
     timer.setEstado(EstadoTimer.ACTIVO);
-    timer.setFechaCreacion(OffsetDateTime.now().minusHours(1));
-    timer.setFechaVencimiento(OffsetDateTime.now().plusDays(3));
+    timer.setCicloVida(fechas);
+    timer.setUsuario(usuario);
     return timer;
   }
 
   private Timer buildTimerGenerado() {
+    CicloVida fechas = new CicloVida(OffsetDateTime.now(), OffsetDateTime.now().plusDays(3));
+    Categoria categoria = new Categoria();
+    Usuario usuario = new Usuario();
+    categoria.setId(5L);
+    categoria.setNombre("Cocina");
+    usuario.setNombre("tatiel");
+    usuario.setId(1L);
     Timer nuevoTimer = new Timer();
     nuevoTimer.setId(99L);
-    nuevoTimer.setFechaCreacion(OffsetDateTime.now());
-    nuevoTimer.setFechaVencimiento(OffsetDateTime.now().plusDays(3));
+    nuevoTimer.setCicloVida(fechas);
+    nuevoTimer.setCategoria(categoria);
+    nuevoTimer.setUsuario(usuario);
     return nuevoTimer;
   }
 
@@ -91,7 +106,8 @@ public class ServicioTimerTest {
       producto,
       categoria,
       regla,
-      1
+      1,
+      usuarioTest
     );
     timer.setId(1L);
     List<Timer> timersActivos = List.of(timer);
@@ -122,11 +138,11 @@ public class ServicioTimerTest {
   @Test
   public void queElTimerQuedeMarcadoComoVencidoSiYaVencio() {
     OffsetDateTime fechaVencimientoPasada = OffsetDateTime.now().minusHours(1);
-    Timer timer = new Timer()
-      .builder()
-      .fechaCreacion(OffsetDateTime.now().minusHours(2))
-      .fechaVencimiento(fechaVencimientoPasada)
-      .build();
+    CicloVida fechaVencida = new CicloVida(
+      OffsetDateTime.now().minusHours(2),
+      fechaVencimientoPasada
+    );
+    Timer timer = new Timer().builder().cicloVida(fechaVencida).build();
 
     when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
 
@@ -139,11 +155,8 @@ public class ServicioTimerTest {
   @Test
   public void queElTimerQuedeMarcadoComoEliminadoSiNoVencioTodavia() {
     OffsetDateTime fechaVencimientoFutura = OffsetDateTime.now().plusHours(1);
-    Timer timer = new Timer()
-      .builder()
-      .fechaCreacion(OffsetDateTime.now())
-      .fechaVencimiento(fechaVencimientoFutura)
-      .build();
+    CicloVida fechaValida = new CicloVida(OffsetDateTime.now(), fechaVencimientoFutura);
+    Timer timer = new Timer().builder().cicloVida(fechaValida).build();
 
     when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
 
@@ -516,7 +529,8 @@ public class ServicioTimerTest {
       new Producto(),
       categoriaOrigen,
       new ReglaVencimiento(),
-      2
+      2,
+      usuarioTest
     );
     timer.setId(1L);
 
@@ -524,7 +538,7 @@ public class ServicioTimerTest {
     when(repositorioCategoriaMock.buscarPorId(2L)).thenReturn(categoriaDestino);
     when(repositorioTimerMock.existeTimerActivoEnCategoriaYGrupo(2L, "GROUP-01")).thenReturn(false);
 
-    CategoriaDto resultado = servicioTimer.importarTimer(1L, 2L, 1);
+    CategoriaDto resultado = servicioTimer.importarTimer(1L, 2L, 1, usuarioTest);
 
     assertNotNull(resultado);
     assertEquals("Isla", resultado.getNombre());
@@ -546,7 +560,8 @@ public class ServicioTimerTest {
       new Producto(),
       categoriaOrigen,
       new ReglaVencimiento(),
-      2
+      2,
+      usuarioTest
     );
     timer.setId(1L);
 
@@ -554,7 +569,7 @@ public class ServicioTimerTest {
     when(repositorioCategoriaMock.buscarPorId(2L)).thenReturn(categoriaDestino);
     when(repositorioTimerMock.existeTimerActivoEnCategoriaYGrupo(2L, "GROUP-01")).thenReturn(false);
 
-    servicioTimer.importarTimer(1L, 2L, 1);
+    servicioTimer.importarTimer(1L, 2L, 1, usuarioTest);
 
     ArgumentCaptor<Timer> captor = ArgumentCaptor.forClass(Timer.class);
     verify(repositorioTimerMock).guardar(captor.capture());
@@ -577,7 +592,8 @@ public class ServicioTimerTest {
       new Producto(),
       categoriaOrigen,
       new ReglaVencimiento(),
-      1
+      1,
+      usuarioTest
     );
     timer.setId(1L);
 
@@ -587,7 +603,7 @@ public class ServicioTimerTest {
 
     ValidacionException ex = assertThrows(
       ValidacionException.class,
-      () -> servicioTimer.importarTimer(1L, 2L, 1)
+      () -> servicioTimer.importarTimer(1L, 2L, 1, usuarioTest)
     );
     assertEquals("El timer ya fue importado a esta categoría", ex.getMessage());
     verify(repositorioTimerMock, never()).guardar(any());
@@ -607,7 +623,8 @@ public class ServicioTimerTest {
       new Producto(),
       categoria,
       new ReglaVencimiento(),
-      1
+      1,
+      usuarioTest
     );
     timer.setId(1L);
 
@@ -616,7 +633,7 @@ public class ServicioTimerTest {
 
     ValidacionException ex = assertThrows(
       ValidacionException.class,
-      () -> servicioTimer.importarTimer(1L, 1L, 1)
+      () -> servicioTimer.importarTimer(1L, 1L, 1, usuarioTest)
     );
     assertEquals("El timer ya pertenece a esta categoría", ex.getMessage());
     verify(repositorioTimerMock, never()).guardar(any());
@@ -627,7 +644,10 @@ public class ServicioTimerTest {
   public void importarTimerInexistenteDeberiaLanzarExcepcion() {
     when(repositorioTimerMock.buscarPorId(99L)).thenReturn(null);
 
-    assertThrows(ValidacionException.class, () -> servicioTimer.importarTimer(99L, 2L, 1));
+    assertThrows(
+      ValidacionException.class,
+      () -> servicioTimer.importarTimer(99L, 2L, 1, usuarioTest)
+    );
     verify(repositorioTimerMock, never()).guardar(any());
   }
 
@@ -647,7 +667,8 @@ public class ServicioTimerTest {
       new Producto(),
       categoriaOrigen,
       new ReglaVencimiento(),
-      2
+      2,
+      usuarioTest
     );
     timer.setId(1L);
 
@@ -655,7 +676,7 @@ public class ServicioTimerTest {
     when(repositorioCategoriaMock.buscarPorId(2L)).thenReturn(categoriaDestino);
     when(repositorioTimerMock.existeTimerActivoEnCategoriaYGrupo(2L, null)).thenReturn(false);
 
-    CategoriaDto resultado = servicioTimer.importarTimer(1L, 2L, 1);
+    CategoriaDto resultado = servicioTimer.importarTimer(1L, 2L, 1, usuarioTest);
 
     assertNotNull(resultado);
     verify(repositorioTimerMock, times(1)).guardar(any(Timer.class));
@@ -671,7 +692,8 @@ public class ServicioTimerTest {
       new Producto(),
       new Categoria(),
       new ReglaVencimiento(),
-      1
+      1,
+      usuarioTest
     );
     timer.setId(1L);
 
@@ -711,11 +733,16 @@ public class ServicioTimerTest {
     OffsetDateTime fechaVencimiento,
     String ubicacion
   ) {
+    Categoria categoria = new Categoria();
+    categoria.setId(2L);
+    categoria.setNombre("Cocina");
+    Usuario usuario = new Usuario();
+    usuario.setNombre("Tatiel");
     Timer timer = new Timer();
+    CicloVida fechas = new CicloVida(fechaCreacion, fechaVencimiento);
     timer.setId(id);
     timer.setGroupId(groupId);
-    timer.setFechaCreacion(fechaCreacion);
-    timer.setFechaVencimiento(fechaVencimiento);
+    timer.setCicloVida(fechas);
 
     if (nombreProducto != null) {
       Producto producto = new Producto();
@@ -729,6 +756,8 @@ public class ServicioTimerTest {
       timer.setReglaVencimiento(regla);
     }
 
+    timer.setCategoria(categoria);
+    timer.setUsuario(usuario);
     return timer;
   }
 
@@ -747,12 +776,13 @@ public class ServicioTimerTest {
         timer.getCategoria(),
         1L,
         null,
-        1
+        1,
+        usuarioTest
       )
     )
       .thenReturn(nuevoTimer);
 
-    TimerDTO resultado = servicioTimer.renovarTimer(timer, 1);
+    TimerDTO resultado = servicioTimer.renovarTimer(timer, 1, usuarioTest);
 
     assertNotNull(resultado);
     assertEquals(99L, resultado.getId());
@@ -773,12 +803,13 @@ public class ServicioTimerTest {
         timer.getCategoria(),
         1L,
         null,
-        1
+        1,
+        usuarioTest
       )
     )
       .thenReturn(nuevoTimer);
 
-    servicioTimer.renovarTimer(timer, 1);
+    servicioTimer.renovarTimer(timer, 1, usuarioTest);
 
     verify(repositorioTimerMock).guardar(argThat(t -> t.getEstado() == EstadoTimer.RENOVADO));
   }
@@ -796,15 +827,16 @@ public class ServicioTimerTest {
         timer.getCategoria(),
         1L,
         null,
-        1
+        1,
+        usuarioTest
       )
     )
       .thenReturn(nuevoTimer);
 
-    servicioTimer.renovarTimer(timer, 1);
+    servicioTimer.renovarTimer(timer, 1, usuarioTest);
 
     verify(servicioReglaVencimientoMock)
-      .generarVencimiento(timer.getProducto(), timer.getCategoria(), 1L, null, 1);
+      .generarVencimiento(timer.getProducto(), timer.getCategoria(), 1L, null, 1, usuarioTest);
   }
 
   // ─── NEGATIVE PATH ────────────────────────────────────────────
@@ -815,7 +847,10 @@ public class ServicioTimerTest {
     Timer timer = buildTimerCompleto(1L);
     timer.setReglaVencimiento(null);
 
-    assertThrows(ValidacionException.class, () -> servicioTimer.renovarTimer(timer, 1));
+    assertThrows(
+      ValidacionException.class,
+      () -> servicioTimer.renovarTimer(timer, 1, usuarioTest)
+    );
   }
 
   @Test
@@ -830,12 +865,16 @@ public class ServicioTimerTest {
         timer.getCategoria(),
         1L,
         null,
-        1
+        1,
+        usuarioTest
       )
     )
       .thenThrow(new IllegalArgumentException("El producto no tiene regla de vencimiento"));
 
-    assertThrows(IllegalArgumentException.class, () -> servicioTimer.renovarTimer(timer, 1));
+    assertThrows(
+      IllegalArgumentException.class,
+      () -> servicioTimer.renovarTimer(timer, 1, usuarioTest)
+    );
   }
 
   @Test
@@ -847,7 +886,10 @@ public class ServicioTimerTest {
 
     when(repositorioTimerMock.buscarPorId(1L)).thenReturn(null);
 
-    assertThrows(ValidacionException.class, () -> servicioTimer.renovarTimer(timer, 1));
+    assertThrows(
+      ValidacionException.class,
+      () -> servicioTimer.renovarTimer(timer, 1, usuarioTest)
+    );
   }
 
   // ─── EDGE CASES ───────────────────────────────────────────────
@@ -856,7 +898,7 @@ public class ServicioTimerTest {
   @DisplayName("EC-01 | renovarTimer | Timer vencido cambia estado a VENCIDO en lugar de RENOVADO")
   void renovarTimer_timerVencido_deberiaSetearEstadoVencido() {
     Timer timer = buildTimerCompleto(1L);
-    timer.setFechaVencimiento(OffsetDateTime.now().minusMinutes(1)); // ya venció
+    timer.getCicloVida().setFechaVencimiento(OffsetDateTime.now().minusMinutes(1)); // ya venció
     Timer nuevoTimer = buildTimerGenerado();
 
     when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
@@ -866,12 +908,13 @@ public class ServicioTimerTest {
         timer.getCategoria(),
         1L,
         null,
-        1
+        1,
+        usuarioTest
       )
     )
       .thenReturn(nuevoTimer);
 
-    servicioTimer.renovarTimer(timer, 1);
+    servicioTimer.renovarTimer(timer, 1, usuarioTest);
 
     verify(repositorioTimerMock).guardar(argThat(t -> t.getEstado() == EstadoTimer.VENCIDO));
   }
@@ -882,7 +925,7 @@ public class ServicioTimerTest {
   )
   void renovarTimer_fechaVencimientoAhora_deberiaConsiderarseVencido() {
     Timer timer = buildTimerCompleto(1L);
-    timer.setFechaVencimiento(OffsetDateTime.now().minusNanos(1));
+    timer.getCicloVida().setFechaVencimiento(OffsetDateTime.now().minusNanos(1));
     Timer nuevoTimer = buildTimerGenerado();
 
     when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
@@ -892,12 +935,13 @@ public class ServicioTimerTest {
         timer.getCategoria(),
         1L,
         null,
-        1
+        1,
+        usuarioTest
       )
     )
       .thenReturn(nuevoTimer);
 
-    servicioTimer.renovarTimer(timer, 1);
+    servicioTimer.renovarTimer(timer, 1, usuarioTest);
 
     verify(repositorioTimerMock).guardar(argThat(t -> t.getEstado() == EstadoTimer.VENCIDO));
   }
@@ -917,15 +961,16 @@ public class ServicioTimerTest {
         timer.getCategoria(),
         1L,
         null,
-        1
+        1,
+        usuarioTest
       )
     )
       .thenReturn(nuevoTimer);
 
-    TimerDTO resultado = servicioTimer.renovarTimer(timer, 1);
+    TimerDTO resultado = servicioTimer.renovarTimer(timer, 1, usuarioTest);
 
     OffsetDateTime fechaCreacionDTO = OffsetDateTime.parse(resultado.getFechaCreacion());
-    assertTrue(fechaCreacionDTO.isAfter(timer.getFechaCreacion()));
+    assertTrue(fechaCreacionDTO.isAfter(timer.getCicloVida().getFechaCreacion()));
   }
 
   // ─── SECURITY CASES ───────────────────────────────────────────
@@ -945,12 +990,16 @@ public class ServicioTimerTest {
         timer.getCategoria(),
         -1L,
         null,
-        1
+        1,
+        usuarioTest
       )
     )
       .thenThrow(new IllegalArgumentException("El producto no tiene regla de vencimiento"));
 
-    assertThrows(IllegalArgumentException.class, () -> servicioTimer.renovarTimer(timer, 1));
+    assertThrows(
+      IllegalArgumentException.class,
+      () -> servicioTimer.renovarTimer(timer, 1, usuarioTest)
+    );
   }
 
   @Test
@@ -960,7 +1009,6 @@ public class ServicioTimerTest {
   void renovarTimer_productoManipulado_deberiaUsarDatosDelTimerOriginal() {
     Timer timer = buildTimerCompleto(1L);
     Timer nuevoTimer = buildTimerGenerado();
-
     when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
     when(
       servicioReglaVencimientoMock.generarVencimiento(
@@ -968,12 +1016,13 @@ public class ServicioTimerTest {
         timer.getCategoria(),
         1L,
         null,
-        1
+        1,
+        usuarioTest
       )
     )
       .thenReturn(nuevoTimer);
 
-    servicioTimer.renovarTimer(timer, 1);
+    servicioTimer.renovarTimer(timer, 1, usuarioTest);
 
     verify(servicioReglaVencimientoMock)
       .generarVencimiento(
@@ -981,7 +1030,51 @@ public class ServicioTimerTest {
         eq(timer.getCategoria()),
         eq(1L),
         isNull(),
-        eq(1)
+        eq(1),
+        eq(usuarioTest)
       );
+  }
+
+  @Test
+  @DisplayName("HAP-01 | obtenerTodosLosTimers | Retorna lista de TimerDTO mapeados correctamente")
+  public void obtenerTodosLosTimers_deberiaRetornarListaDeTimerDTO() {
+    // Arrange
+    Timer timer = this.buildTimerCompleto(1L);
+    // Si mapearATimerDTO requiere otros campos obligatorios (como Categoria o Producto),
+    // se deben instanciar aquí de la misma forma que en tu ejemplo anterior.
+
+    when(repositorioTimerMock.obtenerTodosLosTimers()).thenReturn(List.of(timer));
+
+    // Act
+    List<TimerDTO> resultado = servicioTimer.obtenerTodosLosTimers();
+
+    // Assert
+    assertNotNull(resultado);
+    assertEquals(1, resultado.size());
+    verify(repositorioTimerMock, times(1)).obtenerTodosLosTimers();
+  }
+
+  @Test
+  @DisplayName(
+    "HAP-02 | obtenerTimersConFiltro | Retorna lista de TimerDTO filtrados correctamente por estado y categoria"
+  )
+  public void obtenerTimersConFiltro_deberiaRetornarListaDeTimerDTOFiltrados() {
+    // Arrange
+    EstadoTimer estado = EstadoTimer.ACTIVO; // Asumiendo que es un Enum, ajustar de ser necesario
+    Long categoriaId = 2L;
+
+    Timer timer = this.buildTimerCompleto(10L);
+    timer.getCategoria().setId(2L);
+
+    when(repositorioTimerMock.obtenerTimersConFiltro(estado, categoriaId))
+      .thenReturn(List.of(timer));
+
+    // Act
+    List<TimerDTO> resultado = servicioTimer.obtenerTimersConFiltro(estado, categoriaId);
+
+    // Assert
+    assertNotNull(resultado);
+    assertEquals(1, resultado.size());
+    verify(repositorioTimerMock, times(1)).obtenerTimersConFiltro(estado, categoriaId);
   }
 }

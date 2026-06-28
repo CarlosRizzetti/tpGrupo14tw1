@@ -1,5 +1,6 @@
 package com.tallerwebi.dominio.entity;
 
+import com.tallerwebi.dominio.entity.embeddables.CicloVida;
 import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -19,10 +20,15 @@ public class Timer {
   private Long id;
 
   private String groupId;
-  private OffsetDateTime descongelamiento;
-  private OffsetDateTime fechaCreacion;
-  private OffsetDateTime fechaVencimiento;
+
+  @Embedded
+  private CicloVida cicloVida;
+
   private Integer cantidadProducto;
+
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "idUsuario")
+  private Usuario usuario;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -35,16 +41,17 @@ public class Timer {
     Producto producto,
     Categoria categoria,
     ReglaVencimiento reglaVencimiento,
-    Integer cantidadProducto
+    Integer cantidadProducto,
+    Usuario usuario
   ) {
-    this.fechaCreacion = fechaCreacion;
-    this.fechaVencimiento = fechaVencimiento;
+    this.cicloVida = new CicloVida(fechaCreacion, fechaVencimiento);
     this.groupId = groupId;
     this.estado = EstadoTimer.ACTIVO;
     this.producto = producto;
     this.categoria = categoria;
     this.reglaVencimiento = reglaVencimiento;
     this.cantidadProducto = cantidadProducto;
+    this.usuario = usuario;
   }
 
   public Timer(
@@ -54,16 +61,16 @@ public class Timer {
     Producto producto,
     Categoria categoria,
     ReglaVencimiento reglaVencimiento,
-    Integer cantidadProducto
+    Integer cantidadProducto,
+    Usuario usuario
   ) {
-    this.fechaCreacion = fechaCreacion;
-    this.fechaVencimiento = fechaVencimiento;
-    this.descongelamiento = descongelamiento;
+    this.cicloVida = new CicloVida(fechaCreacion, fechaVencimiento, descongelamiento);
     this.producto = producto;
     this.categoria = categoria;
     this.reglaVencimiento = reglaVencimiento;
     this.estado = EstadoTimer.ACTIVO;
     this.cantidadProducto = cantidadProducto;
+    this.usuario = usuario;
   }
 
   @ManyToOne(fetch = FetchType.EAGER)
