@@ -37,22 +37,19 @@ public class ControladorUsuarioTest {
 
   @Test
   public void listarUsuariosDeberiaRetornarVistaListaConUsuarios() {
-
     // preparacion
     List<UsuarioListadoDto> usuarios = Arrays.asList(
-        new UsuarioListadoDto(),
-        new UsuarioListadoDto());
+      new UsuarioListadoDto(),
+      new UsuarioListadoDto()
+    );
 
-    doReturn(usuarios)
-        .when(servicioUsuarioMock)
-        .listarUsuarios();
+    doReturn(usuarios).when(servicioUsuarioMock).listarUsuarios();
 
     // ejecucion
     ModelAndView mav = controladorUsuario.listarUsuarios();
 
     // validacion
-    assertThat(mav.getViewName(),
-        equalToIgnoringCase("funcionalidadesAdmin/usuario/lista"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/usuario/lista"));
 
     assertThat(mav.getModel().get("usuarios"), equalTo(usuarios));
   }
@@ -99,8 +96,8 @@ public class ControladorUsuarioTest {
     // preparacion
     UsuarioDto dto = new UsuarioDto();
     doThrow(new PasswordInvalida("La contraseña no cumple con los requisitos de seguridad."))
-        .when(servicioUsuarioMock)
-        .crearUsuario(dto);
+      .when(servicioUsuarioMock)
+      .crearUsuario(dto);
 
     // ejecucion
     ModelAndView mav = controladorUsuario.crearUsuario(dto);

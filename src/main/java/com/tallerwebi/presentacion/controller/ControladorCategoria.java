@@ -3,7 +3,6 @@ package com.tallerwebi.presentacion.controller;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import java.util.ArrayList;
-
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -21,7 +20,7 @@ public class ControladorCategoria {
     this.servicioCategoria = servicioCategoria;
   }
 
-@RequestMapping("/home")
+  @RequestMapping("/home")
   public ModelAndView index(Authentication authentication) {
     ModelAndView mav = new ModelAndView("home");
     List<CategoriaDto> categorias;
@@ -48,5 +47,4 @@ public class ControladorCategoria {
     mav.addObject("categorias", categorias);
     return mav;
   }
-  
 }

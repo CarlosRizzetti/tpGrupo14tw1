@@ -4,11 +4,10 @@ import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.presentacion.dto.UsuarioDto;
-import com.tallerwebi.presentacion.dto.UsuarioListadoDto;
 import java.util.List;
 
 public interface ServicioUsuario {
-  List<UsuarioListadoDto> listarUsuarios();
+  List<Usuario> listarUsuarios();
   void crearUsuario(UsuarioDto dto) throws UsuarioExistente, PasswordInvalida;
   Usuario obtenerUsuarioPorId(Long id);
   void editarUsuario(Long id, UsuarioDto dto) throws PasswordInvalida;

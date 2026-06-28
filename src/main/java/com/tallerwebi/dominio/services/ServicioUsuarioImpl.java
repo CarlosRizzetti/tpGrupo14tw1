@@ -12,8 +12,6 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.tallerwebi.presentacion.dto.UsuarioListadoDto;
-import java.util.stream.Collectors;
 
 @Service("servicioUsuario")
 @Transactional
@@ -27,13 +25,8 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
   }
 
   @Override
-  public List<UsuarioListadoDto> listarUsuarios() {
-
-    List<Usuario> usuarios = repositorioUsuario.listarTodos();
-
-    return usuarios.stream()
-        .map(this::mapearADto)
-        .toList();
+  public List<Usuario> listarUsuarios() {
+    return repositorioUsuario.listarTodos();
   }
 
   @Override
@@ -55,11 +48,6 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
   @Override
   public Usuario obtenerUsuarioPorId(Long id) {
     return repositorioUsuario.obtenerPorId(id);
-  }
-
-  @Override
-  public Usuario obtenerUsuarioPorEmail(String email) {
-    return repositorioUsuario.buscarUsuario(email);
   }
 
   @Override
@@ -101,24 +89,9 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
     repositorioUsuario.modificar(usuario);
   }
 
-  private UsuarioListadoDto mapearADto(Usuario usuario) {
-
-    UsuarioListadoDto dto = new UsuarioListadoDto();
-
-    dto.setId(usuario.getId());
-    dto.setNombre(usuario.getNombre());
-    dto.setEmail(usuario.getEmail());
-    dto.setRol(usuario.getRol());
-    dto.setEstado(usuario.getEstado().name());
-
-    if (usuario.getCategorias() != null) {
-      dto.setCategorias(
-          usuario.getCategorias()
-              .stream()
-              .map(c -> c.getNombre())
-              .collect(Collectors.toList()));
-    }
-
-    return dto;
+  @Override
+  public Usuario obtenerUsuarioPorEmail(String email) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'obtenerUsuarioPorEmail'");
   }
 }

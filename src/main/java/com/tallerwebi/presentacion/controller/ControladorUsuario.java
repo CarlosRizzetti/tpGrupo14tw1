@@ -5,9 +5,7 @@ import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
-import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.UsuarioDto;
-import com.tallerwebi.presentacion.dto.UsuarioListadoDto;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -39,16 +37,13 @@ public class ControladorUsuario {
   }
 
   @RequestMapping(value = "/admin/usuarios", method = RequestMethod.GET)
-public ModelAndView listarUsuarios() {
-
-    List<UsuarioListadoDto> usuarios = servicioUsuario.listarUsuarios();
-    List<CategoriaDto> categorias = servicioCategoria.obtenerLasCategoriasParaElMenu();
-
+  public ModelAndView listarUsuarios() {
+    List<Usuario> usuarios = servicioUsuario.listarUsuarios();
     ModelMap modelo = new ModelMap();
     modelo.put("usuarios", usuarios);
     modelo.put("categorias", servicioCategoria.obtenerLasCategoriasParaElMenu());
     return new ModelAndView(VISTA_LISTA, modelo);
-}
+  }
 
   @RequestMapping(value = "/admin/usuarios/nuevo", method = RequestMethod.GET)
   public ModelAndView mostrarFormularioNuevo() {
@@ -92,8 +87,9 @@ public ModelAndView listarUsuarios() {
 
   @RequestMapping(value = "/admin/usuarios/{id}/editar", method = RequestMethod.POST)
   public ModelAndView editarUsuario(
-      @PathVariable Long id,
-      @ModelAttribute(ATTR_DTO) UsuarioDto usuarioDto) {
+    @PathVariable Long id,
+    @ModelAttribute(ATTR_DTO) UsuarioDto usuarioDto
+  ) {
     try {
       servicioUsuario.editarUsuario(id, usuarioDto);
       return new ModelAndView(REDIRECT_LISTA);

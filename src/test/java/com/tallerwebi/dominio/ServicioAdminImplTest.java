@@ -28,7 +28,7 @@ public class ServicioAdminImplTest {
   }
 
   @Test
-public void alAprobarUsuarioDebeActivarYAsignarCategoriaSiExisten() {
+  public void alAprobarUsuarioDebeActivarYAsignarCategoriaSiExisten() {
     Usuario usuario = new Usuario();
     usuario.setEstado(EstadoUsuario.PENDIENTE);
     usuario.setCategorias(new HashSet<>());
@@ -43,7 +43,7 @@ public void alAprobarUsuarioDebeActivarYAsignarCategoriaSiExisten() {
     assertEquals(EstadoUsuario.ACTIVO, usuario.getEstado());
     assertTrue(usuario.getCategorias().contains(categoria));
     verify(repositorioUsuario, times(1)).modificar(usuario);
-}
+  }
 
   @Test
   public void siUsuarioOCategoriaNoExistenNoDebeHacerNada() {
