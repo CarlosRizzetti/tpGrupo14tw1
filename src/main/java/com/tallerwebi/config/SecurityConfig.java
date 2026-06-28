@@ -2,6 +2,7 @@ package com.tallerwebi.config;
 
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import com.tallerwebi.dominio.services.UserDetailsServiceImpl;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -10,11 +11,21 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+  @Value("${google.client-id}")
+  private String googleClientId;
+
+  @Value("${google.client-secret}")
+  private String googleClientSecret;
   private final RepositorioUsuario repositorioUsuario;
 
   public SecurityConfig(RepositorioUsuario repositorioUsuario) {
@@ -68,5 +79,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
       .and()
       .logout()
       .permitAll();
+  }
+
+  @Bean
+  public ClientRegistrationRepository clientRegistrationRepository() {
+    ClientRegistration google = ClientRegistration
+            .withRegistrationId("google")
+            .clientId(googleClientId)
+            .clientSecret(googleClientSecret)
+            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC) //Se envia en el encabezado html con base 64
+            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)//google devuelve un codigo de autorizacion
+            .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+            .scope("email", "profile")
+            .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
+            .tokenUri("https://www.googleapis.com/oauth2/v4/token")
+            .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
+            .userNameAttributeName("email")
+            .clientName("Google")
+            .build();
+
+    return new InMemoryClientRegistrationRepository(google);
   }
 }
