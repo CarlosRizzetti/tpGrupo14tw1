@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
 import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
 import com.tallerwebi.dominio.excepcion.UsuarioSinCategorias;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
@@ -38,7 +39,7 @@ public class UserDetailsServiceImplTest {
   @Test
   public void siElUsuarioEstaInactivoDebeLanzarUsuarioInactivo() {
     Usuario usuario = new Usuario();
-    usuario.setActivo(false);
+    usuario.setEstado(EstadoUsuario.PENDIENTE);
     when(repositorioUsuario.buscar("test@test.com")).thenReturn(usuario);
 
     assertThrows(
@@ -50,7 +51,7 @@ public class UserDetailsServiceImplTest {
   @Test
   public void siElUsuarioNoEsAdminYNoTieneCategoriasDebeLanzarUsuarioSinCategorias() {
     Usuario usuario = new Usuario();
-    usuario.setActivo(true);
+    usuario.setEstado(EstadoUsuario.ACTIVO);
     usuario.setRol("USER");
     usuario.setCategorias(new HashSet<>());
     when(repositorioUsuario.buscar("test@test.com")).thenReturn(usuario);
@@ -66,7 +67,7 @@ public class UserDetailsServiceImplTest {
     Usuario usuario = new Usuario();
     usuario.setEmail("admin@test.com");
     usuario.setPassword("1234");
-    usuario.setActivo(true);
+    usuario.setEstado(EstadoUsuario.ACTIVO);
     usuario.setRol("ADMIN");
     usuario.setCategorias(new HashSet<>());
     when(repositorioUsuario.buscar("admin@test.com")).thenReturn(usuario);
@@ -82,7 +83,7 @@ public class UserDetailsServiceImplTest {
     Usuario usuario = new Usuario();
     usuario.setEmail("user@test.com");
     usuario.setPassword("1234");
-    usuario.setActivo(true);
+    usuario.setEstado(EstadoUsuario.ACTIVO);
     usuario.setRol("USER");
     usuario.setCategorias(new HashSet<>());
     usuario.getCategorias().add(new Categoria());

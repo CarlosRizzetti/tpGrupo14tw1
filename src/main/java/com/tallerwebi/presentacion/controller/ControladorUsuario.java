@@ -6,7 +6,9 @@ import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
 import com.tallerwebi.presentacion.dto.UsuarioDto;
+import com.tallerwebi.presentacion.dto.UsuarioListadoDto;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -38,10 +40,33 @@ public class ControladorUsuario {
 
   @RequestMapping(value = "/admin/usuarios", method = RequestMethod.GET)
   public ModelAndView listarUsuarios() {
-    List<Usuario> usuarios = servicioUsuario.listarUsuarios();
+    List<UsuarioListadoDto> usuarios = servicioUsuario.listarUsuarios();
+
     ModelMap modelo = new ModelMap();
     modelo.put("usuarios", usuarios);
+    modelo.put(
+      "usuariosActivos",
+      usuarios
+        .stream()
+        .filter(usuario -> "ACTIVO".equals(usuario.getEstado()))
+        .collect(Collectors.toList())
+    );
+    modelo.put(
+      "usuariosPendientes",
+      usuarios
+        .stream()
+        .filter(usuario -> "PENDIENTE".equals(usuario.getEstado()))
+        .collect(Collectors.toList())
+    );
+    modelo.put(
+      "usuariosBaja",
+      usuarios
+        .stream()
+        .filter(usuario -> "BAJA".equals(usuario.getEstado()))
+        .collect(Collectors.toList())
+    );
     modelo.put("categorias", servicioCategoria.obtenerLasCategoriasParaElMenu());
+
     return new ModelAndView(VISTA_LISTA, modelo);
   }
 

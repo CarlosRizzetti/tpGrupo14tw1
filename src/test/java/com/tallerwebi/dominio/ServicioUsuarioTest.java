@@ -8,12 +8,14 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
 import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
 import com.tallerwebi.dominio.services.ServicioUsuarioImpl;
 import com.tallerwebi.presentacion.dto.UsuarioDto;
+import com.tallerwebi.presentacion.dto.UsuarioListadoDto;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,12 +34,13 @@ public class ServicioUsuarioTest {
 
   @Test
   public void listarUsuariosDeberiaRetornarLaListaDelRepositorio() {
-    // preparacion
-    List<Usuario> usuariosEsperados = Arrays.asList(new Usuario(), new Usuario());
-    when(repositorioUsuarioMock.listarTodos()).thenReturn(usuariosEsperados);
+    // preparacion (sin mockear retorno)
+    List<Usuario> usuariosMock = Arrays.asList(new Usuario(), new Usuario());
+
+    when(repositorioUsuarioMock.listarTodos()).thenReturn(usuariosMock);
 
     // ejecucion
-    List<Usuario> resultado = servicioUsuario.listarUsuarios();
+    List<UsuarioListadoDto> resultado = servicioUsuario.listarUsuarios();
 
     // validacion
     assertThat(resultado, hasSize(2));
@@ -133,14 +136,14 @@ public class ServicioUsuarioTest {
   public void darDeBajaDeberiaDesactivarElUsuario() {
     // preparacion
     Usuario usuario = new Usuario();
-    usuario.setActivo(true);
+    usuario.setEstado(EstadoUsuario.ACTIVO);
     when(repositorioUsuarioMock.obtenerPorId(1L)).thenReturn(usuario);
 
     // ejecucion
     servicioUsuario.darDeBaja(1L);
 
     // validacion
-    assertThat(usuario.getActivo(), is(false));
+    assertThat(usuario.getEstado(), is(EstadoUsuario.BAJA));
     verify(repositorioUsuarioMock, times(1)).modificar(usuario);
   }
 
@@ -214,14 +217,14 @@ public class ServicioUsuarioTest {
   public void reactivarDeberiaActivarElUsuario() {
     // preparacion
     Usuario usuario = new Usuario();
-    usuario.setActivo(false);
+    usuario.setEstado(EstadoUsuario.BAJA);
     when(repositorioUsuarioMock.obtenerPorId(1L)).thenReturn(usuario);
 
     // ejecucion
     servicioUsuario.reactivar(1L);
 
     // validacion
-    assertThat(usuario.getActivo(), is(true));
+    assertThat(usuario.getEstado(), is(EstadoUsuario.ACTIVO));
     verify(repositorioUsuarioMock, times(1)).modificar(usuario);
   }
 

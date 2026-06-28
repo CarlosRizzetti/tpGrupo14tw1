@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import com.tallerwebi.dominio.interfaces.ServicioValidacionIdentidad;
 import com.tallerwebi.dominio.services.ServicioValidacionIdentidadImpl;
@@ -55,6 +56,27 @@ public class ServicioValidacionIdentidadTest {
       .modificar(org.mockito.ArgumentMatchers.any(Usuario.class));
     verify(mailSenderMock, times(1))
       .send(org.mockito.ArgumentMatchers.any(SimpleMailMessage.class));
+  }
+
+  @Test
+  public void validarTokenExistenteDeberiaActivarUsuarioYAnularToken() {
+    String token = "token";
+
+    Usuario usuario = new Usuario();
+    usuario.setEstado(EstadoUsuario.PENDIENTE);
+    usuario.setTokenValidacion(token);
+
+    when(repositorioUsuarioMock.buscarPorTokenValidacion(token)).thenReturn(usuario);
+
+    boolean activado = servicioValidacionIdentidad.validarToken(token);
+
+    assertThat(activado, is(true));
+
+    ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
+    verify(repositorioUsuarioMock, times(1)).modificar(captor.capture());
+
+    assertThat(captor.getValue().getEstado(), is(EstadoUsuario.ACTIVO));
+    assertThat(captor.getValue().getTokenValidacion(), is(nullValue()));
   }
 
   @Test
