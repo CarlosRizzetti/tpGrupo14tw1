@@ -1,5 +1,6 @@
 package com.tallerwebi.dominio.interfaces;
 
+import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import java.util.List;
 
@@ -7,4 +8,6 @@ public interface ServicioCategoria {
   List<CategoriaDto> obtenerLasCategoriasParaElMenu();
   CategoriaDto obtenerCategoriaPorId(Long id);
   List<CategoriaDto> obtenerCategoriasPorUsuario(String email);
+
+  List<Usuario> obtenerUsuariosPorCategoria(Long categoriaId);
 }

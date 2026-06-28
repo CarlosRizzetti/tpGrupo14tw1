@@ -1,5 +1,6 @@
 package com.tallerwebi.presentacion.controller;
 
+import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import java.util.ArrayList;

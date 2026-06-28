@@ -123,8 +123,13 @@ public class ControladorProducto {
     session.setAttribute(CATEGORIA, categoria);
     List<Producto> productos = servicioProducto.obtenerProductosPorCategoria(id);
 
+    // Obtener los usuarios de la categoría para mostrarlos en la vista
+    List<com.tallerwebi.dominio.entity.Usuario> usuarios =
+      servicioCategoria.obtenerUsuariosPorCategoria(id);
+
     modelo.put(CATEGORIA, categoria);
     modelo.put("productos", productos);
+    modelo.put("usuarios", usuarios);
     return new ModelAndView("listadoDeProductosYReglas/productos", modelo);
   }
 
