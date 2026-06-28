@@ -20,9 +20,11 @@
 
 <!-- HEADER LEFT -->
 <div th:fragment="header_left">
-    <a th:href="@{/home}" class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+    <a th:href="@{/admin}"
+       class="hidden md:flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg border border-white/20 transition text-xs font-bold uppercase tracking-wider">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/>
         </svg>
         Volver
     </a>
@@ -30,6 +32,7 @@
 
 <!-- CONTENT -->
 <div th:fragment="content" class="min-h-screen font-sans p-6 md:p-8 bg-gray-50">
+
 
     <!-- FILTRO DE RANGO -->
     <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
@@ -41,21 +44,29 @@
                 Vencimientos, stock y demanda
             </p>
         </div>
-        <div class="flex items-center gap-2">
-            <label for="filtro-dias"
-                class="text-xs font-bold text-gray-500 uppercase tracking-wider">Rango</label>
-            <select id="filtro-dias"
-                class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-bold text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400">
-                <option value="7">Últimos 7 días</option>
-                <option value="30" th:selected="${dias == 30}">Últimos 30 días</option>
-                <option value="90">Últimos 90 días</option>
-            </select>
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+            <div class="flex items-center gap-2">
+                <button id="btnExportarExcel" class="btn-primary-styled bg- px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-bold text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400">
+                    Exportar a Excel
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <label for="filtro-dias"
+                       class="text-xs font-bold text-gray-500 uppercase tracking-wider">Rango</label>
+                <select id="filtro-dias"
+                        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-bold text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400">
+                    <option value="7">Últimos 7 días</option>
+                    <option value="30" th:selected="${dias == 30}">Últimos 30 días</option>
+                    <option value="90">Últimos 90 días</option>
+                </select>
+            </div>
         </div>
     </div>
 
     <!-- MENSAJE DE ERROR -->
     <div id="estadisticas-error"
-        class="hidden mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-600">
+         class="hidden mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-600">
         No se pudieron cargar las estadísticas. Intente nuevamente.
     </div>
 

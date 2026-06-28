@@ -1,9 +1,9 @@
 package com.tallerwebi.dominio.entity;
 
 import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import javax.persistence.*;
 import lombok.*;
@@ -35,51 +35,14 @@ public class Usuario {
 
   @ManyToMany
   @JoinTable(
-    name = "usuario_categorias_relacion",
-    joinColumns = @JoinColumn(name = "usuario_id"),
-    inverseJoinColumns = @JoinColumn(name = "categoria_id")
+    name = "usuarioCategorias",
+    joinColumns = @JoinColumn(name = "idUsuario"),
+    inverseJoinColumns = @JoinColumn(name = "idCategoria")
   )
-  private List<Categoria> categorias = new ArrayList<>();
+  private Set<Categoria> categorias = new TreeSet<>();
 
-
-
-  public Long getId() {
-    return id;
-  }
-
-  public void setId(Long id) {
-    this.id = id;
-  }
-
-  public String getEmail() {
-    return email;
-  }
-
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  public String getPassword() {
-    return password;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
-  }
-
-  public String getRol() {
-    return rol;
-  }
-
-  public void setRol(String rol) {
-    this.rol = rol;
-  }
-
-  public String getTokenValidacion() {
-    return tokenValidacion;
-  }
-
-  public void setTokenValidacion(String tokenValidacion) {
-    this.tokenValidacion = tokenValidacion;
+  public String getCategoriasIds() {
+    if (categorias == null || categorias.isEmpty()) return "";
+    return categorias.stream().map(c -> String.valueOf(c.getId())).collect(Collectors.joining(","));
   }
 }
