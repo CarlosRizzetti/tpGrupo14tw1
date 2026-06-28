@@ -100,4 +100,25 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
     usuario.setEstado(EstadoUsuario.ACTIVO);
     repositorioUsuario.modificar(usuario);
   }
+
+  private UsuarioListadoDto mapearADto(Usuario usuario) {
+
+    UsuarioListadoDto dto = new UsuarioListadoDto();
+
+    dto.setId(usuario.getId());
+    dto.setNombre(usuario.getNombre());
+    dto.setEmail(usuario.getEmail());
+    dto.setRol(usuario.getRol());
+    dto.setEstado(usuario.getEstado().name());
+
+    if (usuario.getCategorias() != null) {
+      dto.setCategorias(
+          usuario.getCategorias()
+              .stream()
+              .map(c -> c.getNombre())
+              .collect(Collectors.toList()));
+    }
+
+    return dto;
+  }
 }
