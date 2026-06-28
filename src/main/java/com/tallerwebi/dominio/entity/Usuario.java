@@ -1,9 +1,10 @@
 package com.tallerwebi.dominio.entity;
 
 import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
-import java.util.HashSet;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.*;
 import lombok.*;
 
@@ -38,7 +39,9 @@ public class Usuario {
     joinColumns = @JoinColumn(name = "usuario_id"),
     inverseJoinColumns = @JoinColumn(name = "categoria_id")
   )
-  private Set<Categoria> categorias = new HashSet<>();
+  private List<Categoria> categorias = new ArrayList<>();
+
+
 
   public Long getId() {
     return id;

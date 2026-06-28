@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
@@ -123,9 +124,11 @@ public class ControladorProducto {
     session.setAttribute(CATEGORIA, categoria);
     List<Producto> productos = servicioProducto.obtenerProductosPorCategoria(id);
 
+
     // Obtener los usuarios de la categoría para mostrarlos en la vista
     List<com.tallerwebi.dominio.entity.Usuario> usuarios =
       servicioCategoria.obtenerUsuariosPorCategoria(id);
+
 
     modelo.put(CATEGORIA, categoria);
     modelo.put("productos", productos);
