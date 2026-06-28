@@ -3,6 +3,7 @@ package com.tallerwebi.presentacion.controller;
 import com.tallerwebi.dominio.interfaces.ServicioEstadistica;
 import com.tallerwebi.presentacion.dto.EstadisticasDTO;
 import com.tallerwebi.presentacion.dto.PuntoEstadisticoDTO;
+import java.io.InputStream;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.poi.ss.usermodel.*;
@@ -11,7 +12,6 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,101 +70,123 @@ public class ControladorEstadisticas {
     HttpServletResponse response
   ) {
     try {
-      // 1. Obtenemos los datos reutilizando la lógica de tu servicio
-      EstadisticasDTO estadisticas = servicioEstadistica.obtenerEstadisticas(dias);
-
-      // 2. Configuramos las cabeceras HTTP para forzar la descarga del archivo
+      // 1. Configuramos cabeceras antes de abrir archivos
       response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
       response.setHeader(
         "Content-Disposition",
         "attachment; filename=\"reporte_estadisticas_" + dias + "_dias.xlsx\""
       );
 
-      // 3. Creamos el libro de Excel en memoria (try-with-resources garantiza su cierre)
-      try (Workbook workbook = new XSSFWorkbook()) {
-        //Hoja 1
-        crearHojaEstadistica(
-          workbook,
-          "Vencimientos por Estado",
-          "Estado del Timer",
-          "Cantidad",
-          estadisticas.getVencimientosPorEstado()
-        );
-        //Hoja 2
-        crearHojaEstadistica(
-          workbook,
-          "Productos Más Utilizados",
-          "Nombre del Producto",
-          "Cantidad",
-          estadisticas.getProductosMasUtilizados()
-        );
-        //Hoja 3
-        crearHojaEstadistica(
-          workbook,
-          "Vencimientos por Día",
-          "Fecha",
-          "Cantidad",
-          estadisticas.getVencimientosPorDia()
-        );
-        //Hoja 4
-        crearHojaEstadistica(
-          workbook,
-          "Modificaciones Stock",
-          "Fecha",
-          "Movimientos",
-          estadisticas.getModificacionesStockPorDia()
-        );
-        //Hoja 5
-        crearHojaEstadistica(
-          workbook,
-          "Demanda por Día",
-          "Día",
-          "Egresos",
-          estadisticas.getDemandaPorDiaSemana()
-        );
-        //Hoja 6
-        crearHojaEstadistica(
-          workbook,
-          "Demanda por Hora",
-          "Hora",
-          "Egresos",
-          estadisticas.getDemandaPorHora()
-        );
+      // 2. Abrimos la plantilla de Excel en un try-with-resources
+      try (
+        InputStream plantillaIn = getClass().getResourceAsStream("/plantilla_estadisticas.xlsx")
+      ) {
+        if (plantillaIn == null) {
+          throw new RuntimeException(
+            "ERROR CRÍTICO: No se encontró plantilla_estadisticas.xlsx en resources"
+          );
+        }
 
-        workbook.write(response.getOutputStream());
+        // 3. Instanciamos el libro
+        try (Workbook workbook = new XSSFWorkbook(plantillaIn)) {
+          // 4. SOLUCIÓN PMD (DU-anomaly): Pedimos los datos JUSTO antes de usarlos.
+          // Si el archivo fallaba antes, esta línea nunca se ejecuta, ahorrando recursos.
+          EstadisticasDTO estadisticas = servicioEstadistica.obtenerEstadisticas(dias);
+
+          // 5. Llenamos las hojas
+          llenarHojaEstadistica(
+            workbook,
+            "Productos Más Utilizados",
+            "Nombre del Producto",
+            "Cantidad",
+            estadisticas.getProductosMasUtilizados()
+          );
+          llenarHojaEstadistica(
+            workbook,
+            "Vencimientos por Estado",
+            "Estado del Timer",
+            "Cantidad",
+            estadisticas.getVencimientosPorEstado()
+          );
+          llenarHojaEstadistica(
+            workbook,
+            "Vencimientos por Día",
+            "Fecha",
+            "Cantidad",
+            estadisticas.getVencimientosPorDia()
+          );
+          llenarHojaEstadistica(
+            workbook,
+            "Modificaciones Stock",
+            "Fecha",
+            "Movimientos",
+            estadisticas.getModificacionesStockPorDia()
+          );
+          llenarHojaEstadistica(
+            workbook,
+            "Demanda por Día",
+            "Día",
+            "Egresos",
+            estadisticas.getDemandaPorDiaSemana()
+          );
+          llenarHojaEstadistica(
+            workbook,
+            "Demanda por Hora",
+            "Hora",
+            "Egresos",
+            estadisticas.getDemandaPorHora()
+          );
+
+          workbook.setForceFormulaRecalculation(true);
+          workbook.write(response.getOutputStream());
+        }
       }
     } catch (IllegalArgumentException e) {
-      // Manejo del error de días <= 0
+      // 6. SOLUCIÓN PMD (GuardLogStatement): Protegemos el logger con un 'if'
+      if (logger.isWarnEnabled()) {
+        logger.warn("DEBUG (Validación de fechas al exportar): {}", e.getMessage());
+      }
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     } catch (Exception e) {
-      logger.error("Error al exportar estadísticas a Excel", e);
+      // 7. SOLUCIÓN PMD (GuardLogStatement): Protegemos el error log
+      if (logger.isErrorEnabled()) {
+        logger.error("Error al exportar estadísticas a Excel usando plantilla", e);
+      }
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }
 
-  private void crearHojaEstadistica(
+  /**
+   * Método de soporte para rellenar las pestañas inyectando los datos del DTO.
+   */
+  private void llenarHojaEstadistica(
     Workbook workbook,
     String nombreHoja,
     String col1,
     String col2,
     List<PuntoEstadisticoDTO> datos
   ) {
-    Sheet sheet = workbook.createSheet(nombreHoja);
+    // A diferencia de createSheet(), getSheet() busca una pestaña ya existente
+    Sheet sheet = workbook.getSheet(nombreHoja);
 
-    // Estilo para cabecera
+    // Patrón de diseño Defensivo: Si alguien borra la hoja de la plantilla, la creamos para que no explote con NullPointerException
+    if (sheet == null) {
+      sheet = workbook.createSheet(nombreHoja);
+    }
+
+    // Mantenemos la lógica de poner la cabecera en negrita
     CellStyle estiloCabecera = workbook.createCellStyle();
     Font font = workbook.createFont();
     font.setBold(true);
     estiloCabecera.setFont(font);
 
-    // Cabecera
-    Row header = sheet.createRow(0);
+    Row header = sheet.createRow(0); // Fila 1 en Excel
     header.createCell(0).setCellValue(col1);
     header.getCell(0).setCellStyle(estiloCabecera);
     header.createCell(1).setCellValue(col2);
     header.getCell(1).setCellStyle(estiloCabecera);
 
-    // Datos
+    // Iteramos los datos y los inyectamos desde la fila 2 en adelante
     for (int i = 0; i < datos.size(); i++) {
       Row row = sheet.createRow(i + 1);
       PuntoEstadisticoDTO punto = datos.get(i);
@@ -172,6 +194,7 @@ public class ControladorEstadisticas {
       row.createCell(1).setCellValue(punto.getValor());
     }
 
+    // Le damos formato al ancho para que quede prolijo
     sheet.autoSizeColumn(0);
     sheet.autoSizeColumn(1);
   }
