@@ -30,10 +30,10 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
   @Override
   public List<UsuarioListadoDto> listarUsuarios() {
     return repositorioUsuario
-        .listarTodos()
-        .stream()
-        .map(this::mapearAListadoDto)
-        .collect(Collectors.toList());
+      .listarTodos()
+      .stream()
+      .map(this::mapearAListadoDto)
+      .collect(Collectors.toList());
   }
 
   private UsuarioListadoDto mapearAListadoDto(Usuario usuario) {
@@ -47,10 +47,12 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
 
     if (usuario.getCategorias() != null) {
       dto.setCategorias(
-          usuario.getCategorias().stream().map(Categoria::getNombre).collect(Collectors.toList()));
+        usuario.getCategorias().stream().map(Categoria::getNombre).collect(Collectors.toList())
+      );
 
       dto.setCategoriasIds(
-          usuario.getCategorias().stream().map(Categoria::getId).collect(Collectors.toList()));
+        usuario.getCategorias().stream().map(Categoria::getId).collect(Collectors.toList())
+      );
     }
 
     return dto;
@@ -118,7 +120,6 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
 
   @Override
   public Usuario obtenerUsuarioPorEmail(String email) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'obtenerUsuarioPorEmail'");
+    return repositorioUsuario.buscarUsuario(email);
   }
 }
