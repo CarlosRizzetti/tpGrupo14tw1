@@ -1,5 +1,6 @@
 package com.tallerwebi.dominio.services;
 
+import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
 import com.tallerwebi.dominio.excepcion.PasswordInvalida;
@@ -8,7 +9,9 @@ import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
 import com.tallerwebi.dominio.utils.ValidadorPassword;
 import com.tallerwebi.presentacion.dto.UsuarioDto;
+import com.tallerwebi.presentacion.dto.UsuarioListadoDto;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,8 +28,32 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
   }
 
   @Override
-  public List<Usuario> listarUsuarios() {
-    return repositorioUsuario.listarTodos();
+  public List<UsuarioListadoDto> listarUsuarios() {
+    return repositorioUsuario
+        .listarTodos()
+        .stream()
+        .map(this::mapearAListadoDto)
+        .collect(Collectors.toList());
+  }
+
+  private UsuarioListadoDto mapearAListadoDto(Usuario usuario) {
+    UsuarioListadoDto dto = new UsuarioListadoDto();
+
+    dto.setId(usuario.getId());
+    dto.setNombre(usuario.getNombre());
+    dto.setEmail(usuario.getEmail());
+    dto.setRol(usuario.getRol());
+    dto.setEstado(usuario.getEstado() != null ? usuario.getEstado().name() : null);
+
+    if (usuario.getCategorias() != null) {
+      dto.setCategorias(
+          usuario.getCategorias().stream().map(Categoria::getNombre).collect(Collectors.toList()));
+
+      dto.setCategoriasIds(
+          usuario.getCategorias().stream().map(Categoria::getId).collect(Collectors.toList()));
+    }
+
+    return dto;
   }
 
   @Override

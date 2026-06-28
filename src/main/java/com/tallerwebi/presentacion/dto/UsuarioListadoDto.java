@@ -13,7 +13,6 @@ public class UsuarioListadoDto {
   private String email;
   private String rol;
   private String estado;
-
-  // Nombres de categorías (lo que usa Thymeleaf)
   private List<String> categorias;
+  private List<Long> categoriasIds;
 }

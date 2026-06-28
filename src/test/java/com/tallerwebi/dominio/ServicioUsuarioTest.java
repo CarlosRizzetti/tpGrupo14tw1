@@ -40,7 +40,7 @@ public class ServicioUsuarioTest {
     when(repositorioUsuarioMock.listarTodos()).thenReturn(usuariosMock);
 
     // ejecucion
-    List<Usuario> resultado = servicioUsuario.listarUsuarios();
+    List<UsuarioListadoDto> resultado = servicioUsuario.listarUsuarios();
 
     // validacion
     assertThat(resultado, hasSize(2));

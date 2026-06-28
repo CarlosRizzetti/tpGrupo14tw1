@@ -60,8 +60,7 @@
                 </thead>
 
                 <tbody>
-                    <tr th:each="usuario : ${usuarios}"
-                        th:if="${usuario.estado != null and usuario.estado == 'ACTIVO'}"
+                    <tr th:each="usuario : ${usuariosActivos}"
                         class="border-b border-black/10 bg-white hover:bg-yellow-50 transition text-gray-800">
 
                         <td class="px-6 py-4" th:text="${usuario.id}"></td>
@@ -88,7 +87,7 @@
                             </form>
 
                             <button type="button" th:if="${usuario.rol == 'USER'}"
-                                th:attr="data-categorias=${#strings.listJoin(usuario.categorias, ',')}"
+                                th:attr="data-categorias=${#strings.listJoin(usuario.categoriasIds, ',')}"
                                 th:onclick="|abrirModal(this, ${usuario.id})|"
                                 class="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition">
                                 Asignar Categoría
@@ -105,8 +104,7 @@
         <!-- USUARIOS PENDIENTES -->
         <!-- ========================= -->
 
-        <div th:with="pendientes=${usuarios.?[estado != null and estado == 'PENDIENTE']}">
-
+        <div th:with="pendientes=${usuariosPendientes}">
             <!-- MENSAJE SI NO HAY -->
             <div th:if="${#lists.isEmpty(pendientes)}"
                 class="text-center p-10 mt-10 bg-black/5 rounded-xl border border-white/10">
@@ -252,7 +250,6 @@
         <script>
             function abrirModal(btn, usuarioId) {
                 var form = document.getElementById('formAsignarCategoria');
-                // El controlador espera /admin/usuarios/{id}/aprobar
                 form.action = '/admin/usuarios/' + usuarioId + '/aprobar';
 
                 var categoriasStr = btn.getAttribute('data-categorias') || '';
@@ -261,17 +258,16 @@
 
                 for (var i = 0; i < select.options.length; i++) {
                     var opt = select.options[i];
-                    // Quitar estilos y marcas previas
+
                     opt.style.backgroundColor = '';
                     opt.style.color = '';
-                    opt.text = opt.text.replace('✔ ', '');
+                    opt.text = opt.text.replace('✓ ', '');
                     opt.disabled = false;
 
-                    // Si la categoría ya está asignada
                     if (categoriasAsignadas.includes(opt.value)) {
-                        opt.style.backgroundColor = '#e5e7eb'; // Gris claro
-                        opt.style.color = '#9ca3af'; // Gris oscuro
-                        opt.text = '✔ ' + opt.text;
+                        opt.style.backgroundColor = '#e5e7eb';
+                        opt.style.color = '#9ca3af';
+                        opt.text = '✓ ' + opt.text;
                         opt.disabled = true;
                     }
                 }
