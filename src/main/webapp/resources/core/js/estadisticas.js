@@ -1,3 +1,5 @@
+/* global ApexCharts */
+
 /**
  * Estadísticas: consume /estadisticas/datos y renderiza los gráficos con ApexCharts
  * (motor utilizado por el plugin de charts de Flowbite: https://flowbite.com/docs/plugins/charts/).
@@ -194,7 +196,7 @@ const cargar = async (dias) => {
     const datos = await respuesta.json();
     mostrarError(false);
     renderizar(datos);
-  } catch (e) {
+  } catch {
     mostrarError(true);
   }
 };

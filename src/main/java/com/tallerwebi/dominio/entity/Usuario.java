@@ -1,14 +1,17 @@
 package com.tallerwebi.dominio.entity;
 
+import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 public class Usuario {
 
@@ -25,7 +28,17 @@ public class Usuario {
   @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<Timer> timers;
 
-  private Boolean activo = false;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private EstadoUsuario estado = EstadoUsuario.PENDIENTE;
+
+  @ManyToMany
+  @JoinTable(
+    name = "usuario_categorias_relacion",
+    joinColumns = @JoinColumn(name = "usuario_id"),
+    inverseJoinColumns = @JoinColumn(name = "categoria_id")
+  )
+  private Set<Categoria> categorias = new HashSet<>();
 
   public Long getId() {
     return id;
@@ -65,17 +78,5 @@ public class Usuario {
 
   public void setTokenValidacion(String tokenValidacion) {
     this.tokenValidacion = tokenValidacion;
-  }
-
-  public Boolean getActivo() {
-    return activo;
-  }
-
-  public void setActivo(Boolean activo) {
-    this.activo = activo;
-  }
-
-  public void activar() {
-    activo = true;
   }
 }

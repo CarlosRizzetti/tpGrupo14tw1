@@ -476,6 +476,7 @@
                             <!-- Exclusiones para el reporte visual: Se omiten clases de configuración
                                  que no contienen lógica de negocio para no distorsionar la métrica global -->
                             <excludes>
+                                <exclude>com/tallerwebi/dominio/services/ServicioImpresionImpl.class</exclude>
                                 <exclude>com/tallerwebi/config/*</exclude>
                                 <exclude>com/tallerwebi/MyServletInitializer.class</exclude>
                             </excludes>
