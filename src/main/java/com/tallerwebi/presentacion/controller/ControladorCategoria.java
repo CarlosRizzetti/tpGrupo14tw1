@@ -27,6 +27,9 @@ public class ControladorCategoria {
     List<CategoriaDto> categorias;
 
     if (authentication != null && authentication.isAuthenticated()) {
+      String email = authentication.getName();
+      mav.addObject("userEmail", email);
+
       boolean isAdmin = authentication
         .getAuthorities()
         .stream()
