@@ -211,3 +211,9 @@ document.addEventListener("DOMContentLoaded", () => {
     filtro.addEventListener("change", () => cargar(filtro.value));
   }
 });
+
+document.getElementById('btnExportarExcel').addEventListener('click', function() {
+  const selectElement = document.getElementById('filtro-dias');
+  const dias = selectElement ? selectElement.value : 30;
+  window.location.href = `/admin/estadisticas/exportar/excel?dias=${dias}`;
+});
