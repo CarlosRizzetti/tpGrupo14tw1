@@ -1,10 +1,12 @@
 package com.tallerwebi.dominio;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import com.tallerwebi.dominio.services.ServicioAdminImpl;
@@ -26,9 +28,11 @@ public class ServicioAdminImplTest {
   }
 
   @Test
-  public void alAprobarUsuarioDebeActivarYEAsignarCategoriaSiExisten() {
+public void alAprobarUsuarioDebeActivarYAsignarCategoriaSiExisten() {
     Usuario usuario = new Usuario();
+    usuario.setEstado(EstadoUsuario.PENDIENTE);
     usuario.setCategorias(new HashSet<>());
+
     Categoria categoria = new Categoria();
 
     when(repositorioUsuario.obtenerPorId(1L)).thenReturn(usuario);
@@ -36,10 +40,10 @@ public class ServicioAdminImplTest {
 
     servicioAdmin.aprobarUsuario(1L, 2L);
 
-    assertTrue(usuario.getActivo());
+    assertEquals(EstadoUsuario.ACTIVO, usuario.getEstado());
     assertTrue(usuario.getCategorias().contains(categoria));
     verify(repositorioUsuario, times(1)).modificar(usuario);
-  }
+}
 
   @Test
   public void siUsuarioOCategoriaNoExistenNoDebeHacerNada() {

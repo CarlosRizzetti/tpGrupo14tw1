@@ -2,6 +2,7 @@ package com.tallerwebi.dominio.services;
 
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import com.tallerwebi.dominio.interfaces.ServicioAdmin;
@@ -30,7 +31,7 @@ public class ServicioAdminImpl implements ServicioAdmin {
     Usuario usuario = repositorioUsuario.obtenerPorId(idUsuario);
     Categoria categoria = repositorioCategoria.buscarPorId(idCategoria);
     if (usuario != null && categoria != null) {
-      usuario.setActivo(true);
+      usuario.setEstado(EstadoUsuario.ACTIVO);
       if (!usuario.getCategorias().contains(categoria)) {
         usuario.getCategorias().add(categoria);
       }

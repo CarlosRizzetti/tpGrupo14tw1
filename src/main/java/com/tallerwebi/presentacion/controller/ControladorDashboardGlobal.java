@@ -56,11 +56,10 @@ public class ControladorDashboardGlobal {
         .anyMatch(timers -> timers != null && !timers.isEmpty());
 
       mav.addObject("categorias", categorias);
+      mav.addObject("timersPorCategoria", timersPorCategoria); // 👈 SIEMPRE
 
       if (!anyTimers) {
         mav.addObject("error", "No hay timers activos");
-      } else {
-        mav.addObject("timersPorCategoria", timersPorCategoria);
       }
 
       return mav;

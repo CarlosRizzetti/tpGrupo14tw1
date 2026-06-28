@@ -1,6 +1,7 @@
 package com.tallerwebi.dominio.services;
 
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import com.tallerwebi.dominio.interfaces.ServicioValidacionIdentidad;
 import java.util.UUID;
@@ -55,7 +56,12 @@ public class ServicioValidacionIdentidadImpl implements ServicioValidacionIdenti
     if (usuario == null) {
       return false;
     }
-    // usuario.setActivo(true);
+
+    if (usuario.getEstado() != EstadoUsuario.PENDIENTE) {
+      return false;
+    }
+
+    usuario.setEstado(EstadoUsuario.ACTIVO);
     usuario.setTokenValidacion(null);
     repositorioUsuario.modificar(usuario);
     return true;

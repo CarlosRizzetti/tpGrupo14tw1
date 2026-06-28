@@ -1,6 +1,7 @@
 package com.tallerwebi.dominio.services;
 
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
 import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
@@ -11,6 +12,8 @@ import java.util.List;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.tallerwebi.presentacion.dto.UsuarioListadoDto;
+import java.util.stream.Collectors;
 
 @Service("servicioUsuario")
 @Transactional
@@ -24,8 +27,13 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
   }
 
   @Override
-  public List<Usuario> listarUsuarios() {
-    return repositorioUsuario.listarTodos();
+  public List<UsuarioListadoDto> listarUsuarios() {
+
+    List<Usuario> usuarios = repositorioUsuario.listarTodos();
+
+    return usuarios.stream()
+        .map(this::mapearADto)
+        .toList();
   }
 
   @Override
@@ -40,7 +48,7 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
     usuario.setEmail(dto.getEmail());
     usuario.setPassword(dto.getPassword());
     usuario.setRol(dto.getRol() != null ? dto.getRol() : "USER");
-    usuario.setActivo(true);
+    usuario.setEstado(EstadoUsuario.PENDIENTE);
     repositorioUsuario.guardar(usuario);
   }
 
@@ -79,7 +87,7 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
     if (usuario == null) {
       throw new IllegalArgumentException("Usuario no encontrado");
     }
-    usuario.setActivo(false);
+    usuario.setEstado(EstadoUsuario.BAJA);
     repositorioUsuario.modificar(usuario);
   }
 
@@ -89,7 +97,7 @@ public class ServicioUsuarioImpl implements ServicioUsuario {
     if (usuario == null) {
       throw new IllegalArgumentException("Usuario no encontrado");
     }
-    usuario.setActivo(true);
+    usuario.setEstado(EstadoUsuario.ACTIVO);
     repositorioUsuario.modificar(usuario);
   }
 }

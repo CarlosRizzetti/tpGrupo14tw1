@@ -1,6 +1,9 @@
 package com.tallerwebi.dominio.entity;
 
+import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.*;
 import lombok.*;
 
@@ -16,9 +19,7 @@ public class Usuario {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(unique = true)
   private String email;
-
   private String password;
   private String nombre;
   private String rol;
@@ -27,7 +28,9 @@ public class Usuario {
   @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<Timer> timers;
 
-  private Boolean activo = false;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private EstadoUsuario estado = EstadoUsuario.PENDIENTE;
 
   @ManyToMany
   @JoinTable(
@@ -37,8 +40,43 @@ public class Usuario {
   )
   private Set<Categoria> categorias = new HashSet<>();
 
-  public String getCategoriasIds() {
-    if (categorias == null || categorias.isEmpty()) return "";
-    return categorias.stream().map(c -> String.valueOf(c.getId())).collect(Collectors.joining(","));
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public String getPassword() {
+    return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  public String getRol() {
+    return rol;
+  }
+
+  public void setRol(String rol) {
+    this.rol = rol;
+  }
+
+  public String getTokenValidacion() {
+    return tokenValidacion;
+  }
+
+  public void setTokenValidacion(String tokenValidacion) {
+    this.tokenValidacion = tokenValidacion;
   }
 }
