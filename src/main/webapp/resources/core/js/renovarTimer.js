@@ -52,7 +52,7 @@ const resetRenewModal = () => {
 
 export const openRenewModal = (timerId, productName, location, cantidadTimer) => {
   const cantidad = cantidadTimer ?? 0;
-  console.log(cantidadTimer)
+  console.log(cantidadTimer);
   RENEW.productName().textContent = productName;
   RENEW.productLoc().textContent  = location;
   RENEW.timerId().value           = timerId;
