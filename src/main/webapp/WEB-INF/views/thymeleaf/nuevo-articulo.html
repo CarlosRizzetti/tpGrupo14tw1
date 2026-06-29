@@ -1,0 +1,123 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, ~{}, _)}">
+<head>
+    <title>Ingresar Producto</title>
+</head>
+<body>
+
+<div th:fragment="header_center">
+    <span class="text-puesto-header-text font-bold uppercase tracking-widest">
+        Nuevo Articulo
+    </span>
+</div>
+
+<div th:fragment="header_left">
+    <a th:href="@{/}" class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+        </svg>
+        Volver
+    </a>
+</div>
+
+<div th:fragment="header_right">
+</div>
+
+<div th:fragment="content" class="p-6">
+    <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div class="p-6">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 border-b pb-4">Ingresar Nuevo Articulo</h2>
+            
+            <div th:if="${error}" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Error!</strong>
+                <span class="block sm:inline" th:text="${error}"></span>
+            </div>
+
+            <form th:action="@{/almacen/nuevo-articulo}" th:object="${articulo}" method="post" class="space-y-4">
+                
+                <div>
+                    <label for="codigo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Código del Articulo</label>
+                    <input type="text" id="codigo" th:field="*{codigo}" required
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                </div>
+                
+                <div>
+                    <label for="nombre" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre del Articulo</label>
+                    <input type="text" id="nombre" th:field="*{nombre}" required
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                </div>
+                
+                <div>
+                    <label for="marca" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Marca</label>
+                    <input type="text" id="marca" th:field="*{marca}" required
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="proveedor" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Proveedor</label>
+                        <input type="text" id="proveedor" th:field="*{proveedor}" required
+                               class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                    </div>
+                    
+                    <div>
+                        <label for="numeroDeLote" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Numero de Lote</label>
+                        <input type="number" id="numeroDeLote" th:field="*{numeroDeLote}" required
+                               class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label for="cantidad" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad</label>
+                        <input type="number" step="0.01" id="cantidad" th:field="*{cantidad}" required
+                               class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                    </div>
+                    
+                    <div>
+                        <label for="unidadDeMedida" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Unidad de Medida</label>
+                        <select id="unidadDeMedida" th:field="*{unidadDeMedida}" required
+                                class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                            <option th:each="unidad : ${T(com.tallerwebi.dominio.entity.enums.UnidadDeMedida).values()}"
+                                    th:value="${unidad}" th:text="${unidad}"></option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="tipoArticulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría</label>
+                        <select id="tipoArticulo" th:field="*{tipoArticulo}" required
+                                class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                            <option th:each="tipo : ${T(com.tallerwebi.dominio.entity.enums.TipoArticulo).values()}"
+                                    th:value="${tipo}" th:text="${tipo}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="fechaDeIngreso" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de Ingreso</label>
+                        <input type="datetime-local" id="fechaDeIngreso" name="fechaIngresoStr" required
+                               class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                    </div>
+                    
+                    <div>
+                        <label for="fechaDeVencimiento" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de Vencimiento</label>
+                        <input type="datetime-local" id="fechaDeVencimiento" name="fechaVencimientoStr" required
+                               class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                    </div>
+                </div>
+
+                <div class="pt-4 flex items-center justify-end">
+                    <button type="submit"
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-bold rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        Guardar Articulo
+                    </button>
+                </div>
+                
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

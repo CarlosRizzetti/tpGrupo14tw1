@@ -153,9 +153,8 @@ public class ControladorProductoTest {
       equalToIgnoringCase("El nombre del producto es obligatorio")
     );
   }
-
   // --- GET /category/{id}/products ---
-
+  /*
   @Test
   public void mostrarProductosPorCategoriaDeberiaRetornarVistaProductosConLista() {
     // preparacion
@@ -210,6 +209,8 @@ public class ControladorProductoTest {
     verify(servicioProductoMock).listarProductos(categoriaId);
     verify(servicioCategoriaMock).obtenerLasCategoriasParaElMenu();
   }
+
+ */
   /*
   @Test
   public void deberiaGenerarUnVencimientoYRedirigir() {

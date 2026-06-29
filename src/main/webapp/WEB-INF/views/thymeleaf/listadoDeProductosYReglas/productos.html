@@ -40,6 +40,8 @@
         </a>
     </div>
 
+
+
     <!-- Usuarios Section -->
     <div class="mb-8" th:if="${usuarios != null}">
         <h3 class="font-bold text-xl mb-4 text-gray-800 dark:text-gray-200">Usuarios en esta Categoría:</h3>
@@ -56,21 +58,36 @@
         </div>
     </div>
 
-    <div th:if="${#lists.isEmpty(productos)}" class="text-center p-10 mt-10 bg-white/5 rounded-xl border border-white/10">
-        <p class="text-xl md:text-2xl text-white font-bold opacity-70">No hay productos en esta categoría.</p>
-    </div>
-
-    <div th:unless="${#lists.isEmpty(productos)}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pb-10">
-        <a th:each="producto : ${productos}"
-           th:href="@{/product/{id}(id=${producto.id}, categoryId=${categoria.id})}"
-           class="group relative flex flex-col items-center justify-center p-6 bg-puesto-btn text-puesto-btn-text border-b-[6px] border-puesto-btn-border rounded-3xl shadow-md hover:shadow-xl transition-all duration-200 hover:-translate-y-1 min-h-[160px]">
-
-            <span class="text-2xl md:text-3xl font-bold uppercase tracking-tight text-center"
-                  th:text="${producto.nombre}">
-            </span>
-
-            <div class="w-10 h-1 md:w-16 md:h-1.5 mt-4 rounded-full opacity-50 bg-puesto-btn-border"></div>
+    <!-- Boton Articulos Almacen -->
+    <div th:if="${categoria != null and categoria.id == 5}" class="mb-8 w-full flex flex-wrap gap-6 justify-center md:justify-start">
+        <a th:href="@{/almacen/articulos}" class="group relative flex flex-col items-center justify-center p-6 bg-puesto-btn text-puesto-btn-text text-3xl border-b-[8px] border-puesto-btn-border rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-200 hover:-translate-y-2 min-h-[180px]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            Ver todos los artículos
+        </a>
+        <a th:href="@{/almacen/stock}" class="group relative flex flex-col items-center justify-center p-6 bg-puesto-btn text-puesto-btn-text text-3xl border-b-[8px] border-puesto-btn-border rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-200 hover:-translate-y-2 min-h-[180px]">
+            <svg class="w-10 h-10 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            Consultar Stock
+        </a>
+        <a th:href="@{/almacen/nuevo-articulo}" class="group relative flex flex-col items-center justify-center p-6 bg-puesto-btn text-puesto-btn-text text-3xl border-b-[8px] border-puesto-btn-border rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-200 hover:-translate-y-2 min-h-[180px]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Ingresar Producto
         </a>
     </div>
+
+
+    <!-- Boton Ingresar Producto Trazabilidad -->
+    <div th:if="${categoria != null and categoria.id == 6}" class="mb-8 w-full flex justify-center md:justify-start">
+        <a th:href="@{/trazabilidad/nuevo-articulo}" class="group relative flex flex-col items-center justify-center p-6 bg-puesto-btn text-puesto-btn-text text-3xl border-b-[8px] border-puesto-btn-border rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-200 hover:-translate-y-2 min-h-[180px]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Ingresar Producto
+        </a>
+    </div>
+
 </div>
 </body>

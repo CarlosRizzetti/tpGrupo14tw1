@@ -4,6 +4,11 @@ INSERT INTO Categoria (id, icono, estaActiva, nombre) VALUES (1, '/resources/cor
 INSERT INTO Categoria (id, icono, estaActiva, nombre) VALUES (2, '/resources/core/img/servicio.png', 1, 'Servicio');
 INSERT INTO Categoria (id, icono, estaActiva, nombre) VALUES (3, '/resources/core/img/mccafe.png', 1, 'McCafe');
 INSERT INTO Categoria (id, icono, estaActiva, nombre) VALUES (4, '/resources/core/img/isla.png', 1, 'Isla');
+INSERT INTO Categoria (id, icono, estaActiva, nombre) VALUES (5, '/resources/core/img/Deposito.png', 1, 'Almacen');
+INSERT INTO Categoria (id, icono, estaActiva, nombre) VALUES (6, '/resources/core/img/Traza.png', 1, 'Trazabilidad');
+
+INSERT INTO Articulos (id,codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (1, 001, 'Cajas de Hamburguesas', 'McCain', 'Distribuidora Central', 1001, NOW(6), '2027-12-31 23:59:59', 10, 'UNIDAD', 'CONGELADO');
+INSERT INTO Articulos (id, codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (2, 002, 'Vasos Grandes', 'Papelera SA', 'Distribuidora Sur', 1002, NOW(6), '2027-12-31 23:59:59', 500, 'UNIDAD', 'SECO');
 
 INSERT INTO Producto (id, cantidad, estaActivo, nombre) VALUES (1, 100, 1, 'Hamburguesa');
 INSERT INTO Producto (id, cantidad, estaActivo, nombre) VALUES (2, 100, 1, 'Papas Fritas');

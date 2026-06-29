@@ -4,6 +4,7 @@ import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.interfaces.ServicioArticulo;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
@@ -15,7 +16,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
@@ -30,6 +30,7 @@ public class ControladorProducto {
   private final ServicioProducto servicioProducto;
   private final ServicioCategoria servicioCategoria;
   private final ServicioReglaVencimiento servicioReglaVencimiento;
+  private final ServicioArticulo servicioArticulo;
   private static final String CATEGORIA = "categoria";
   private final ServicioUsuario servicioUsuario;
 
@@ -38,12 +39,14 @@ public class ControladorProducto {
     ServicioProducto servicioProducto,
     ServicioCategoria servicioCategoria,
     ServicioReglaVencimiento servicioReglaVencimiento,
-    ServicioUsuario servicioUsuario
+    ServicioUsuario servicioUsuario,
+    ServicioArticulo servicioArticulo
   ) {
     this.servicioProducto = servicioProducto;
     this.servicioCategoria = servicioCategoria;
     this.servicioReglaVencimiento = servicioReglaVencimiento;
     this.servicioUsuario = servicioUsuario;
+    this.servicioArticulo = servicioArticulo;
   }
 
   // GET — mostrar el formulario
@@ -118,17 +121,38 @@ public class ControladorProducto {
   }
 
   @RequestMapping(path = "/category/{id}/products", method = RequestMethod.GET)
-  public ModelAndView mostrarProductosPorCategoria(@PathVariable Long id, HttpSession session) {
+  public ModelAndView mostrarProductosPorCategoria(
+    @PathVariable Long id,
+    HttpSession session,
+    org.springframework.security.core.Authentication authentication
+  ) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return new ModelAndView("redirect:/login");
+    }
+
+    boolean isAdmin = authentication
+      .getAuthorities()
+      .stream()
+      .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+
+    if (!isAdmin) {
+      List<CategoriaDto> categoriasUsuario = servicioCategoria.obtenerCategoriasPorUsuario(
+        authentication.getName()
+      );
+      boolean tienePermiso = categoriasUsuario.stream().anyMatch(c -> c.getId().equals(id));
+      if (!tienePermiso) {
+        return new ModelAndView("redirect:/home");
+      }
+    }
+
     ModelMap modelo = new ModelMap();
     CategoriaDto categoria = servicioCategoria.obtenerCategoriaPorId(id);
     session.setAttribute(CATEGORIA, categoria);
     List<Producto> productos = servicioProducto.obtenerProductosPorCategoria(id);
 
-
     // Obtener los usuarios de la categoría para mostrarlos en la vista
     List<com.tallerwebi.dominio.entity.Usuario> usuarios =
       servicioCategoria.obtenerUsuariosPorCategoria(id);
-
 
     modelo.put(CATEGORIA, categoria);
     modelo.put("productos", productos);
