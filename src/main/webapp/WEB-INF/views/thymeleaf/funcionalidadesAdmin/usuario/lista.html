@@ -8,30 +8,10 @@
 
 <body>
 
-<div th:fragment="header_center">
-    <span class="text-puesto-header-text font-bold uppercase tracking-widest">Gestión de Usuarios</span>
-</div>
-
-<div th:fragment="header_left">
-    <a th:href="@{/admin}" class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
-        </svg>
-        Volver
-    </a>
-</div>
-
-<div th:fragment="header_right">
-    <a th:href="@{/admin/usuarios/nuevo}"
-       class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg border border-white/20 transition text-xs font-bold uppercase tracking-wider">
-        + Nuevo Usuario
-    </a>
-</div>
-
-<div th:fragment="content" class="p-6">
-
-    <div th:if="${#lists.isEmpty(usuarios)}" class="text-center p-10 mt-10 bg-white/5 rounded-xl border border-white/10">
-        <p class="text-xl text-white font-bold opacity-70">No hay usuarios registrados.</p>
+    <div th:fragment="header_center">
+        <span class="text-puesto-header-text font-bold uppercase tracking-widest">
+            Gestión de Usuarios
+        </span>
     </div>
 
     <div th:fragment="header_left">
@@ -80,8 +60,7 @@
                 </thead>
 
                 <tbody>
-                    <tr th:each="usuario : ${usuarios}"
-                        th:if="${usuario.estado != null and usuario.estado.name() == 'ACTIVO'}"
+                    <tr th:each="usuario : ${usuariosActivos}"
                         class="border-b border-black/10 bg-white hover:bg-yellow-50 transition text-gray-800">
 
                         <td class="px-6 py-4" th:text="${usuario.id}"></td>
@@ -125,8 +104,7 @@
         <!-- USUARIOS PENDIENTES -->
         <!-- ========================= -->
 
-        <div th:with="pendientes=${usuarios.?[estado != null and estado.name() == 'PENDIENTE']}">
-
+        <div th:with="pendientes=${usuariosPendientes}">
             <!-- MENSAJE SI NO HAY -->
             <div th:if="${#lists.isEmpty(pendientes)}"
                 class="text-center p-10 mt-10 bg-black/5 rounded-xl border border-white/10">
@@ -272,7 +250,6 @@
         <script>
             function abrirModal(btn, usuarioId) {
                 var form = document.getElementById('formAsignarCategoria');
-                // El controlador espera /admin/usuarios/{id}/aprobar
                 form.action = '/admin/usuarios/' + usuarioId + '/aprobar';
 
                 var categoriasStr = btn.getAttribute('data-categorias') || '';
@@ -281,17 +258,16 @@
 
                 for (var i = 0; i < select.options.length; i++) {
                     var opt = select.options[i];
-                    // Quitar estilos y marcas previas
+
                     opt.style.backgroundColor = '';
                     opt.style.color = '';
-                    opt.text = opt.text.replace('✔ ', '');
+                    opt.text = opt.text.replace('✓ ', '');
                     opt.disabled = false;
 
-                    // Si la categoría ya está asignada
                     if (categoriasAsignadas.includes(opt.value)) {
-                        opt.style.backgroundColor = '#e5e7eb'; // Gris claro
-                        opt.style.color = '#9ca3af'; // Gris oscuro
-                        opt.text = '✔ ' + opt.text;
+                        opt.style.backgroundColor = '#e5e7eb';
+                        opt.style.color = '#9ca3af';
+                        opt.text = '✓ ' + opt.text;
                         opt.disabled = true;
                     }
                 }

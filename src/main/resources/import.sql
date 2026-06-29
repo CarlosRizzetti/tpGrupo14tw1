@@ -11,7 +11,7 @@ INSERT INTO Producto (id, cantidad, estaActivo, nombre) VALUES (3, 100, 1, 'Hela
 INSERT INTO Producto (id, cantidad, estaActivo, nombre) VALUES (4, 100, 1, 'Cafe');
 
 INSERT INTO Usuario(id, nombre, email, password, rol, estado) VALUES(3, 'Tatiel','tahielrecchia05@gmail.com', '$2a$10$pKxNbg5qcYqoRCxKvU0t8e8dMAWZ8QBl5clkQD9KHcIsgBFcnz9Ei', 'ADMIN', 'ACTIVO');
-INSERT INTO Usuario(id, nombre, email, password, rol, activo) VALUES(6, 'Tatiel','santi2@mail.com', '$2a$10$aHZnx5KAVlbHi52kmBYWDO0eD23FBux7ucIUeTR9rUOFaBlDKLz7C', 'ADMIN', true);
+INSERT INTO Usuario(id, nombre, email, password, rol, estado) VALUES(6, 'Tatiel','santi2@mail.com', '$2a$10$aHZnx5KAVlbHi52kmBYWDO0eD23FBux7ucIUeTR9rUOFaBlDKLz7C', 'ADMIN', 'ACTIVO');
 
 INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES (3, 1);
 INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES (3, 2);
@@ -29,8 +29,8 @@ INSERT INTO ProductosCategoria (idProducto, idCategoria) VALUES (3, 4); -- Helad
 INSERT INTO ProductosCategoria (idProducto, idCategoria) VALUES (4, 3); -- Cafe -> McCafe
 
 
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('VENCIDO', NOW(6), '2026-05-24 20:00:59', 'GRP-100', 2,3, 1, 3, 1);
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('RENOVADO', NOW(6), '2026-05-23 20:00:59', 'GRP-100', 10,3, 1, 3, 1);
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('IMPORTADO', NOW(6), '2026-05-23 19:00:59', 'GRP-100', 5,3, 1, 3, 1);
+INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidad ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('VENCIDO', NOW(6), '2026-05-24 20:00:59', 'GRP-100', 2,3, 1, 3, 1);
+INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidad ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('RENOVADO', NOW(6), '2026-05-23 20:00:59', 'GRP-100', 10,3, 1, 3, 1);
+INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidad ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('IMPORTADO', NOW(6), '2026-05-23 19:00:59', 'GRP-100', 5,3, 1, 3, 1);
 
 SET FOREIGN_KEY_CHECKS = 1;

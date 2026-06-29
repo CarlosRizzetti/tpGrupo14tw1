@@ -15,6 +15,7 @@ import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
 import com.tallerwebi.dominio.services.ServicioUsuarioImpl;
 import com.tallerwebi.presentacion.dto.UsuarioDto;
+import com.tallerwebi.presentacion.dto.UsuarioListadoDto;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,12 +34,13 @@ public class ServicioUsuarioTest {
 
   @Test
   public void listarUsuariosDeberiaRetornarLaListaDelRepositorio() {
-    // preparacion
-    List<Usuario> usuariosEsperados = Arrays.asList(new Usuario(), new Usuario());
-    when(repositorioUsuarioMock.listarTodos()).thenReturn(usuariosEsperados);
+    // preparacion (sin mockear retorno)
+    List<Usuario> usuariosMock = Arrays.asList(new Usuario(), new Usuario());
+
+    when(repositorioUsuarioMock.listarTodos()).thenReturn(usuariosMock);
 
     // ejecucion
-    List<Usuario> resultado = servicioUsuario.listarUsuarios();
+    List<UsuarioListadoDto> resultado = servicioUsuario.listarUsuarios();
 
     // validacion
     assertThat(resultado, hasSize(2));

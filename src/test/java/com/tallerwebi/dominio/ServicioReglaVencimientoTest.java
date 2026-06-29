@@ -7,7 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.*;
-import com.tallerwebi.dominio.interfaces.*;
+import com.tallerwebi.dominio.interfaces.RepositorioReglaVencimiento;
+import com.tallerwebi.dominio.interfaces.RepositorioTimer;
+import com.tallerwebi.dominio.interfaces.ServicioControlStock;
+import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.services.ServicioReglaVencimientoImpl;
 import java.time.Clock;
 import java.time.Instant;
@@ -24,7 +27,6 @@ public class ServicioReglaVencimientoTest {
   private ServicioProducto servicioProductoMock;
   private ServicioControlStock servicioControlStockMock;
   private Clock clock;
-  private ServicioImpresion servicioImpresionMock;
 
   @BeforeEach
   public void init() {
@@ -33,15 +35,13 @@ public class ServicioReglaVencimientoTest {
     repositorioTimerMock = mock(RepositorioTimer.class);
     servicioProductoMock = mock(ServicioProducto.class);
     servicioControlStockMock = mock(ServicioControlStock.class);
-    servicioImpresionMock = mock(ServicioImpresion.class);
     servicioReglaVencimiento =
       new ServicioReglaVencimientoImpl(
         repositorioReglaVencimientoMock,
         repositorioTimerMock,
         servicioProductoMock,
         servicioControlStockMock,
-        clock,
-        servicioImpresionMock
+        clock
       );
   }
 

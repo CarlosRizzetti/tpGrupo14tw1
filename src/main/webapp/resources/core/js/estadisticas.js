@@ -1,3 +1,5 @@
+/* global ApexCharts */
+
 /**
  * Estadísticas: consume /estadisticas/datos y renderiza los gráficos con ApexCharts
  * (motor utilizado por el plugin de charts de Flowbite: https://flowbite.com/docs/plugins/charts/).
@@ -194,7 +196,7 @@ const cargar = async (dias) => {
     const datos = await respuesta.json();
     mostrarError(false);
     renderizar(datos);
-  } catch (e) {
+  } catch {
     mostrarError(true);
   }
 };
@@ -208,4 +210,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (filtro) {
     filtro.addEventListener("change", () => cargar(filtro.value));
   }
+});
+
+document.getElementById("btnExportarExcel").addEventListener("click", function() {
+  const selectElement = document.getElementById("filtro-dias");
+  const dias = selectElement ? selectElement.value : 30;
+  window.location.href = `/admin/estadisticas/exportar/excel?dias=${dias}`;
 });

@@ -28,9 +28,11 @@ public class ServicioAdminImplTest {
   }
 
   @Test
-  public void alAprobarUsuarioDebeActivarYEAsignarCategoriaSiExisten() {
+  public void alAprobarUsuarioDebeActivarYAsignarCategoriaSiExisten() {
     Usuario usuario = new Usuario();
+    usuario.setEstado(EstadoUsuario.PENDIENTE);
     usuario.setCategorias(new HashSet<>());
+
     Categoria categoria = new Categoria();
 
     when(repositorioUsuario.obtenerPorId(1L)).thenReturn(usuario);

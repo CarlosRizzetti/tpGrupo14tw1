@@ -1,8 +1,10 @@
 package com.tallerwebi.presentacion;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.*;
@@ -782,5 +784,36 @@ public class ControladorDashboardTest {
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
     assertNull(respuesta.getBody());
+  }
+
+  @Test
+  public void queSiNoHayCategoriaEnSesionRedirijaAHome() {
+    when(sessionMock.getAttribute("categoria")).thenReturn(null);
+
+    ModelAndView mav = controladorDashboard.index(sessionMock);
+
+    assertEquals("redirect:/home", mav.getViewName());
+
+    verify(servicioTimerMock, never()).obtenerTimersActivos(anyLong());
+  }
+
+  @Test
+  public void queSiNoHayTimersActivosMuestreMensajeDeError() {
+    Categoria categoria = new Categoria("icono", true, "Cocina");
+    categoria.setId(1L);
+
+    CategoriaDto categoriaDto = new CategoriaDto(categoria);
+
+    when(sessionMock.getAttribute("categoria")).thenReturn(categoriaDto);
+    when(servicioTimerMock.obtenerTimersActivos(1L)).thenReturn(Collections.emptyList());
+
+    ModelAndView mav = controladorDashboard.index(sessionMock);
+
+    assertEquals("dashboard/dashboard", mav.getViewName());
+
+    assertEquals(categoriaDto, mav.getModel().get("categoria"));
+    assertEquals("No hay timers activos", mav.getModel().get("error"));
+
+    assertFalse(mav.getModel().containsKey("timers"));
   }
 }
