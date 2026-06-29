@@ -7,9 +7,11 @@ import static org.mockito.Mockito.*;
 import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
+import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
 import com.tallerwebi.presentacion.controller.ControladorUsuario;
 import com.tallerwebi.presentacion.dto.UsuarioDto;
+import com.tallerwebi.presentacion.dto.UsuarioListadoDto;
 import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpSession;
@@ -21,27 +23,34 @@ public class ControladorUsuarioTest {
 
   private ControladorUsuario controladorUsuario;
   private ServicioUsuario servicioUsuarioMock;
+  private ServicioCategoria servicioCategoriaMock;
   private HttpSession sessionMock;
 
   @BeforeEach
   public void init() {
     servicioUsuarioMock = mock(ServicioUsuario.class);
+    servicioCategoriaMock = mock(ServicioCategoria.class);
     sessionMock = mock(HttpSession.class);
-    controladorUsuario = new ControladorUsuario(servicioUsuarioMock);
+    controladorUsuario = new ControladorUsuario(servicioUsuarioMock, servicioCategoriaMock);
     when(sessionMock.getAttribute("ROL")).thenReturn("ADMIN");
   }
 
   @Test
   public void listarUsuariosDeberiaRetornarVistaListaConUsuarios() {
     // preparacion
-    List<Usuario> usuarios = Arrays.asList(new Usuario(), new Usuario());
-    when(servicioUsuarioMock.listarUsuarios()).thenReturn(usuarios);
+    List<UsuarioListadoDto> usuarios = Arrays.asList(
+      new UsuarioListadoDto(),
+      new UsuarioListadoDto()
+    );
+
+    doReturn(usuarios).when(servicioUsuarioMock).listarUsuarios();
 
     // ejecucion
     ModelAndView mav = controladorUsuario.listarUsuarios();
 
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/usuario/lista"));
+
     assertThat(mav.getModel().get("usuarios"), equalTo(usuarios));
   }
 

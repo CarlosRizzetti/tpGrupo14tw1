@@ -56,7 +56,7 @@ const resetModal = () => {
 
 const buildCategoryOptions = (categories) => {
   const select = ELEMENTS.categorySelect();
-  select.innerHTML = `<option value="">— Elegí una categoría —</option>`;
+  select.innerHTML = "<option value=\"\">— Elegí una categoría —</option>";
 
   if (!categories?.length) {
     const empty = new Option("Sin categorías disponibles");

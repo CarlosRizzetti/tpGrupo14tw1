@@ -3,13 +3,16 @@ package com.tallerwebi.presentacion;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.interfaces.ServicioLogin;
 import com.tallerwebi.dominio.interfaces.ServicioValidacionIdentidad;
 import com.tallerwebi.presentacion.controller.ControladorLogin;
+import com.tallerwebi.presentacion.dto.LoginDto;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
@@ -116,9 +119,27 @@ public class ControladorLoginTest {
   }
 
   @Test
-  public void loginDeberiaRedirigirARaiz() {
+  public void loginConErrorDeberiaMostrarMensajeDeLaExcepcion() {
+    // preparacion
+    when(requestMock.getSession()).thenReturn(sessionMock);
+    when(sessionMock.getAttribute("SPRING_SECURITY_LAST_EXCEPTION"))
+      .thenReturn(new RuntimeException("Mi error personalizado"));
+
     // ejecucion
-    ModelAndView modelAndView = controladorLogin.login();
+    ModelAndView modelAndView = controladorLogin.login("true", requestMock);
+
+    // validacion
+    assertThat(modelAndView.getViewName(), equalToIgnoringCase("loginYRegistro/login"));
+    assertThat(
+      modelAndView.getModel().get("error").toString(),
+      equalToIgnoringCase("Mi error personalizado")
+    );
+  }
+
+  @Test
+  public void loginSinErrorDeberiaMostrarFormularioVacio() {
+    // ejecucion
+    ModelAndView modelAndView = controladorLogin.login(null, requestMock);
 
     // validacion
     assertThat(modelAndView.getViewName(), equalToIgnoringCase("loginYRegistro/login"));
@@ -132,5 +153,59 @@ public class ControladorLoginTest {
     // validacion
     assertThat(modelAndView.getViewName(), equalToIgnoringCase("loginYRegistro/nuevo-usuario"));
     assertThat(modelAndView.getModel().get("usuario"), instanceOf(Usuario.class));
+  }
+
+  @Test
+  public void validarLoginConUsuarioValidoDeberiaRedirigirAHome() throws Exception {
+    LoginDto loginDto = new LoginDto();
+    loginDto.setEmail("dami@unlam.com");
+    loginDto.setPassword("1234");
+
+    when(requestMock.getSession()).thenReturn(sessionMock);
+    when(servicioLoginMock.consultarUsuario("dami@unlam.com", "1234")).thenReturn(usuarioMock);
+
+    when(usuarioMock.getRol()).thenReturn("ADMIN");
+    when(usuarioMock.getEmail()).thenReturn("dami@unlam.com");
+
+    ModelAndView mav = controladorLogin.validarLogin(loginDto, requestMock);
+
+    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/home"));
+
+    verify(sessionMock).setAttribute("ROL", "ADMIN");
+    verify(sessionMock).setAttribute("EMAIL", "dami@unlam.com");
+  }
+
+  @Test
+  public void validarLoginConUsuarioInexistenteDeberiaMostrarError() throws Exception {
+    LoginDto loginDto = new LoginDto();
+    loginDto.setEmail("dami@unlam.com");
+    loginDto.setPassword("1234");
+
+    when(servicioLoginMock.consultarUsuario("dami@unlam.com", "1234")).thenReturn(null);
+
+    ModelAndView mav = controladorLogin.validarLogin(loginDto, requestMock);
+
+    assertThat(mav.getViewName(), equalToIgnoringCase("loginYRegistro/login"));
+    assertThat(
+      mav.getModel().get("error").toString(),
+      equalToIgnoringCase("Usuario o clave incorrecta")
+    );
+  }
+
+  @Test
+  public void validarLoginConPasswordInvalidaDeberiaLanzarRuntimeException() throws Exception {
+    LoginDto loginDto = new LoginDto();
+    loginDto.setEmail("dami@unlam.com");
+    loginDto.setPassword("1234");
+
+    when(servicioLoginMock.consultarUsuario("dami@unlam.com", "1234"))
+      .thenThrow(new PasswordInvalida("Password inválida"));
+
+    assertThrows(
+      RuntimeException.class,
+      () -> {
+        controladorLogin.validarLogin(loginDto, requestMock);
+      }
+    );
   }
 }
