@@ -7,16 +7,15 @@ import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.excepcion.CantidadInvalidaException;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
-import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
-import com.tallerwebi.dominio.interfaces.RepositorioTimer;
-import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
-import com.tallerwebi.dominio.interfaces.ServicioTimer;
+import com.tallerwebi.dominio.interfaces.*;
 import com.tallerwebi.dominio.utils.ValidacionHelper;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.TimerDTO;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,16 +28,20 @@ public class ServicioTimerImpl implements ServicioTimer {
   private final ServicioReglaVencimiento servicioReglaVencimiento;
   private RepositorioTimer repositorioTimer;
   private RepositorioCategoria repositorioCategoria;
+  private ServicioImpresion servicioImpresion;
+  private static final Logger log = LoggerFactory.getLogger(ServicioTimerImpl.class);
 
   @Autowired
   public ServicioTimerImpl(
     RepositorioTimer repositorioTimer,
     RepositorioCategoria repositorioCategoria,
-    ServicioReglaVencimiento servicioReglaVencimiento
+    ServicioReglaVencimiento servicioReglaVencimiento,
+    ServicioImpresion servicioImpresion
   ) {
     this.repositorioTimer = repositorioTimer;
     this.repositorioCategoria = repositorioCategoria;
     this.servicioReglaVencimiento = servicioReglaVencimiento;
+    this.servicioImpresion = servicioImpresion;
   }
 
   @Override
@@ -93,32 +96,72 @@ public class ServicioTimerImpl implements ServicioTimer {
     Integer cantidad,
     Usuario usuario
   ) {
+    Timer timer = obtenerTimerValidado(timerId);
+    Categoria categoriaDestino = obtenerCategoriaValidada(categoriaId);
+
+    validarImportacion(timer, categoriaId, cantidad);
+
+    Timer clon = crearTimerConCantidadYCategoria(timer, cantidad, categoriaDestino, usuario);
+    actualizarTimerOriginal(timer, timerId, cantidad);
+    repositorioTimer.guardar(clon);
+    intentarImpresion(clon);
+
+    return new CategoriaDto(categoriaDestino);
+  }
+
+  private Timer obtenerTimerValidado(Long timerId) {
     Timer timer = repositorioTimer.buscarPorId(timerId);
     ValidacionHelper.queNoSeaNull(timer, "timer");
+    return timer;
+  }
 
-    Categoria categoriaDestino = repositorioCategoria.buscarPorId(categoriaId);
-    ValidacionHelper.queNoSeaNull(categoriaDestino, "categoria de destino");
+  private Categoria obtenerCategoriaValidada(Long categoriaId) {
+    Categoria categoria = repositorioCategoria.buscarPorId(categoriaId);
+    ValidacionHelper.queNoSeaNull(categoria, "categoria de destino");
+    return categoria;
+  }
 
+  private void validarImportacion(Timer timer, Long categoriaId, Integer cantidad) {
     if (timer.getCategoria().getId().equals(categoriaId)) {
       throw new ValidacionException("El timer ya pertenece a esta categoría");
     }
-
     if (repositorioTimer.existeTimerActivoEnCategoriaYGrupo(categoriaId, timer.getGroupId())) {
       throw new ValidacionException("El timer ya fue importado a esta categoría");
     }
+    if (cantidad > timer.getCantidadProducto()) {
+      throw new CantidadInvalidaException(
+        "La cantidad a importar no puede ser mayor al stock actual del vencimiento"
+      );
+    }
+  }
 
-    if (cantidad > timer.getCantidadProducto()) throw new CantidadInvalidaException(
-      "La cantidad a importar no puede ser mayor al stock actual del vencimiento"
-    );
-    Timer clon = crearTimerConCantidadYCategoria(timer, cantidad, categoriaDestino, usuario);
+  private void actualizarTimerOriginal(Timer timer, Long timerId, Integer cantidad) {
     if (cantidad.equals(timer.getCantidadProducto())) {
       modificarEstado(timerId, EstadoTimer.IMPORTADO);
       modificarCantidad(timerId, 0);
     } else {
       modificarCantidad(timerId, timer.getCantidadProducto() - cantidad);
     }
-    repositorioTimer.guardar(clon);
-    return new CategoriaDto(categoriaDestino);
+  }
+
+  private void intentarImpresion(Timer clon) {
+    try {
+      servicioImpresion.imprimirTicketVencimiento(
+        clon.getProducto(),
+        clon.getReglaVencimiento(),
+        clon.getCicloVida().getFechaCreacion(),
+        clon.getCicloVida().getFechaVencimiento(),
+        clon.getCicloVida().getDescongelamiento()
+      );
+    } catch (Exception e) {
+      if (log.isWarnEnabled()) {
+        log.warn(
+          "No se pudo imprimir el ticket de importación para el timer {}: {}",
+          clon.getId(),
+          e.getMessage()
+        );
+      }
+    }
   }
 
   @Override
@@ -187,7 +230,7 @@ public class ServicioTimerImpl implements ServicioTimer {
     Categoria categoria,
     Usuario usuario
   ) {
-    return new Timer(
+    Timer clon = new Timer(
       timer.getCicloVida().getFechaCreacion(),
       timer.getCicloVida().getFechaVencimiento(),
       timer.getGroupId(),
@@ -197,5 +240,11 @@ public class ServicioTimerImpl implements ServicioTimer {
       cantidad,
       usuario
     );
+
+    if (timer.getCicloVida().getDescongelamiento() != null) {
+      clon.getCicloVida().setDescongelamiento(timer.getCicloVida().getDescongelamiento());
+    }
+
+    return clon;
   }
 }

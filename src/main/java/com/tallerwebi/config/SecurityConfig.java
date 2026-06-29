@@ -1,10 +1,12 @@
 package com.tallerwebi.config;
 
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
+import com.tallerwebi.dominio.interfaces.ServicioOAuth2;
 import com.tallerwebi.dominio.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -14,21 +16,23 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
+@PropertySource("classpath:application.properties")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-  @Value("${google.client-id}")
-  private String googleClientId;
-
-  @Value("${google.client-secret}")
-  private String googleClientSecret;
   private final RepositorioUsuario repositorioUsuario;
+  private final ServicioOAuth2 servicioOAuth2;
 
-  public SecurityConfig(RepositorioUsuario repositorioUsuario) {
+  public SecurityConfig(RepositorioUsuario repositorioUsuario, ServicioOAuth2 servicioOAuth2) {
+    this.servicioOAuth2 = servicioOAuth2;
     this.repositorioUsuario = repositorioUsuario;
   }
 
@@ -77,26 +81,46 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
       .defaultSuccessUrl("/home", true)
       .permitAll()
       .and()
+      .oauth2Login()
+      .loginPage("/login")
+      .userInfoEndpoint()
+      .userService((OAuth2UserService<OAuth2UserRequest, OAuth2User>) userDetailsService())
+      .and()
+      .successHandler(oAuth2SuccessHandler())
+      .and()
       .logout()
       .permitAll();
   }
 
   @Bean
-  public ClientRegistrationRepository clientRegistrationRepository() {
+  public AuthenticationSuccessHandler oAuth2SuccessHandler() {
+    return (request, response, authentication) -> {
+      OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+      String email = oAuth2User.getAttribute("email");
+      String nombre = oAuth2User.getAttribute("name");
+      servicioOAuth2.procesarUsuarioGoogle(email, nombre, response);
+    };
+  }
+
+  @Bean
+  public static ClientRegistrationRepository clientRegistrationRepository(
+    @Value("${google.client-id}") String googleClientId,
+    @Value("${google.client-secret}") String googleClientSecret
+  ) {
     ClientRegistration google = ClientRegistration
-            .withRegistrationId("google")
-            .clientId(googleClientId)
-            .clientSecret(googleClientSecret)
-            .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC) //Se envia en el encabezado html con base 64
-            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)//google devuelve un codigo de autorizacion
-            .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
-            .scope("email", "profile")
-            .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
-            .tokenUri("https://www.googleapis.com/oauth2/v4/token")
-            .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
-            .userNameAttributeName("email")
-            .clientName("Google")
-            .build();
+      .withRegistrationId("google")
+      .clientId(googleClientId)
+      .clientSecret(googleClientSecret)
+      .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+      .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+      .redirectUri("{baseUrl}/login/oauth2/code/{registrationId}")
+      .scope("email", "profile")
+      .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
+      .tokenUri("https://www.googleapis.com/oauth2/v4/token")
+      .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
+      .userNameAttributeName("email")
+      .clientName("Google")
+      .build();
 
     return new InMemoryClientRegistrationRepository(google);
   }

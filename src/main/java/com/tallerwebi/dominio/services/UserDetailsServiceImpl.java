@@ -13,11 +13,18 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class UserDetailsServiceImpl
+  implements UserDetailsService, OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
   private final RepositorioUsuario repositorioUsuario;
   private static final Logger logger = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
@@ -41,6 +48,32 @@ public class UserDetailsServiceImpl implements UserDetailsService {
       usuario.getEmail(),
       usuario.getPassword(),
       Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + usuario.getRol()))
+    );
+  }
+
+  @Override
+  public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+    OAuth2User oAuth2User = new DefaultOAuth2UserService().loadUser(userRequest);
+
+    String email = oAuth2User.getAttribute("email");
+
+    Usuario usuario = repositorioUsuario.buscar(email);
+
+    if (usuario == null) {
+      String nombre = oAuth2User.getAttribute("name");
+      usuario = new Usuario();
+      usuario.setEmail(email);
+      usuario.setNombre(nombre);
+      usuario.setEstado(EstadoUsuario.PENDIENTE);
+      usuario.setRol("USER");
+      repositorioUsuario.guardar(usuario);
+    }
+
+    // Devuelve el usuario con sus roles de tu BD a Spring Security
+    return new DefaultOAuth2User(
+      Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + usuario.getRol())),
+      oAuth2User.getAttributes(),
+      "email"
     );
   }
 
