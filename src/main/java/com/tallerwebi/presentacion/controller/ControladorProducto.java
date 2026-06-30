@@ -4,7 +4,6 @@ import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Usuario;
-import com.tallerwebi.dominio.interfaces.ServicioArticulo;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
@@ -30,7 +29,6 @@ public class ControladorProducto {
   private final ServicioProducto servicioProducto;
   private final ServicioCategoria servicioCategoria;
   private final ServicioReglaVencimiento servicioReglaVencimiento;
-  private final ServicioArticulo servicioArticulo;
   private static final String CATEGORIA = "categoria";
   private final ServicioUsuario servicioUsuario;
 
@@ -39,14 +37,12 @@ public class ControladorProducto {
     ServicioProducto servicioProducto,
     ServicioCategoria servicioCategoria,
     ServicioReglaVencimiento servicioReglaVencimiento,
-    ServicioUsuario servicioUsuario,
-    ServicioArticulo servicioArticulo
+    ServicioUsuario servicioUsuario
   ) {
     this.servicioProducto = servicioProducto;
     this.servicioCategoria = servicioCategoria;
     this.servicioReglaVencimiento = servicioReglaVencimiento;
     this.servicioUsuario = servicioUsuario;
-    this.servicioArticulo = servicioArticulo;
   }
 
   // GET — mostrar el formulario
