@@ -20,7 +20,6 @@ class DashboardTimer {
     this.actualizarTodos();
 
     // Solicitar permiso de notificaciones nativas del navegador (HTML5 Web Notifications API).
-    // Si el usuario aún no ha aceptado ni rechazado el permiso, el navegador desplegará un cuadro de diálogo consultando si desea recibir alertas.
     if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
       Notification.requestPermission();
     }
@@ -146,11 +145,10 @@ class DashboardTimer {
     if (this.notifLoc) this.notifLoc.textContent = ubicacion;
     if (this.modal) this.modal.classList.remove("hidden");
 
-    // Disparar la notificación nativa del navegador al sistema operativo/escritorio si los permisos fueron concedidos.
     // Esto generará una alerta visual en la esquina inferior o superior de la pantalla del usuario independientemente de qué pestaña esté mirando.
     if ("Notification" in window && Notification.permission === "granted") {
       new Notification("¡Timer a punto de vencer!", {
-        body: `El producto "${nombre}" en "${ubicacion}" requiere tu atención inmediata.`,
+        body: `El producto "${nombre}" en "${ubicacion}" esta por vencer.`,
       });
     }
 

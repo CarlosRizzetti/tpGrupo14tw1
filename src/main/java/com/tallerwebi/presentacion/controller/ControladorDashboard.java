@@ -188,4 +188,15 @@ public class ControladorDashboard {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
+
+  @GetMapping("/api/timers/activos")
+  @ResponseBody
+  public ResponseEntity<List<TimerDTO>> obtenerTodosLosTimersActivos() {
+    try {
+      List<TimerDTO> timers = servicioTimer.obtenerTimersConFiltro(EstadoTimer.ACTIVO, null);
+      return ResponseEntity.ok(timers);
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+  }
 }

@@ -48,6 +48,7 @@
         <div th:replace="${content}"></div>
     </main>
     <div th:if="${extra != null}" th:replace="${extra}"></div>
+    <div th:if="${extra == null}" th:insert="~{dashboard/fragments/notificacion::alertaVencimiento}"></div>
 
 </div>
 
@@ -63,5 +64,6 @@
     </a>
 </div>
 
+<script th:src="@{/resources/core/js/notificacionesGlobales.js}" defer></script>
 </body>
 </html>
