@@ -79,7 +79,7 @@ public class ControladorArticuloTest {
     );
 
     // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/almacen/articulos"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/admin"));
     verify(servicioArticuloMock, times(1)).registrarArticulo(articulo);
   }
 
@@ -92,7 +92,7 @@ public class ControladorArticuloTest {
     ModelAndView mav = controladorArticulo.registrarArticulo(articulo, null, "");
 
     // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/almacen/articulos"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/admin"));
     verify(servicioArticuloMock, times(1)).registrarArticulo(articulo);
   }
 
@@ -139,7 +139,7 @@ public class ControladorArticuloTest {
     ModelAndView mav = controladorArticulo.registrarArticulo(articulo, null, null);
 
     // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/almacen/articulos"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/admin"));
     verify(servicioArticuloMock, times(1)).registrarArticulo(articulo);
   }
 }

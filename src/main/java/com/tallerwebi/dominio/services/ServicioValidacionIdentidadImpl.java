@@ -61,7 +61,7 @@ public class ServicioValidacionIdentidadImpl implements ServicioValidacionIdenti
       return false;
     }
 
-    usuario.setEstado(EstadoUsuario.ACTIVO);
+    usuario.setEstado(EstadoUsuario.PENDIENTE);
     usuario.setTokenValidacion(null);
     repositorioUsuario.modificar(usuario);
     return true;

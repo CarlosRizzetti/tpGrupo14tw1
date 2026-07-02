@@ -2,7 +2,6 @@ package com.tallerwebi.dominio.services;
 
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
-import com.tallerwebi.dominio.excepcion.ImpresionException;
 import com.tallerwebi.dominio.interfaces.ServicioImpresion;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,11 +17,15 @@ import javax.print.DocPrintJob;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 import javax.print.SimpleDoc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ServicioImpresionImpl implements ServicioImpresion {
+
+  private static final Logger logger = LoggerFactory.getLogger(ServicioImpresionImpl.class);
 
   @Value("${impresora.nombre:POS-58 11.3.0.1}")
   private String nombreImpresora;
@@ -38,7 +41,8 @@ public class ServicioImpresionImpl implements ServicioImpresion {
     try {
       PrintService impresora = buscarImpresora(nombreImpresora);
       if (impresora == null) {
-        throw new ImpresionException("No hay impresora disponible");
+        logger.warn("Impresión omitida: No hay impresora disponible ({})", nombreImpresora);
+        return;
       }
 
       byte[] comandos = construirComandosEscPos(
@@ -53,13 +57,7 @@ public class ServicioImpresionImpl implements ServicioImpresion {
       Doc documento = new SimpleDoc(comandos, DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
       trabajo.print(documento, null);
     } catch (Exception e) {
-      throw new ImpresionException(
-        "Error al imprimir ticket de vencimiento para '{}': {}" +
-        producto.getNombre() +
-        " " +
-        e.getMessage(),
-        e
-      );
+      logger.error("No se pudo imprimir el ticket", e);
     }
   }
 

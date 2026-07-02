@@ -25,7 +25,7 @@ public class RepositorioArticuloImpl implements RepositorioArticulo {
 
   @Override
   public void guardar(Articulos articulo) {
-    sessionFactory.getCurrentSession().save(articulo);
+    sessionFactory.getCurrentSession().saveOrUpdate(articulo);
   }
 
   @Override

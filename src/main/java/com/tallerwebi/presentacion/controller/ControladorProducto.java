@@ -4,10 +4,12 @@ import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.excepcion.SinStockSuficienteException;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
+import com.tallerwebi.dominio.utils.AuthenticationUtils;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.List;
@@ -15,12 +17,12 @@ import java.util.Set;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class ControladorProducto {
@@ -177,19 +179,27 @@ public class ControladorProducto {
     @RequestParam(name = "categoryId", required = false) Long categoryId,
     @RequestParam(name = "reglaId") Long reglaId,
     @RequestParam(name = "cantidad") Integer cantidad,
-    @AuthenticationPrincipal User usuarioLogueado
+    Authentication authentication,
+    RedirectAttributes redirectAttributes
   ) {
+    String email = AuthenticationUtils.obtenerEmailDeAutenticacion(authentication);
     Producto producto = servicioProducto.obtenerProductoConReglas(id);
     Categoria categoria = determinarCategoria(producto, categoryId);
-    Usuario usuario = servicioUsuario.obtenerUsuarioPorEmail(usuarioLogueado.getUsername());
-    servicioReglaVencimiento.generarVencimiento(
-      producto,
-      categoria,
-      reglaId,
-      offsetMinutes,
-      cantidad,
-      usuario
-    );
+    Usuario usuario = servicioUsuario.obtenerUsuarioPorEmail(email);
+
+    try {
+      servicioReglaVencimiento.generarVencimiento(
+        producto,
+        categoria,
+        reglaId,
+        offsetMinutes,
+        cantidad,
+        usuario
+      );
+    } catch (SinStockSuficienteException | IllegalArgumentException e) {
+      redirectAttributes.addFlashAttribute("error", e.getMessage());
+      return "redirect:/product/" + id;
+    }
 
     return "redirect:/dashboard";
   }

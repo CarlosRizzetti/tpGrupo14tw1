@@ -11,6 +11,7 @@ import com.tallerwebi.dominio.excepcion.IdInvalido;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
+import com.tallerwebi.dominio.interfaces.ServicioImpresion;
 import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
 import com.tallerwebi.dominio.services.ServicioTimerImpl;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
@@ -32,17 +33,20 @@ public class ServicioTimerTest {
   public ServicioTimerImpl servicioTimer;
   public ServicioReglaVencimiento servicioReglaVencimientoMock;
   private Usuario usuarioTest;
+  private ServicioImpresion servicioImpresionMock;
 
   @BeforeEach
   public void init() {
     this.repositorioTimerMock = mock(RepositorioTimer.class);
     this.repositorioCategoriaMock = mock(RepositorioCategoria.class);
     this.servicioReglaVencimientoMock = mock(ServicioReglaVencimiento.class);
+    this.servicioImpresionMock = mock(ServicioImpresion.class);
     this.servicioTimer =
       new ServicioTimerImpl(
         repositorioTimerMock,
         repositorioCategoriaMock,
-        servicioReglaVencimientoMock
+        servicioReglaVencimientoMock,
+        servicioImpresionMock
       );
     usuarioTest = new Usuario();
   }

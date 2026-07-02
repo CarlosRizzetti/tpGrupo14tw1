@@ -1,7 +1,7 @@
 package com.tallerwebi.dominio.entity.enums;
 
 public enum UnidadDeMedida {
-  KILO,
+  KILOS,
   LITROS,
   UNIDAD,
 }

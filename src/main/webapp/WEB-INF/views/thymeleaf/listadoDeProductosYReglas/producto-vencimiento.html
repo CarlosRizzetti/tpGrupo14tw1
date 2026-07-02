@@ -38,6 +38,11 @@
     <div class="p-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
 
+            <div th:if="${error}" class="col-span-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">¡Atención!</strong>
+                <span class="block sm:inline" th:text="${error}"></span>
+            </div>
+
             <div th:each="rule : ${reglas}" class="bg-white rounded-[2rem] shadow-xl overflow-hidden flex flex-col border border-gray-100">
 
                 <form th:action="@{/producto/{id}/generar(id=${producto.id})}"
@@ -97,7 +102,6 @@
                                        name="cantidad"
                                        value="1"
                                        min="1"
-                                       th:max="${producto.cantidad}"
                                        class="w-full text-center text-4xl font-black bg-white border-2 border-gray-200 rounded-2xl p-3 focus:outline-none focus:border-gray-400 text-gray-800"
                                        required>
                                 <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 font-bold text-[10px] uppercase tracking-wider italic">

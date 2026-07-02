@@ -1,5 +1,6 @@
 package com.tallerwebi.dominio.entity;
 
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.persistence.*;
@@ -23,6 +24,9 @@ public class Producto {
 
   @Column(nullable = false)
   private Integer cantidad = 0;
+
+  @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<Timer> timers;
 
   @ManyToMany
   @JoinTable(

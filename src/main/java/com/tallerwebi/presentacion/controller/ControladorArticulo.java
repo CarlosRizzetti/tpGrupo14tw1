@@ -22,7 +22,7 @@ public class ControladorArticulo {
     this.servicioArticulo = servicioArticulo;
   }
 
-  @RequestMapping(path = "/almacen/articulos", method = RequestMethod.GET)
+  @RequestMapping(path = "/admin/articulos", method = RequestMethod.GET)
   public ModelAndView mostrarArticulosDelAlmacen() {
     ModelMap modelo = new ModelMap();
     List<Articulos> articulos = servicioArticulo.obtenerTodosLosArticulos();
@@ -33,7 +33,7 @@ public class ControladorArticulo {
     return new ModelAndView("articulos", modelo);
   }
 
-  @RequestMapping(path = "/almacen/stock", method = RequestMethod.GET)
+  @RequestMapping(path = "/admin/stock", method = RequestMethod.GET)
   public ModelAndView mostrarStock() {
     ModelMap modelo = new ModelMap();
     List<com.tallerwebi.presentacion.dto.StockArticuloDto> stockArticulos =
@@ -43,7 +43,7 @@ public class ControladorArticulo {
   }
 
   @RequestMapping(
-    path = { "/almacen/nuevo-articulo", "/trazabilidad/nuevo-articulo" },
+    path = { "/admin/nuevo-articulo", "/trazabilidad/nuevo-articulo" },
     method = RequestMethod.GET
   )
   public ModelAndView mostrarFormularioNuevoArticulo() {
@@ -53,7 +53,7 @@ public class ControladorArticulo {
   }
 
   @RequestMapping(
-    path = { "/almacen/nuevo-articulo", "/trazabilidad/nuevo-articulo" },
+    path = { "/admin/nuevo-articulo", "/trazabilidad/nuevo-articulo" },
     method = RequestMethod.POST
   )
   public ModelAndView registrarArticulo(
@@ -73,7 +73,7 @@ public class ControladorArticulo {
         );
       }
       servicioArticulo.registrarArticulo(articulo);
-      return new ModelAndView("redirect:/almacen/articulos");
+      return new ModelAndView("redirect:/admin");
     } catch (Exception e) {
       ModelMap modelo = new ModelMap();
       modelo.put("articulo", articulo);

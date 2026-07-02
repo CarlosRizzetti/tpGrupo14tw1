@@ -41,7 +41,7 @@ public class RepositorioArticuloImplTest {
   public void guardarDeberiaLlamarASessionSave() {
     Articulos articulo = new Articulos();
     repositorioArticulo.guardar(articulo);
-    verify(sessionMock).save(articulo);
+    verify(sessionMock, times(1)).saveOrUpdate(articulo);
   }
 
   @Test
