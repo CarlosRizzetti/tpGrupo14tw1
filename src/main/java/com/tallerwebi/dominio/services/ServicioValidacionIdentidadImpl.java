@@ -60,8 +60,6 @@ public class ServicioValidacionIdentidadImpl implements ServicioValidacionIdenti
     if (usuario.getEstado() != EstadoUsuario.PENDIENTE) {
       return false;
     }
-
-    usuario.setEstado(EstadoUsuario.ACTIVO);
     usuario.setTokenValidacion(null);
     repositorioUsuario.modificar(usuario);
     return true;

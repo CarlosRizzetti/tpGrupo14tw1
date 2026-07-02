@@ -9,6 +9,7 @@ import com.tallerwebi.dominio.interfaces.ServicioValidacionIdentidad;
 import com.tallerwebi.presentacion.dto.LoginDto;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -28,6 +29,9 @@ public class ControladorLogin {
   private final ServicioLogin servicioLogin;
   private final ServicioValidacionIdentidad servicioValidacionIdentidad;
 
+  @Value("${recaptcha.site-key}")
+  private String recaptchaSiteKey;
+
   @Autowired
   public ControladorLogin(
     ServicioLogin servicioLogin,
@@ -45,7 +49,6 @@ public class ControladorLogin {
     return new ModelAndView("redirect:/login");
   }
 
-  // Login normal — no se toca, tests existentes siguen pasando
   @RequestMapping("/login")
   public ModelAndView login(
     @RequestParam(value = "error", required = false) String errorParam,
@@ -57,16 +60,14 @@ public class ControladorLogin {
         .getSession()
         .getAttribute("SPRING_SECURITY_LAST_EXCEPTION");
       if (exception != null) {
-        modelo.put(ERROR, exception.getMessage());
-      } else {
         modelo.put(ERROR, "Usuario o clave incorrecta");
       }
     }
     modelo.put("loginDto", new LoginDto());
+    modelo.put("recaptchaSiteKey", recaptchaSiteKey);
     return new ModelAndView(VISTA_LOGIN, modelo);
   }
 
-  // Login OAuth2 — maneja errores de Google
   @RequestMapping("/login-oauth")
   public ModelAndView loginOauth(
     @RequestParam(value = "pendiente", required = false) String pendiente,
@@ -80,6 +81,7 @@ public class ControladorLogin {
       modelo.put(ERROR, "Todavía no te asignaron una categoría");
     }
     modelo.put("loginDto", new LoginDto());
+    modelo.put("recaptchaSiteKey", recaptchaSiteKey);
     return new ModelAndView(VISTA_LOGIN, modelo);
   }
 

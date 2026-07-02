@@ -2,6 +2,7 @@ package com.tallerwebi.config;
 
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import com.tallerwebi.dominio.interfaces.ServicioOAuth2;
+import com.tallerwebi.dominio.services.ServicioRecaptcha;
 import com.tallerwebi.dominio.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,7 @@ import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -30,10 +32,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   private final RepositorioUsuario repositorioUsuario;
   private final ServicioOAuth2 servicioOAuth2;
+  private final ServicioRecaptcha servicioRecaptcha;
 
-  public SecurityConfig(RepositorioUsuario repositorioUsuario, ServicioOAuth2 servicioOAuth2) {
+  public SecurityConfig(
+    RepositorioUsuario repositorioUsuario,
+    ServicioOAuth2 servicioOAuth2,
+    ServicioRecaptcha servicioRecaptcha
+  ) {
     this.servicioOAuth2 = servicioOAuth2;
     this.repositorioUsuario = repositorioUsuario;
+    this.servicioRecaptcha = servicioRecaptcha;
   }
 
   @Bean
@@ -55,6 +63,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http
+      .addFilterBefore(
+        new FiltroRecaptcha(servicioRecaptcha),
+        UsernamePasswordAuthenticationFilter.class
+      )
       .csrf()
       .disable()
       .exceptionHandling()
