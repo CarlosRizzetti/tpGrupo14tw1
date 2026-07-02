@@ -13,8 +13,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +29,6 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class ControladorEstadisticas {
 
-  private static final Logger logger = LoggerFactory.getLogger(ControladorEstadisticas.class);
   private static final int DIAS_POR_DEFECTO = 30;
 
   private final ServicioEstadistica servicioEstadistica;
@@ -59,7 +56,6 @@ public class ControladorEstadisticas {
     } catch (IllegalArgumentException e) {
       return ResponseEntity.badRequest().build();
     } catch (Exception e) {
-      logger.error("Error al obtener las estadísticas", e);
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
@@ -136,14 +132,8 @@ public class ControladorEstadisticas {
         }
       }
     } catch (IllegalArgumentException e) {
-      if (logger.isWarnEnabled()) {
-        logger.warn("DEBUG (Validación de fechas al exportar): {}", e.getMessage());
-      }
       response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     } catch (Exception e) {
-      if (logger.isErrorEnabled()) {
-        logger.error("Error al exportar estadísticas a Excel usando plantilla", e);
-      }
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
   }

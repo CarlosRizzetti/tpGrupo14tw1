@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/app :: layout(~{::content}, _, ~{::header_center}, _, _, _)}">
+      th:replace="~{layouts/app :: layout(~{::content}, _, ~{::header_center}, _, _, ~{::scripts})}">
 <head>
     <title>Login / MCD Vencimientos</title>
 </head>
@@ -17,7 +17,7 @@
             <p class="text-sm opacity-80 font-medium">Control de Etiquetas</p>
         </div>
 
-        <div th:if="${error != null}" class="mb-6 p-4 bg-red-100/90 border-l-4 border-red-500 text-red-800 rounded shadow-inner">
+        <div th:if="${error != null}" id="error-container" class="mb-6 p-4 bg-red-100/90 border-l-4 border-red-500 text-red-800 rounded shadow-inner">
             <span class="font-bold text-sm" th:text="${error}"></span>
         </div>
 
@@ -36,6 +36,12 @@
                        placeholder="********" required />
             </div>
 
+                <div class="flex justify-center">
+                    <div class="g-recaptcha"
+                         th:data-sitekey="${recaptchaSiteKey}"
+                         data-theme="light">
+                    </div>
+                </div>
             <button id="btn-login" type="submit"
                     class="w-full py-4 mt-6 bg-puesto-header text-puesto-header-text font-black uppercase tracking-widest text-lg rounded-xl hover:opacity-90 transition-all border-b-4 border-black/20 hover:-translate-y-1 hover:shadow-xl">
                 Entrar
@@ -73,5 +79,8 @@
     <script type="module" th:src="@{/resources/core/js/login.js}"></script>
 </div>
 </body>
-
+<div th:fragment="scripts">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script th:src="@{/resources/core/js/ValidacionCaptcha.js}" defer></script>
+</div>
 </html>
