@@ -19,9 +19,15 @@ class DashboardTimer {
     setInterval(() => this.actualizarTodos(), 1000);
     this.actualizarTodos();
 
+    // Solicitar permiso de notificaciones nativas del navegador (HTML5 Web Notifications API).
+    // Si el usuario aún no ha aceptado ni rechazado el permiso, el navegador desplegará un cuadro de diálogo consultando si desea recibir alertas.
+    if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+      Notification.requestPermission();
+    }
+
     //Modal notificación
     const closeBtn = document.getElementById("cerrarNotificacion");
-    if (closeBtn) {
+    if (closeBtn && this.modal) {
       closeBtn.addEventListener("click", () => this.modal.classList.add("hidden"));
     }
   }
@@ -136,9 +142,17 @@ class DashboardTimer {
 
     this.alertaSonido.play().catch(() => console.log("Interacción requerida para audio"));
 
-    this.notifNombre.textContent = nombre;
-    this.notifLoc.textContent = ubicacion;
-    this.modal.classList.remove("hidden");
+    if (this.notifNombre) this.notifNombre.textContent = nombre;
+    if (this.notifLoc) this.notifLoc.textContent = ubicacion;
+    if (this.modal) this.modal.classList.remove("hidden");
+
+    // Disparar la notificación nativa del navegador al sistema operativo/escritorio si los permisos fueron concedidos.
+    // Esto generará una alerta visual en la esquina inferior o superior de la pantalla del usuario independientemente de qué pestaña esté mirando.
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("¡Timer a punto de vencer!", {
+        body: `El producto "${nombre}" en "${ubicacion}" requiere tu atención inmediata.`,
+      });
+    }
 
     sessionStorage.setItem("notificados", JSON.stringify([...this.notificados]));
     this.notificados.add(id);
