@@ -1,7 +1,6 @@
 package com.tallerwebi.config;
 
 import java.util.Properties;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,9 +22,6 @@ public class MailConfig {
   @Value("${mailtrap.password}")
   private String password;
 
-
-
-
   @Bean
   public JavaMailSender javaMailSender() {
     JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
@@ -42,6 +38,4 @@ public class MailConfig {
     props.put("mail.debug", "false");
     return mailSender;
   }
-
-
 }

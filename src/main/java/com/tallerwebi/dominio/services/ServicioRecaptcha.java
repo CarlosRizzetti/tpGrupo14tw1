@@ -14,13 +14,17 @@ public class ServicioRecaptcha {
   private String secretKey;
 
   private static final String VERIFY_URL = "https://www.google.com/recaptcha/api/siteverify";
+  private final RestTemplate restTemplate;
+
+  // 2. Lo inyectamos por constructor
+  public ServicioRecaptcha(RestTemplate restTemplate) {
+    this.restTemplate = restTemplate;
+  }
 
   public boolean verificar(String recaptchaResponse) {
     if (recaptchaResponse == null || recaptchaResponse.isEmpty()) {
       return false;
     }
-
-    RestTemplate restTemplate = new RestTemplate();
 
     MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
     body.add("secret", secretKey);
