@@ -8,14 +8,13 @@ import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.excepcion.CantidadInvalidaException;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.*;
+import com.tallerwebi.dominio.utils.ImpresionHelper;
 import com.tallerwebi.dominio.utils.ValidacionHelper;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.TimerDTO;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +28,6 @@ public class ServicioTimerImpl implements ServicioTimer {
   private RepositorioTimer repositorioTimer;
   private RepositorioCategoria repositorioCategoria;
   private ServicioImpresion servicioImpresion;
-  private static final Logger log = LoggerFactory.getLogger(ServicioTimerImpl.class);
 
   @Autowired
   public ServicioTimerImpl(
@@ -104,7 +102,7 @@ public class ServicioTimerImpl implements ServicioTimer {
     Timer clon = crearTimerConCantidadYCategoria(timer, cantidad, categoriaDestino, usuario);
     actualizarTimerOriginal(timer, timerId, cantidad);
     repositorioTimer.guardar(clon);
-    intentarImpresion(clon);
+    ImpresionHelper.intentarImpresionDeVencimiento(clon, servicioImpresion);
 
     return new CategoriaDto(categoriaDestino);
   }
@@ -141,26 +139,6 @@ public class ServicioTimerImpl implements ServicioTimer {
       modificarCantidad(timerId, 0);
     } else {
       modificarCantidad(timerId, timer.getCantidadProducto() - cantidad);
-    }
-  }
-
-  private void intentarImpresion(Timer clon) {
-    try {
-      servicioImpresion.imprimirTicketVencimiento(
-        clon.getProducto(),
-        clon.getReglaVencimiento(),
-        clon.getCicloVida().getFechaCreacion(),
-        clon.getCicloVida().getFechaVencimiento(),
-        clon.getCicloVida().getDescongelamiento()
-      );
-    } catch (Exception e) {
-      if (log.isWarnEnabled()) {
-        log.warn(
-          "No se pudo imprimir el ticket de importación para el timer {}: {}",
-          clon.getId(),
-          e.getMessage()
-        );
-      }
     }
   }
 

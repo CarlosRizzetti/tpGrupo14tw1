@@ -18,6 +18,8 @@ import javax.print.DocPrintJob;
 import javax.print.PrintService;
 import javax.print.PrintServiceLookup;
 import javax.print.SimpleDoc;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,8 @@ public class ServicioImpresionImpl implements ServicioImpresion {
 
   @Value("${impresora.nombre:POS-58 11.3.0.1}")
   private String nombreImpresora;
+
+  private static final Logger log = LoggerFactory.getLogger(ServicioImpresionImpl.class);
 
   @Override
   public void imprimirTicketVencimiento(
@@ -38,7 +42,7 @@ public class ServicioImpresionImpl implements ServicioImpresion {
     try {
       PrintService impresora = buscarImpresora(nombreImpresora);
       if (impresora == null) {
-        throw new ImpresionException("No hay impresora disponible");
+        throw new ImpresionException("No se encontró la impresora con nombre " + nombreImpresora);
       }
 
       byte[] comandos = construirComandosEscPos(

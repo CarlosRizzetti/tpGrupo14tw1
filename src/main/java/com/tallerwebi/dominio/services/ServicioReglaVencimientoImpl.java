@@ -12,8 +12,11 @@ import com.tallerwebi.dominio.interfaces.ServicioControlStock;
 import com.tallerwebi.dominio.interfaces.ServicioImpresion;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
+import com.tallerwebi.dominio.utils.ImpresionHelper;
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
 
+  private static final Logger log = LoggerFactory.getLogger(ServicioReglaVencimientoImpl.class);
   private final RepositorioReglaVencimiento repositorioReglaVencimiento;
   private final RepositorioTimer repositorioTimer;
   private final ServicioProducto servicioProducto;
@@ -66,14 +70,46 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
     Integer cantidadUsada,
     Usuario usuario
   ) {
+    ReglaVencimiento regla = obtenerReglaValidada(reglaId);
+    validarCantidadUsada(cantidadUsada);
+    servicioProducto.descontarStock(producto, cantidadUsada);
+
+    Timer timer = crearYGuardarTimer(
+      producto,
+      categoria,
+      regla,
+      offsetMinutos,
+      cantidadUsada,
+      usuario
+    );
+    servicioControlStock.registrarMovimiento(
+      producto,
+      timer,
+      cantidadUsada,
+      TipoMovimientoStock.EGRESO
+    );
+
+    ImpresionHelper.intentarImpresionDeVencimiento(timer, servicioImpresion);
+
+    return timer;
+  }
+
+  private ReglaVencimiento obtenerReglaValidada(Long reglaId) {
     ReglaVencimiento regla = repositorioReglaVencimiento.obtenerReglaVencimientoPorId(reglaId);
     if (regla == null) {
       throw new IllegalArgumentException("El producto no tiene regla de vencimiento");
     }
+    return regla;
+  }
 
-    validarCantidadUsada(cantidadUsada);
-    servicioProducto.descontarStock(producto, cantidadUsada);
-
+  private Timer crearYGuardarTimer(
+    Producto producto,
+    Categoria categoria,
+    ReglaVencimiento regla,
+    Integer offsetMinutos,
+    Integer cantidadUsada,
+    Usuario usuario
+  ) {
     OffsetDateTime fechaElaboracion = obtenerFechaDeElaboracion(offsetMinutos);
     OffsetDateTime vencimiento = obtenerFechaVencimiento(fechaElaboracion, regla);
     OffsetDateTime descongelamiento = obtenerFechaDeDescongelamiento(fechaElaboracion, regla);
@@ -89,22 +125,6 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
       usuario
     );
     repositorioTimer.guardar(timer);
-
-    servicioControlStock.registrarMovimiento(
-      producto,
-      timer,
-      cantidadUsada,
-      TipoMovimientoStock.EGRESO
-    );
-
-    servicioImpresion.imprimirTicketVencimiento(
-      producto,
-      regla,
-      fechaElaboracion,
-      vencimiento,
-      descongelamiento
-    );
-
     return timer;
   }
 
