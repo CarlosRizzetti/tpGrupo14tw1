@@ -2,7 +2,10 @@ package com.tallerwebi.config;
 
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import com.tallerwebi.dominio.interfaces.ServicioOAuth2;
+import com.tallerwebi.dominio.interfaces.ServicioOAuth2;
+import com.tallerwebi.dominio.services.ServicioRecaptcha;
 import com.tallerwebi.dominio.services.UserDetailsServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,14 +17,24 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -30,10 +43,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   private final RepositorioUsuario repositorioUsuario;
   private final ServicioOAuth2 servicioOAuth2;
+  private final ServicioRecaptcha servicioRecaptcha;
 
-  public SecurityConfig(RepositorioUsuario repositorioUsuario, ServicioOAuth2 servicioOAuth2) {
-    this.servicioOAuth2 = servicioOAuth2;
+  @Autowired
+  public SecurityConfig(
+    RepositorioUsuario repositorioUsuario,
+    ServicioOAuth2 servicioOAuth2,
+    ServicioRecaptcha servicioRecaptcha
+  ) {
     this.repositorioUsuario = repositorioUsuario;
+    this.servicioOAuth2 = servicioOAuth2;
+    this.servicioRecaptcha = servicioRecaptcha;
   }
 
   @Bean
@@ -55,6 +75,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http
+      .addFilterBefore(
+        new FiltroRecaptcha(servicioRecaptcha),
+        UsernamePasswordAuthenticationFilter.class
+      )
       .csrf()
       .disable()
       .exceptionHandling()
