@@ -65,6 +65,14 @@ public class ServicioProduccionTest {
     ingredientes.add(detalle);
     receta.setIngredientes(ingredientes);
 
+    List<com.tallerwebi.presentacion.dto.StockArticuloDto> stockAgrupado = new ArrayList<>();
+    stockAgrupado.add(new com.tallerwebi.presentacion.dto.StockArticuloDto("Pan", 5.0));
+    when(repositorioArticuloMock.obtenerStockAgrupadoPorNombre()).thenReturn(stockAgrupado);
+
+    List<Articulos> articulosMismoNombre = new ArrayList<>();
+    articulosMismoNombre.add(articulo);
+    when(repositorioArticuloMock.buscarPorNombre("Pan")).thenReturn(articulosMismoNombre);
+
     when(repositorioRecetaMock.buscarPorProducto(producto)).thenReturn(receta);
 
     assertThrows(
@@ -96,11 +104,110 @@ public class ServicioProduccionTest {
     ingredientes.add(detalle);
     receta.setIngredientes(ingredientes);
 
+    List<com.tallerwebi.presentacion.dto.StockArticuloDto> stockAgrupado = new ArrayList<>();
+    stockAgrupado.add(new com.tallerwebi.presentacion.dto.StockArticuloDto("Pan", 15.0));
+    when(repositorioArticuloMock.obtenerStockAgrupadoPorNombre()).thenReturn(stockAgrupado);
+
+    List<Articulos> articulosMismoNombre = new ArrayList<>();
+    articulosMismoNombre.add(articulo);
+    when(repositorioArticuloMock.buscarPorNombre("Pan")).thenReturn(articulosMismoNombre);
+
     when(repositorioRecetaMock.buscarPorProducto(producto)).thenReturn(receta);
 
     servicioProduccion.procesarProduccion(producto, timer, 1);
 
     verify(repositorioArticuloMock, times(1)).guardar(articulo);
     verify(repositorioTrazabilidadMock, times(1)).guardar(any(Trazabilidad.class));
+  }
+
+  @Test
+  public void procesarProduccionConStockDistribuidoDeberiaDescontarDeVariosArticulos() {
+    Producto producto = new Producto();
+    Timer timer = new Timer();
+    Receta receta = new Receta();
+    receta.setProducto(producto);
+
+    RecetaDetalle detalle = new RecetaDetalle();
+    Articulos articuloReceta = new Articulos();
+    articuloReceta.setNombre("Pan");
+    detalle.setArticulo(articuloReceta);
+    detalle.setCantidad(10.0);
+
+    List<RecetaDetalle> ingredientes = new ArrayList<>();
+    ingredientes.add(detalle);
+    receta.setIngredientes(ingredientes);
+
+    List<com.tallerwebi.presentacion.dto.StockArticuloDto> stockAgrupado = new ArrayList<>();
+    stockAgrupado.add(new com.tallerwebi.presentacion.dto.StockArticuloDto("Pan", 15.0));
+    when(repositorioArticuloMock.obtenerStockAgrupadoPorNombre()).thenReturn(stockAgrupado);
+
+    Articulos articulo1 = new Articulos();
+    articulo1.setNombre("Pan");
+    articulo1.setCantidad(6.0);
+
+    Articulos articulo2 = new Articulos();
+    articulo2.setNombre("Pan");
+    articulo2.setCantidad(9.0);
+
+    List<Articulos> articulosMismoNombre = new ArrayList<>();
+    articulosMismoNombre.add(articulo1);
+    articulosMismoNombre.add(articulo2);
+    when(repositorioArticuloMock.buscarPorNombre("Pan")).thenReturn(articulosMismoNombre);
+
+    when(repositorioRecetaMock.buscarPorProducto(producto)).thenReturn(receta);
+
+    servicioProduccion.procesarProduccion(producto, timer, 1);
+
+    verify(repositorioArticuloMock, times(1)).guardar(articulo1);
+    verify(repositorioArticuloMock, times(1)).guardar(articulo2);
+    verify(repositorioTrazabilidadMock, times(1)).guardar(any(Trazabilidad.class));
+
+    org.junit.jupiter.api.Assertions.assertEquals(0.0, articulo1.getCantidad());
+    org.junit.jupiter.api.Assertions.assertEquals(5.0, articulo2.getCantidad());
+  }
+
+  @Test
+  public void procesarProduccionFiltraArticulosPorNombreExactoYDescuentaCorrectamente() {
+    Producto producto = new Producto();
+    Timer timer = new Timer();
+    Receta receta = new Receta();
+    receta.setProducto(producto);
+
+    RecetaDetalle detalle = new RecetaDetalle();
+    Articulos articuloReceta = new Articulos();
+    articuloReceta.setNombre("Pan");
+    detalle.setArticulo(articuloReceta);
+    detalle.setCantidad(10.0);
+
+    List<RecetaDetalle> ingredientes = new ArrayList<>();
+    ingredientes.add(detalle);
+    receta.setIngredientes(ingredientes);
+
+    List<com.tallerwebi.presentacion.dto.StockArticuloDto> stockAgrupado = new ArrayList<>();
+    stockAgrupado.add(new com.tallerwebi.presentacion.dto.StockArticuloDto("Pan", 15.0));
+    when(repositorioArticuloMock.obtenerStockAgrupadoPorNombre()).thenReturn(stockAgrupado);
+
+    Articulos articuloFalso = new Articulos();
+    articuloFalso.setNombre("Pancho");
+    articuloFalso.setCantidad(20.0);
+
+    Articulos articuloCorrecto = new Articulos();
+    articuloCorrecto.setNombre("Pan");
+    articuloCorrecto.setCantidad(15.0);
+
+    List<Articulos> articulosMismoNombre = new ArrayList<>();
+    articulosMismoNombre.add(articuloFalso);
+    articulosMismoNombre.add(articuloCorrecto);
+    when(repositorioArticuloMock.buscarPorNombre("Pan")).thenReturn(articulosMismoNombre);
+
+    when(repositorioRecetaMock.buscarPorProducto(producto)).thenReturn(receta);
+
+    servicioProduccion.procesarProduccion(producto, timer, 1);
+
+    verify(repositorioArticuloMock, never()).guardar(articuloFalso);
+    verify(repositorioArticuloMock, times(1)).guardar(articuloCorrecto);
+
+    org.junit.jupiter.api.Assertions.assertEquals(20.0, articuloFalso.getCantidad());
+    org.junit.jupiter.api.Assertions.assertEquals(5.0, articuloCorrecto.getCantidad());
   }
 }

@@ -35,9 +35,12 @@ public class ServicioRecetaImpl implements ServicioReceta {
     if (receta == null) {
       receta = new Receta();
       receta.setProducto(producto);
+      receta.setIngredientes(new ArrayList<>());
     } else {
       if (receta.getIngredientes() != null) {
         receta.getIngredientes().clear(); // Limpiamos ingredientes viejos
+      } else {
+        receta.setIngredientes(new ArrayList<>());
       }
     }
 
@@ -54,7 +57,7 @@ public class ServicioRecetaImpl implements ServicioReceta {
         }
       }
     }
-    receta.setIngredientes(nuevosIngredientes);
+    receta.getIngredientes().addAll(nuevosIngredientes);
     repositorioReceta.guardar(receta);
   }
 

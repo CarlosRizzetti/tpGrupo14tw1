@@ -12,7 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @Entity
-@SuppressWarnings("PMD.TooManyFields")
+@SuppressWarnings({ "PMD.TooManyFields" })
 public class Articulos {
 
   @Id

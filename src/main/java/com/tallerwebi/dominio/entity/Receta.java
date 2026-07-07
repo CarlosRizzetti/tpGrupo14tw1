@@ -20,6 +20,11 @@ public class Receta {
   @JoinColumn(name = "idProducto", nullable = false)
   private Producto producto;
 
-  @OneToMany(mappedBy = "receta", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToMany(
+    mappedBy = "receta",
+    cascade = CascadeType.ALL,
+    fetch = FetchType.EAGER,
+    orphanRemoval = true
+  )
   private List<RecetaDetalle> ingredientes;
 }

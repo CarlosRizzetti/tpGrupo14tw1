@@ -58,11 +58,20 @@ public class ServicioProduccionImpl implements ServicioProduccion {
     );
   }
 
+  @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
   private void validarStockSuficiente(Receta receta, Integer cantidadAProducir) {
+    List<com.tallerwebi.presentacion.dto.StockArticuloDto> stockAgrupado = obtenerStockAgrupado();
+
     for (RecetaDetalle detalle : receta.getIngredientes()) {
       Articulos articulo = detalle.getArticulo();
       Double cantidadRequerida = detalle.getCantidad() * cantidadAProducir;
-      Double cantidadDisponible = articulo.getCantidad() != null ? articulo.getCantidad() : 0.0;
+
+      Double cantidadDisponible = stockAgrupado
+        .stream()
+        .filter(dto -> dto.getNombre() != null && dto.getNombre().equals(articulo.getNombre()))
+        .map(com.tallerwebi.presentacion.dto.StockArticuloDto::getStock)
+        .findFirst()
+        .orElse(0.0);
 
       if (cantidadDisponible < cantidadRequerida) {
         throw new SinStockSuficienteException(
@@ -77,37 +86,93 @@ public class ServicioProduccionImpl implements ServicioProduccion {
     }
   }
 
+  @Override
+  public List<com.tallerwebi.presentacion.dto.StockArticuloDto> obtenerStockAgrupado() {
+    return repositorioArticulo.obtenerStockAgrupadoPorNombre();
+  }
+
   private void descontarStockYGenerarTrazabilidad(
     Producto producto,
     Timer timer,
     Receta receta,
     Integer cantidadAProducir
   ) {
+    Trazabilidad trazabilidad = generarTrazabilidad(producto, timer);
+    List<TrazabilidadDetalle> detalles = descontarStock(receta, cantidadAProducir, trazabilidad);
+    trazabilidad.setArticulosUsados(detalles);
+    repositorioTrazabilidad.guardar(trazabilidad);
+  }
+
+  private Trazabilidad generarTrazabilidad(Producto producto, Timer timer) {
     Trazabilidad trazabilidad = new Trazabilidad();
     trazabilidad.setFechaGeneracion(OffsetDateTime.now());
     trazabilidad.setProducto(producto);
     trazabilidad.setTimer(timer);
+    return trazabilidad;
+  }
 
-    List<TrazabilidadDetalle> detallesTrazabilidad = new ArrayList<>();
-
+  @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
+  private List<TrazabilidadDetalle> descontarStock(
+    Receta receta,
+    Integer cantidadAProducir,
+    Trazabilidad trazabilidad
+  ) {
+    List<TrazabilidadDetalle> detalles = new ArrayList<>();
     for (RecetaDetalle detalle : receta.getIngredientes()) {
-      Articulos articulo = detalle.getArticulo();
-      Double cantidadRequerida = detalle.getCantidad() * cantidadAProducir;
+      detalles.addAll(descontarIngrediente(detalle, cantidadAProducir, trazabilidad));
+    }
+    return detalles;
+  }
+
+  @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
+  private List<TrazabilidadDetalle> descontarIngrediente(
+    RecetaDetalle detalle,
+    Integer cantidadAProducir,
+    Trazabilidad trazabilidad
+  ) {
+    List<TrazabilidadDetalle> detalles = new ArrayList<>();
+    Articulos articuloReceta = detalle.getArticulo();
+    Double cantidadRestante = detalle.getCantidad() * cantidadAProducir;
+
+    List<Articulos> articulosMismoNombre = repositorioArticulo.buscarPorNombre(
+      articuloReceta.getNombre()
+    );
+
+    for (Articulos articulo : articulosMismoNombre) {
+      if (
+        articulo.getNombre() == null || !articulo.getNombre().equals(articuloReceta.getNombre())
+      ) {
+        continue;
+      }
+
+      if (cantidadRestante <= 0) {
+        break;
+      }
 
       Double cantidadDisponible = articulo.getCantidad() != null ? articulo.getCantidad() : 0.0;
-      articulo.setCantidad(cantidadDisponible - cantidadRequerida);
-      repositorioArticulo.guardar(articulo);
 
-      TrazabilidadDetalle trazabilidadDetalle = new TrazabilidadDetalle();
-      trazabilidadDetalle.setArticulo(articulo);
-      trazabilidadDetalle.setCantidadUsada(cantidadRequerida);
-      trazabilidadDetalle.setTrazabilidad(trazabilidad);
+      if (cantidadDisponible > 0) {
+        Double cantidadADescontar = Math.min(cantidadDisponible, cantidadRestante);
+        articulo.setCantidad(cantidadDisponible - cantidadADescontar);
+        repositorioArticulo.guardar(articulo);
 
-      detallesTrazabilidad.add(trazabilidadDetalle);
+        TrazabilidadDetalle td = new TrazabilidadDetalle();
+        td.setArticulo(articulo);
+        td.setCantidadUsada(cantidadADescontar);
+        td.setTrazabilidad(trazabilidad);
+        detalles.add(td);
+
+        cantidadRestante -= cantidadADescontar;
+      }
     }
 
-    trazabilidad.setArticulosUsados(detallesTrazabilidad);
-    repositorioTrazabilidad.guardar(trazabilidad);
+    if (cantidadRestante > 0) {
+      throw new SinStockSuficienteException(
+        "No hay stock disponible suficiente al descontar para el ingrediente: " +
+        articuloReceta.getNombre()
+      );
+    }
+    return detalles;
   }
 
   @Override

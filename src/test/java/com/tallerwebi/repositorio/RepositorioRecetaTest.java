@@ -62,13 +62,14 @@ public class RepositorioRecetaTest {
     Query<Receta> queryMock = mock(Query.class);
     List<Receta> listaEsperada = Collections.singletonList(new Receta());
 
-    when(sessionMock.createQuery("FROM Receta", Receta.class)).thenReturn(queryMock);
+    when(sessionMock.createQuery("SELECT DISTINCT r FROM Receta r", Receta.class))
+      .thenReturn(queryMock);
     when(queryMock.list()).thenReturn(listaEsperada);
 
     List<Receta> resultado = repositorioReceta.obtenerTodas();
 
     assertEquals(listaEsperada, resultado);
-    verify(sessionMock).createQuery("FROM Receta", Receta.class);
+    verify(sessionMock).createQuery("SELECT DISTINCT r FROM Receta r", Receta.class);
     verify(queryMock).list();
   }
 }

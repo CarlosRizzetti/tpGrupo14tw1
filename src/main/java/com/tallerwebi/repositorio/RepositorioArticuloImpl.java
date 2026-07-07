@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
+@SuppressWarnings("unchecked")
 public class RepositorioArticuloImpl implements RepositorioArticulo {
 
   private final SessionFactory sessionFactory;
@@ -18,7 +19,6 @@ public class RepositorioArticuloImpl implements RepositorioArticulo {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public List<Articulos> obtenerTodos() {
     return sessionFactory.getCurrentSession().createQuery("FROM Articulos").list();
   }
@@ -34,7 +34,6 @@ public class RepositorioArticuloImpl implements RepositorioArticulo {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public List<Articulos> buscarPorNombre(String nombre) {
     return sessionFactory
       .getCurrentSession()
@@ -45,7 +44,6 @@ public class RepositorioArticuloImpl implements RepositorioArticulo {
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public List<com.tallerwebi.presentacion.dto.StockArticuloDto> obtenerStockAgrupadoPorNombre() {
     return sessionFactory
       .getCurrentSession()

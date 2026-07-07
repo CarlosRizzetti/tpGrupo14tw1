@@ -22,7 +22,7 @@ public class RepositorioRecetaImpl implements RepositorioReceta {
     return sessionFactory
       .getCurrentSession()
       .createQuery(
-        "FROM Receta r JOIN FETCH r.ingredientes WHERE r.producto = :producto",
+        "SELECT DISTINCT r FROM Receta r LEFT JOIN FETCH r.ingredientes WHERE r.producto = :producto",
         Receta.class
       )
       .setParameter("producto", producto)
@@ -36,6 +36,9 @@ public class RepositorioRecetaImpl implements RepositorioReceta {
 
   @Override
   public java.util.List<Receta> obtenerTodas() {
-    return sessionFactory.getCurrentSession().createQuery("FROM Receta", Receta.class).list();
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery("SELECT DISTINCT r FROM Receta r", Receta.class)
+      .list();
   }
 }
