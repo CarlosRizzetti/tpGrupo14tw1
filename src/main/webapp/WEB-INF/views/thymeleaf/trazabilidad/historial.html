@@ -47,8 +47,11 @@
                     </td>
                     <td class="p-4 align-top">
                         <ul class="list-disc pl-4 text-sm text-gray-700">
-                            <li th:each="d : ${t.articulosUsados}" 
-                                th:text="${d.cantidadUsada} + ' x ' + ${d.articulo.nombre}">
+                            <li th:each="d : ${t.articulosUsados}" class="mb-1">
+                                <span th:text="${d.cantidadUsada} + ' x ' + ${d.articulo.nombre}"></span>
+                                <span class="text-xs font-bold text-gray-600 bg-gray-200 px-2 py-0.5 rounded ml-1" 
+                                      th:text="'Lote: ' + (${d.articulo.numeroDeLote != null ? d.articulo.numeroDeLote : 'S/N'})">
+                                </span>
                             </li>
                         </ul>
                     </td>
