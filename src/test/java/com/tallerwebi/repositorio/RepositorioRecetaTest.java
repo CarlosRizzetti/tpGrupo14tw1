@@ -35,7 +35,7 @@ public class RepositorioRecetaTest {
 
     when(
       sessionMock.createQuery(
-        "FROM Receta r JOIN FETCH r.ingredientes WHERE r.producto = :producto",
+        "SELECT DISTINCT r FROM Receta r LEFT JOIN FETCH r.ingredientes WHERE r.producto = :producto",
         Receta.class
       )
     )

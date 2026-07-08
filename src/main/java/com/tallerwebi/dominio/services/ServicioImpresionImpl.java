@@ -2,6 +2,7 @@ package com.tallerwebi.dominio.services;
 
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
+import com.tallerwebi.dominio.excepcion.ImpresionException;
 import com.tallerwebi.dominio.interfaces.ServicioImpresion;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -56,7 +57,7 @@ public class ServicioImpresionImpl implements ServicioImpresion {
       Doc documento = new SimpleDoc(comandos, DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
       trabajo.print(documento, null);
     } catch (Exception e) {
-      logger.error("No se pudo imprimir el ticket", e);
+      log.error("No se pudo imprimir el ticket", e);
     }
   }
 
