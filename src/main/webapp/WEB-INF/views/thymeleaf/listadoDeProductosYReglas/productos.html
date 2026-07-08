@@ -43,6 +43,23 @@
         </a>
     </div>
 
+    <!-- Usuarios Section -->
+    <div class="mb-8" th:if="${usuarios != null}">
+        <h3 class="font-bold text-xl mb-4 text-gray-800 dark:text-gray-200">Usuarios asignados en esta Categoría:</h3>
+
+        <div th:if="${!#lists.isEmpty(usuarios)}" class="flex flex-wrap gap-2">
+            <span th:each="usuario : ${usuarios}"
+                  class="px-4 py-2 bg-blue-100 text-blue-800 rounded-full font-semibold text-sm shadow-sm"
+                  th:text="${usuario.nombre}">
+            </span>
+        </div>
+
+        <div th:if="${#lists.isEmpty(usuarios)}" class="text-gray-500 italic text-sm">
+            No hay usuarios asignados a esta categoría.
+        </div>
+    </div>
+
+
     <div th:if="${#lists.isEmpty(productos)}"
          class="text-center p-10 mt-10 bg-white/5 rounded-xl border border-white/10">
         <p class="text-xl md:text-2xl text-white font-bold opacity-70">No hay productos en esta categoría.</p>
@@ -61,25 +78,7 @@
             <div class="w-10 h-1 md:w-16 md:h-1.5 mt-4 rounded-full opacity-50 bg-puesto-btn-border"></div>
         </a>
     </div>
-</div>
-
-
-<!-- Usuarios Section -->
-<div class="mb-8" th:if="${usuarios != null}">
-    <h3 class="font-bold text-xl mb-4 text-gray-800 dark:text-gray-200">Usuarios en esta Categoría:</h3>
-
-    <div th:if="${!#lists.isEmpty(usuarios)}" class="flex flex-wrap gap-2">
-            <span th:each="usuario : ${usuarios}"
-                  class="px-4 py-2 bg-blue-100 text-blue-800 rounded-full font-semibold text-sm shadow-sm"
-                  th:text="${usuario.email}">
-            </span>
-    </div>
-
-    <div th:if="${#lists.isEmpty(usuarios)}" class="text-gray-500 italic text-sm">
-        No hay usuarios asignados a esta categoría.
-    </div>
-</div>
-
 
 </div>
 </body>
+</html>

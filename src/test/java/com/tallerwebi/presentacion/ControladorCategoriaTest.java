@@ -50,22 +50,18 @@ public class ControladorCategoriaTest {
   }
 
   @Test
-  public void siNoEsAdminDebeTraerCategoriasPorUsuario() {
+  public void siUsuarioAutenticadoDebeTraerTodasLasCategorias() {
     Authentication auth = mock(Authentication.class);
     when(auth.isAuthenticated()).thenReturn(true);
     when(auth.getName()).thenReturn("test@test.com");
-    List<GrantedAuthority> authorities = Collections.singletonList(
-      new SimpleGrantedAuthority("ROLE_USER")
-    );
-    doReturn(authorities).when(auth).getAuthorities();
 
     List<CategoriaDto> categorias = new ArrayList<>();
     categorias.add(new CategoriaDto());
-    when(servicioCategoria.obtenerCategoriasPorUsuario("test@test.com")).thenReturn(categorias);
+    when(servicioCategoria.obtenerLasCategoriasParaElMenu()).thenReturn(categorias);
 
     ModelAndView mav = controladorCategoria.index(auth);
 
-    verify(servicioCategoria, times(1)).obtenerCategoriasPorUsuario("test@test.com");
+    verify(servicioCategoria, times(1)).obtenerLasCategoriasParaElMenu();
     assertThat(mav.getViewName(), equalTo("home"));
     assertThat(mav.getModel().get("categorias"), equalTo(categorias));
   }
@@ -75,20 +71,12 @@ public class ControladorCategoriaTest {
     Authentication auth = mock(Authentication.class);
     when(auth.isAuthenticated()).thenReturn(true);
     when(auth.getName()).thenReturn("test@test.com");
-    List<GrantedAuthority> authorities = Collections.singletonList(
-      new SimpleGrantedAuthority("ROLE_USER")
-    );
-    doReturn(authorities).when(auth).getAuthorities();
 
-    when(servicioCategoria.obtenerCategoriasPorUsuario("test@test.com"))
-      .thenReturn(new ArrayList<>());
+    when(servicioCategoria.obtenerLasCategoriasParaElMenu()).thenReturn(new ArrayList<>());
 
     ModelAndView mav = controladorCategoria.index(auth);
 
     assertTrue(mav.getModel().containsKey("mensajeVacio"));
-    assertThat(
-      mav.getModel().get("mensajeVacio"),
-      equalTo("Todavía no te asignaron una categoría")
-    );
+    assertThat(mav.getModel().get("mensajeVacio"), equalTo("No hay categorías disponibles"));
   }
 }

@@ -72,8 +72,7 @@
 
 <!-- FRAGMENTO 2 -->
 <div th:fragment="header_right">
-    <a sec:authorize="hasRole('ADMIN')"
-       th:href="@{/dashboard/global}"
+    <a th:href="@{/dashboard/global}"
        class="md:flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg border border-white/20 transition text-xs font-bold uppercase tracking-wider">
         Dashboard Global
     </a>

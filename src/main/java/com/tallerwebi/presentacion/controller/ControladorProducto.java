@@ -128,21 +128,6 @@ public class ControladorProducto {
       return new ModelAndView("redirect:/login");
     }
 
-    boolean isAdmin = authentication
-      .getAuthorities()
-      .stream()
-      .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
-
-    if (!isAdmin) {
-      List<CategoriaDto> categoriasUsuario = servicioCategoria.obtenerCategoriasPorUsuario(
-        authentication.getName()
-      );
-      boolean tienePermiso = categoriasUsuario.stream().anyMatch(c -> c.getId().equals(id));
-      if (!tienePermiso) {
-        return new ModelAndView("redirect:/home");
-      }
-    }
-
     ModelMap modelo = new ModelMap();
     CategoriaDto categoria = servicioCategoria.obtenerCategoriaPorId(id);
     session.setAttribute(CATEGORIA, categoria);
@@ -159,12 +144,32 @@ public class ControladorProducto {
   }
 
   @RequestMapping(path = "/product/{id}", method = RequestMethod.GET)
-  public ModelAndView mostrarVencimientoProducto(@PathVariable Long id, HttpSession session) {
+  public ModelAndView mostrarVencimientoProducto(
+    @PathVariable Long id,
+    HttpSession session,
+    Authentication authentication
+  ) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return new ModelAndView("redirect:/login");
+    }
+
     ModelMap modelo = new ModelMap();
     Producto producto = servicioProducto.obtenerProductoConReglas(id);
     Set<ReglaVencimiento> reglas = producto.getReglas();
     CategoriaDto categoriaDto = (CategoriaDto) session.getAttribute(CATEGORIA);
 
+    boolean isAdmin = authentication
+      .getAuthorities()
+      .stream()
+      .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+    boolean tienePermiso =
+      categoriaDto != null &&
+      servicioCategoria
+        .obtenerCategoriasPorUsuario(authentication.getName())
+        .stream()
+        .anyMatch(c -> c.getId().equals(categoriaDto.getId()));
+
+    modelo.put("puedeGenerarTimer", isAdmin || tienePermiso);
     modelo.put("producto", producto);
     modelo.put("reglas", reglas);
     modelo.put(CATEGORIA, categoriaDto);
@@ -182,9 +187,29 @@ public class ControladorProducto {
     Authentication authentication,
     RedirectAttributes redirectAttributes
   ) {
-    String email = AuthenticationUtils.obtenerEmailDeAutenticacion(authentication);
+    final String email = AuthenticationUtils.obtenerEmailDeAutenticacion(authentication);
     Producto producto = servicioProducto.obtenerProductoConReglas(id);
     Categoria categoria = determinarCategoria(producto, categoryId);
+
+    boolean isAdmin = authentication
+      .getAuthorities()
+      .stream()
+      .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+    boolean tienePermiso =
+      categoria != null &&
+      servicioCategoria
+        .obtenerCategoriasPorUsuario(email)
+        .stream()
+        .anyMatch(c -> c.getId().equals(categoria.getId()));
+
+    if (!isAdmin && !tienePermiso) {
+      redirectAttributes.addFlashAttribute(
+        "error",
+        "No tienes permisos para generar timers en esta categoría"
+      );
+      return "redirect:/product/" + id;
+    }
+
     Usuario usuario = servicioUsuario.obtenerUsuarioPorEmail(email);
 
     try {

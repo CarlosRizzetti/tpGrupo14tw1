@@ -37,6 +37,8 @@ INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES (3, 4);
 INSERT INTO Usuario(id, email, password, rol, estado) VALUES(7, 'cr10@mail.com', '$2a$10$vpXbkVGioeJq7AxQp/nWFeOwN1pQXL5dbJijT83BVv2LuJTcWy1pG', 'ADMIN', 'ACTIVO');
 INSERT INTO Usuario(id, nombre, email, password, rol, estado) VALUES(3, 'Tatiel','tahielrecchia05@gmail.com', '$2a$10$pKxNbg5qcYqoRCxKvU0t8e8dMAWZ8QBl5clkQD9KHcIsgBFcnz9Ei', 'ADMIN', 'ACTIVO');
 INSERT INTO Usuario(id, nombre, email, password, rol, estado) VALUES(6, 'Tatiel','santi2@mail.com', '$2a$10$aHZnx5KAVlbHi52kmBYWDO0eD23FBux7ucIUeTR9rUOFaBlDKLz7C', 'ADMIN', 'ACTIVO');
+INSERT INTO Usuario(id, nombre, email, password, rol, estado) VALUES(7, 'Carlos','cr10@mail.com', '$2a$10$H5r3PwNXEVZeVqJfDie49en6CcS75xXc58XSUJPjvP3aYTmb9AasS', 'ADMIN', 'ACTIVO');
+
 
 INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES (3, 1);
 INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES (3, 2);

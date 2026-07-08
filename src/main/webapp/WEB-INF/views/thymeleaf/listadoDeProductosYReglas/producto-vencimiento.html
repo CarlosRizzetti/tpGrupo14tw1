@@ -116,13 +116,16 @@
                     </div>
 
                     <div class="p-4 bg-gray-50/50">
-                        <button type="submit"
+                        <button th:if="${puedeGenerarTimer}" type="submit"
                                 class="w-full py-4 bg-puesto-btn text-puesto-btn-text border-b-[6px] border-puesto-btn-border rounded-2xl text-xl font-black uppercase tracking-wider active:border-b-0 active:translate-y-1.5 transition-all flex items-center justify-center gap-3 shadow-md hover:opacity-95">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 00-2 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                             </svg>
                             GENERAR
                         </button>
+                        <div th:unless="${puedeGenerarTimer}" class="text-center p-3 bg-red-50 text-red-600 rounded-xl font-bold border border-red-200 text-sm">
+                            No tienes permisos para generar
+                        </div>
                     </div>
                 </form>
             </div>
