@@ -132,7 +132,7 @@ public class ControladorLoginTest {
     assertThat(modelAndView.getViewName(), equalToIgnoringCase("loginYRegistro/login"));
     assertThat(
       modelAndView.getModel().get("error").toString(),
-      equalToIgnoringCase("Mi error personalizado")
+      equalToIgnoringCase("Usuario o clave incorrecta")
     );
   }
 

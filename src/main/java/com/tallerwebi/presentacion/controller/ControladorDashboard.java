@@ -10,6 +10,7 @@ import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
+import com.tallerwebi.dominio.utils.AuthenticationUtils;
 import com.tallerwebi.dominio.utils.ValidacionHelper;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ResponseDTO;
@@ -23,8 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -90,10 +90,11 @@ public class ControladorDashboard {
   public ResponseEntity<?> renovarTimer(
     @PathVariable Long timerId,
     @PathVariable Integer cantidad,
-    @AuthenticationPrincipal User usuarioLogueado
+    Authentication authentication
   ) {
     try {
-      Usuario usuario = servicioUsuario.obtenerUsuarioPorEmail(usuarioLogueado.getUsername());
+      String email = AuthenticationUtils.obtenerEmailDeAutenticacion(authentication);
+      Usuario usuario = servicioUsuario.obtenerUsuarioPorEmail(email);
       ValidacionHelper.validarId(timerId);
       Timer timer = servicioTimer.buscarPorId(timerId);
       ValidacionHelper.validarCantidad(cantidad);
@@ -125,10 +126,11 @@ public class ControladorDashboard {
     @PathVariable Long categoryId,
     @PathVariable Integer cantidad,
     HttpSession session,
-    @AuthenticationPrincipal User usuarioLogueado
+    Authentication authentication
   ) {
     try {
-      Usuario usuario = servicioUsuario.obtenerUsuarioPorEmail(usuarioLogueado.getUsername());
+      String email = AuthenticationUtils.obtenerEmailDeAutenticacion(authentication);
+      Usuario usuario = servicioUsuario.obtenerUsuarioPorEmail(email);
       ValidacionHelper.validarId(timerId);
       ValidacionHelper.validarId(categoryId);
       ValidacionHelper.validarCantidad(cantidad);
@@ -182,6 +184,17 @@ public class ControladorDashboard {
       return ResponseEntity.badRequest().build();
     } catch (ValidacionException e) {
       return ResponseEntity.notFound().build();
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+  }
+
+  @GetMapping("/api/timers/activos")
+  @ResponseBody
+  public ResponseEntity<List<TimerDTO>> obtenerTodosLosTimersActivos() {
+    try {
+      List<TimerDTO> timers = servicioTimer.obtenerTimersConFiltro(EstadoTimer.ACTIVO, null);
+      return ResponseEntity.ok(timers);
     } catch (Exception e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }

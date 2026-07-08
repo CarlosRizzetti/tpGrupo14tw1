@@ -28,6 +28,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.servlet.ModelAndView;
@@ -40,7 +41,7 @@ public class ControladorDashboardTest {
   private ServicioProducto servicioProductoMock;
 
   private ServicioUsuario servicioUsuarioMock;
-  User user;
+  Authentication authenticationMock;
   Usuario usuarioTest;
 
   @BeforeEach
@@ -49,12 +50,18 @@ public class ControladorDashboardTest {
     this.servicioTimerMock = mock(ServicioTimer.class);
     this.servicioProductoMock = mock(ServicioProducto.class);
     this.servicioUsuarioMock = mock(ServicioUsuario.class);
+    this.authenticationMock = mock(Authentication.class);
     controladorDashboard =
       new ControladorDashboard(servicioTimerMock, servicioProductoMock, servicioUsuarioMock);
-    user =
-      new User("user", "asd", Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN")));
+
+    User user = new User(
+      "user",
+      "asd",
+      Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"))
+    );
     usuarioTest = new Usuario();
     when(servicioUsuarioMock.obtenerUsuarioPorEmail(any())).thenReturn(usuarioTest);
+    when(authenticationMock.getPrincipal()).thenReturn(user);
   }
 
   private Timer buildTimerConProducto(Long timerId, Long productoId) {
@@ -125,7 +132,7 @@ public class ControladorDashboardTest {
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
     when(servicioTimerMock.renovarTimer(timer, 1, usuarioTest)).thenReturn(nuevoTimer);
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1, user);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1, authenticationMock);
 
     assertEquals(HttpStatus.OK, respuesta.getStatusCode());
     assertNotNull(respuesta.getBody());
@@ -140,7 +147,7 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NP-01 | renovarTimer | Id nulo retorna 400")
   void renovarTimer_conIdNulo_deberiaRetornar400() {
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(null, 1, user);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(null, 1, authenticationMock);
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
     Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
@@ -150,7 +157,7 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("NP-02 | renovarTimer | Id negativo retorna 400")
   void renovarTimer_conIdNegativo_deberiaRetornar400() {
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(-1L, 1, user);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(-1L, 1, authenticationMock);
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
     Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
@@ -162,7 +169,7 @@ public class ControladorDashboardTest {
   void renovarTimer_timerNoEncontrado_deberiaRetornar500() {
     when(servicioTimerMock.buscarPorId(1L)).thenThrow(new RuntimeException("Timer no encontrado"));
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1, user);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1, authenticationMock);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
     Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
@@ -178,7 +185,7 @@ public class ControladorDashboardTest {
     when(servicioTimerMock.renovarTimer(timer, 1, usuarioTest))
       .thenThrow(new RuntimeException("Error al generar vencimiento"));
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1, user);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1, authenticationMock);
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
   }
@@ -186,7 +193,7 @@ public class ControladorDashboardTest {
   @Test
   @DisplayName("EC-01 | renovarTimer | Id cero retorna 400")
   void renovarTimer_conIdCero_deberiaRetornar400() {
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(0L, 1, user);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(0L, 1, authenticationMock);
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
   }
@@ -200,7 +207,7 @@ public class ControladorDashboardTest {
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
     when(servicioTimerMock.renovarTimer(timer, 1, usuarioTest)).thenReturn(nuevoTimer);
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1, user);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1, authenticationMock);
 
     assertEquals(HttpStatus.OK, respuesta.getStatusCode());
   }
@@ -217,7 +224,7 @@ public class ControladorDashboardTest {
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
     when(servicioTimerMock.renovarTimer(timer, 1, usuarioTest)).thenReturn(nuevoTimer);
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1, user);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(1L, 1, authenticationMock);
 
     assertEquals(HttpStatus.OK, respuesta.getStatusCode());
     Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
@@ -231,7 +238,11 @@ public class ControladorDashboardTest {
     when(servicioTimerMock.buscarPorId(Long.MAX_VALUE))
       .thenThrow(new RuntimeException("Timer no encontrado"));
 
-    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(Long.MAX_VALUE, 1, user);
+    ResponseEntity<?> respuesta = controladorDashboard.renovarTimer(
+      Long.MAX_VALUE,
+      1,
+      authenticationMock
+    );
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
     Map<String, Object> body = (Map<String, Object>) respuesta.getBody();
@@ -251,7 +262,7 @@ public class ControladorDashboardTest {
       99L,
       1,
       sessionMock,
-      user
+      authenticationMock
     );
 
     assertEquals(HttpStatus.OK, respuesta.getStatusCode());
@@ -269,7 +280,7 @@ public class ControladorDashboardTest {
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
 
-    controladorDashboard.importarTimer(1L, 99L, 1, sessionMock, user);
+    controladorDashboard.importarTimer(1L, 99L, 1, sessionMock, authenticationMock);
 
     verify(servicioTimerMock).importarTimer(1L, 99L, 1, usuarioTest);
   }
@@ -282,7 +293,7 @@ public class ControladorDashboardTest {
       99L,
       1,
       sessionMock,
-      user
+      authenticationMock
     );
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
@@ -297,7 +308,7 @@ public class ControladorDashboardTest {
       -1L,
       1,
       sessionMock,
-      user
+      authenticationMock
     );
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
@@ -315,7 +326,7 @@ public class ControladorDashboardTest {
       99L,
       1,
       sessionMock,
-      user
+      authenticationMock
     );
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
@@ -333,7 +344,7 @@ public class ControladorDashboardTest {
       99L,
       1,
       sessionMock,
-      user
+      authenticationMock
     );
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
@@ -352,7 +363,7 @@ public class ControladorDashboardTest {
       99L,
       1,
       sessionMock,
-      user
+      authenticationMock
     );
 
     assertEquals(HttpStatus.BAD_REQUEST, respuesta.getStatusCode());
@@ -374,7 +385,7 @@ public class ControladorDashboardTest {
       99L,
       1,
       sessionMock,
-      user
+      authenticationMock
     );
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());
@@ -397,7 +408,7 @@ public class ControladorDashboardTest {
       99L,
       1,
       sessionMock,
-      user
+      authenticationMock
     );
 
     assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, respuesta.getStatusCode());

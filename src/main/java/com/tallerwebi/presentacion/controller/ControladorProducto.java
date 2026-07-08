@@ -8,6 +8,7 @@ import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
+import com.tallerwebi.dominio.utils.AuthenticationUtils;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.List;
@@ -15,8 +16,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -154,11 +154,12 @@ public class ControladorProducto {
     @RequestParam(name = "categoryId", required = false) Long categoryId,
     @RequestParam(name = "reglaId") Long reglaId,
     @RequestParam(name = "cantidad") Integer cantidad,
-    @AuthenticationPrincipal User usuarioLogueado
+    Authentication authentication
   ) {
+    String email = AuthenticationUtils.obtenerEmailDeAutenticacion(authentication);
     Producto producto = servicioProducto.obtenerProductoConReglas(id);
     Categoria categoria = determinarCategoria(producto, categoryId);
-    Usuario usuario = servicioUsuario.obtenerUsuarioPorEmail(usuarioLogueado.getUsername());
+    Usuario usuario = servicioUsuario.obtenerUsuarioPorEmail(email);
     servicioReglaVencimiento.generarVencimiento(
       producto,
       categoria,

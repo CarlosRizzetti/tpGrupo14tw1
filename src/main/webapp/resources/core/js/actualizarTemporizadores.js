@@ -19,9 +19,14 @@ class DashboardTimer {
     setInterval(() => this.actualizarTodos(), 1000);
     this.actualizarTodos();
 
+    // Solicitar permiso de notificaciones nativas del navegador (HTML5 Web Notifications API).
+    if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+      Notification.requestPermission();
+    }
+
     //Modal notificación
     const closeBtn = document.getElementById("cerrarNotificacion");
-    if (closeBtn) {
+    if (closeBtn && this.modal) {
       closeBtn.addEventListener("click", () => this.modal.classList.add("hidden"));
     }
   }
@@ -136,9 +141,16 @@ class DashboardTimer {
 
     this.alertaSonido.play().catch(() => console.log("Interacción requerida para audio"));
 
-    this.notifNombre.textContent = nombre;
-    this.notifLoc.textContent = ubicacion;
-    this.modal.classList.remove("hidden");
+    if (this.notifNombre) this.notifNombre.textContent = nombre;
+    if (this.notifLoc) this.notifLoc.textContent = ubicacion;
+    if (this.modal) this.modal.classList.remove("hidden");
+
+    // Esto generará una alerta visual en la esquina inferior o superior de la pantalla del usuario independientemente de qué pestaña esté mirando.
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("¡Timer a punto de vencer!", {
+        body: `El producto "${nombre}" en "${ubicacion}" esta por vencer.`,
+      });
+    }
 
     sessionStorage.setItem("notificados", JSON.stringify([...this.notificados]));
     this.notificados.add(id);

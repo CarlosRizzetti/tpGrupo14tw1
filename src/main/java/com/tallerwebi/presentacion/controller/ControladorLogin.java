@@ -8,24 +8,29 @@ import com.tallerwebi.dominio.interfaces.ServicioLogin;
 import com.tallerwebi.dominio.interfaces.ServicioValidacionIdentidad;
 import com.tallerwebi.presentacion.dto.LoginDto;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 public class ControladorLogin {
 
   private static final String ERROR = "error";
+  private static final String VISTA_LOGIN = "loginYRegistro/login";
   private static final String VISTA_NUEVO_USUARIO = "loginYRegistro/nuevo-usuario";
   private static final String REDIRECT_VALIDACION = "redirect:/validacion-identidad";
   private final ServicioLogin servicioLogin;
   private final ServicioValidacionIdentidad servicioValidacionIdentidad;
+
+  @Value("${recaptcha.site-key}")
+  private String recaptchaSiteKey;
 
   @Autowired
   public ControladorLogin(
@@ -46,10 +51,7 @@ public class ControladorLogin {
 
   @RequestMapping("/login")
   public ModelAndView login(
-    @org.springframework.web.bind.annotation.RequestParam(
-      value = "error",
-      required = false
-    ) String errorParam,
+    @RequestParam(value = "error", required = false) String errorParam,
     HttpServletRequest request
   ) {
     ModelMap modelo = new ModelMap();
@@ -58,15 +60,33 @@ public class ControladorLogin {
         .getSession()
         .getAttribute("SPRING_SECURITY_LAST_EXCEPTION");
       if (exception != null) {
-        modelo.put(ERROR, exception.getMessage());
-      } else {
         modelo.put(ERROR, "Usuario o clave incorrecta");
       }
     }
     modelo.put("loginDto", new LoginDto());
-    return new ModelAndView("loginYRegistro/login", modelo);
+    modelo.put("recaptchaSiteKey", recaptchaSiteKey);
+    return new ModelAndView(VISTA_LOGIN, modelo);
   }
 
+  @RequestMapping("/login-oauth")
+  public ModelAndView loginOauth(
+    @RequestParam(value = "pendiente", required = false) String pendiente,
+    @RequestParam(value = "sinCategorias", required = false) String sinCategorias
+  ) {
+    ModelMap modelo = new ModelMap();
+    if (pendiente != null) {
+      modelo.put(ERROR, "Tu cuenta está pendiente de activación");
+    }
+    if (sinCategorias != null) {
+      modelo.put(ERROR, "Todavía no te asignaron una categoría");
+    }
+    modelo.put("loginDto", new LoginDto());
+    modelo.put("recaptchaSiteKey", recaptchaSiteKey);
+    return new ModelAndView(VISTA_LOGIN, modelo);
+  }
+
+  // Código muerto
+  @Deprecated
   @RequestMapping(path = "/validar-login", method = RequestMethod.POST)
   public ModelAndView validarLogin(
     @ModelAttribute("loginDto") LoginDto loginDto,
@@ -84,21 +104,15 @@ public class ControladorLogin {
       } else {
         ModelMap model = new ModelMap();
         model.put(ERROR, "Usuario o clave incorrecta");
-        return new ModelAndView("loginYRegistro/login", model);
+        return new ModelAndView(VISTA_LOGIN, model);
       }
     } catch (UsuarioInactivo e) {
       ModelMap model = new ModelMap();
       model.put(ERROR, "El usuario está inactivo");
-      return new ModelAndView("loginYRegistro/login", model);
+      return new ModelAndView(VISTA_LOGIN, model);
     } catch (PasswordInvalida e) {
       throw new RuntimeException(e);
     }
-  }
-
-  @RequestMapping(path = "/logout", method = RequestMethod.GET)
-  public ModelAndView logout(HttpSession session) {
-    session.invalidate();
-    return new ModelAndView("redirect:/");
   }
 
   @RequestMapping(path = "/registrarme", method = RequestMethod.POST)

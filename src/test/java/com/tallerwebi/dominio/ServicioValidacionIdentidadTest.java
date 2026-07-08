@@ -75,7 +75,7 @@ public class ServicioValidacionIdentidadTest {
     ArgumentCaptor<Usuario> captor = ArgumentCaptor.forClass(Usuario.class);
     verify(repositorioUsuarioMock, times(1)).modificar(captor.capture());
 
-    assertThat(captor.getValue().getEstado(), is(EstadoUsuario.ACTIVO));
+    assertThat(captor.getValue().getEstado(), is(EstadoUsuario.PENDIENTE));
     assertThat(captor.getValue().getTokenValidacion(), is(nullValue()));
   }
 
