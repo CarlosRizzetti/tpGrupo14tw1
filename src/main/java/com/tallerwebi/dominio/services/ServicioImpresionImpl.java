@@ -5,7 +5,7 @@ import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.interfaces.ServicioImpresion;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -25,10 +25,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class ServicioImpresionImpl implements ServicioImpresion {
 
-  private static final Logger logger = LoggerFactory.getLogger(ServicioImpresionImpl.class);
-
   @Value("${impresora.nombre:POS-58 11.3.0.1}")
   private String nombreImpresora;
+
+  private static final Logger log = LoggerFactory.getLogger(ServicioImpresionImpl.class);
 
   @Override
   public void imprimirTicketVencimiento(
@@ -41,8 +41,7 @@ public class ServicioImpresionImpl implements ServicioImpresion {
     try {
       PrintService impresora = buscarImpresora(nombreImpresora);
       if (impresora == null) {
-        logger.warn("Impresión omitida: No hay impresora disponible ({})", nombreImpresora);
-        return;
+        throw new ImpresionException("No se encontró la impresora con nombre " + nombreImpresora);
       }
 
       byte[] comandos = construirComandosEscPos(
@@ -77,38 +76,30 @@ public class ServicioImpresionImpl implements ServicioImpresion {
     // A. NOMBRE — centrado, tamaño doble
     buffer.write(CENTRADO);
     buffer.write(TEXTO_DOBLE);
-    buffer.write(
-      (producto.getNombre().toUpperCase(Locale.ROOT) + "\n").getBytes(StandardCharsets.UTF_8)
-    );
+    buffer.write((producto.getNombre().toUpperCase(Locale.ROOT) + "\n").getBytes(CHARSET));
 
     // B. UBICACIÓN — tamaño normal, negrita
     buffer.write(TEXTO_NORMAL);
     buffer.write(NEGRITA_ON);
     for (String linea : cortarTexto(regla.getUbicacion(), 30)) {
-      buffer.write(("(" + linea.trim() + ")\n").getBytes(StandardCharsets.UTF_8));
+      buffer.write(("(" + linea.trim() + ")\n").getBytes(CHARSET));
     }
     buffer.write(NEGRITA_OFF);
     buffer.write("--------------------------------\n".getBytes());
 
     // C. TIEMPOS — alineado izquierda
     buffer.write(IZQUIERDA);
-    buffer.write(
-      ("Retirado:   " + fechaElaboracion.format(formato) + "\n").getBytes(StandardCharsets.UTF_8)
-    );
+    buffer.write(("Retirado:   " + fechaElaboracion.format(formato) + "\n").getBytes(CHARSET));
 
     if (regla.getDescongelamientoMinutos() > 0) {
       buffer.write(
-        ("Descongela: " + fechaDescongelamiento.format(formato) + "\n").getBytes(
-            StandardCharsets.UTF_8
-          )
+        ("Descongela: " + fechaDescongelamiento.format(formato) + "\n").getBytes(CHARSET)
       );
     }
 
     // D. VENCIMIENTO — negrita
     buffer.write(NEGRITA_ON);
-    buffer.write(
-      ("Vencimiento:" + fechaVencimiento.format(formato) + "\n").getBytes(StandardCharsets.UTF_8)
-    );
+    buffer.write(("Vencimiento:" + fechaVencimiento.format(formato) + "\n").getBytes(CHARSET));
     buffer.write(NEGRITA_OFF);
 
     // Cierre
@@ -135,11 +126,11 @@ public class ServicioImpresionImpl implements ServicioImpresion {
         lineas.add(lineaActual.toString());
         lineaActual = new StringBuilder(palabra);
       } else {
-        if (!(lineaActual.length() > 0)) lineaActual.append(" ");
+        if (lineaActual.length() > 0) lineaActual.append(" ");
         lineaActual.append(palabra);
       }
     }
-    if (!(lineaActual.length() > 0)) {
+    if (lineaActual.length() > 0) {
       lineas.add(lineaActual.toString());
     }
     return lineas;
@@ -155,4 +146,6 @@ public class ServicioImpresionImpl implements ServicioImpresion {
   private static final byte[] NEGRITA_OFF = { 0x1B, 0x45, 0x00 };
   private static final byte[] AVANCE_3_LINEAS = { 0x1B, 0x64, 0x03 };
   private static final byte[] CORTE = { 0x1D, 0x56, 0x41, 0x00 };
+
+  private final Charset CHARSET = Charset.forName("CP437");
 }
