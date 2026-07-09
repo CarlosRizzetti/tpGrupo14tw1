@@ -18,11 +18,11 @@ public class ConsumoTimer {
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name = "detalle_pedido_ingrediente_id")
+  @JoinColumn(name = "detallePedidoIngredienteId")
   private DetallePedidoIngrediente detallePedidoIngrediente;
 
   @ManyToOne
-  @JoinColumn(name = "timer_id")
+  @JoinColumn(name = "timerId")
   private Timer timer;
 
   private Integer cantidadConsumida;
