@@ -18,6 +18,7 @@ public interface RepositorioTimer {
    */
   List<OffsetDateTime> obtenerFechasCreacionDesde(OffsetDateTime desde);
 
+  List<Timer> obtenerTimersActivosConStockPorProducto(Long productoId);
   /**
    * Conteo de vencimientos generados por producto desde la fecha indicada.
    *
