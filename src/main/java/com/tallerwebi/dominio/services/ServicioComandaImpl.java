@@ -13,11 +13,13 @@ import com.tallerwebi.dominio.excepcion.IngredientesNoDisponiblesException;
 import com.tallerwebi.dominio.interfaces.RepositorioComanda;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioComanda;
+import com.tallerwebi.presentacion.dto.ComandaCocinaDTO;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,6 +63,22 @@ public class ServicioComandaImpl implements ServicioComanda {
     ejecutarPlan(plan);
     finalizarPedido(comanda.getPedido());
     marcarComandaComoSacada(comanda);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<ComandaCocinaDTO> listarPendientesPorCategoria(Long idCategoria) {
+    return repositorioComanda
+      .listarPendientesPorCategoria(idCategoria)
+      .stream()
+      .map(ComandaCocinaDTO::new)
+      .collect(Collectors.toList());
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public int contarPendientesPorCategoria(Long idCategoria) {
+    return repositorioComanda.listarPendientesPorCategoria(idCategoria).size();
   }
 
   private List<DetallePedidoIngrediente> obtenerIngredientesDelPedido(Pedido pedido) {

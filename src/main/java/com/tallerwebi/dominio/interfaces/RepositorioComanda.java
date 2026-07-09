@@ -8,5 +8,7 @@ public interface RepositorioComanda {
 
   List<Comanda> listarPendientes();
 
+  List<Comanda> listarPendientesPorCategoria(Long idCategoria);
+
   void actualizar(Comanda comanda);
 }

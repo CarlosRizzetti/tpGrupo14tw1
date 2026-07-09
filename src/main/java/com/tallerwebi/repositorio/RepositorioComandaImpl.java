@@ -29,8 +29,28 @@ public class RepositorioComandaImpl implements RepositorioComanda {
   public List<Comanda> listarPendientes() {
     return sessionFactory
       .getCurrentSession()
-      .createQuery("from Comanda c where c.estado = :estado", Comanda.class)
+      .createQuery(
+        "from Comanda c where c.estado = :estado order by c.pedido.horaCobro asc",
+        Comanda.class
+      )
       .setParameter("estado", EstadoComanda.PENDIENTE)
+      .list();
+  }
+
+  @Override
+  public List<Comanda> listarPendientesPorCategoria(Long idCategoria) {
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery(
+        "select distinct c from Comanda c " +
+        "join c.pedido.detalles d " +
+        "join d.productoFinal.categorias cat " +
+        "where c.estado = :estado and cat.id = :idCategoria " +
+        "order by c.id asc",
+        Comanda.class
+      )
+      .setParameter("estado", EstadoComanda.PENDIENTE)
+      .setParameter("idCategoria", idCategoria)
       .list();
   }
 
