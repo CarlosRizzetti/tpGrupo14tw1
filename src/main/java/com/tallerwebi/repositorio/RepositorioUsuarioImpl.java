@@ -67,6 +67,21 @@ public class RepositorioUsuarioImpl implements RepositorioUsuario {
   }
 
   @Override
+  public List<Usuario> listarLosUsuariosDeLasCategorias(Long categoriaId) {
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery(
+        "SELECT DISTINCT u " +
+        "FROM Usuario u " +
+        "JOIN u.categorias c " +
+        "WHERE c.id = :categoriaId",
+        Usuario.class
+      )
+      .setParameter("categoriaId", categoriaId)
+      .list();
+  }
+
+  @Override
   public Usuario obtenerPorId(Long id) {
     return sessionFactory.getCurrentSession().get(Usuario.class, id);
   }

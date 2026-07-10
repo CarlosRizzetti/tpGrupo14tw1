@@ -93,7 +93,9 @@ function dispararNotificacionGlobal(timer, notificados) {
   try {
     const audio = new Audio("/sounds/alert.mp3");
     audio.play().catch(() => {}); // Si falla (ej. por falta de archivo 404 o política de autoplay), se ignora
-  } catch (e) {}
+  } catch (e) {
+    // Ignorado intencionalmente si el audio no puede reproducirse
+  }
   
   // 3. Mostrar el modal visual en pantalla si la página actual cuenta con el fragmento HTML del modal
   const modal = document.getElementById("notificacion-modal");

@@ -113,7 +113,8 @@
 
                 <div class="grid grid-cols-3 h-20 border-t border-gray-100 flex-none">
 
-                    <button type="button"
+                    <button th:if="${tieneCategoriaAsignada or isAdmin}"
+                            type="button"
                             th:data-action="delete"
                             th:data-timer-id="${timer.id}"
                             th:data-category-id="${categoria.id}"
@@ -124,7 +125,8 @@
                         <span class="text-[10px] font-black uppercase tracking-wider">Eliminar</span>
                     </button>
 
-                    <button type="button"
+                    <button th:unless="${tieneCategoriaAsignada and !isAdmin}"
+                            type="button"
                             th:data-action="import"
                             th:data-timer-id="${timer.id}"
                             th:data-product-name="${timer.nombre}"
@@ -137,7 +139,8 @@
                         <span class="text-[10px] font-black uppercase tracking-wider">Importar</span>
                     </button>
 
-                    <button type="button"
+                    <button th:if="${tieneCategoriaAsignada or isAdmin}"
+                            type="button"
                             th:data-action="renew"
                             th:data-timer-id="${timer.id}"
                             th:data-category-id="${categoria.id}"

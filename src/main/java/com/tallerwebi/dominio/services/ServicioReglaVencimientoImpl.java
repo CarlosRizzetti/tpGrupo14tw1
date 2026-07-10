@@ -10,6 +10,7 @@ import com.tallerwebi.dominio.interfaces.RepositorioReglaVencimiento;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioControlStock;
 import com.tallerwebi.dominio.interfaces.ServicioImpresion;
+import com.tallerwebi.dominio.interfaces.ServicioProduccion;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
 import com.tallerwebi.dominio.utils.ImpresionHelper;
@@ -32,6 +33,7 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
   private final ServicioControlStock servicioControlStock;
   private final Clock clock;
   private final ServicioImpresion servicioImpresion;
+  private final ServicioProduccion servicioProduccion;
 
   @Autowired
   public ServicioReglaVencimientoImpl(
@@ -40,7 +42,8 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
     ServicioProducto servicioProducto,
     ServicioControlStock servicioControlStock,
     Clock clock,
-    ServicioImpresion servicioImpresion
+    ServicioImpresion servicioImpresion,
+    ServicioProduccion servicioProduccion
   ) {
     this.repositorioReglaVencimiento = repositorioReglaVencimiento;
     this.repositorioTimer = repositorioTimer;
@@ -48,6 +51,7 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
     this.servicioControlStock = servicioControlStock;
     this.clock = clock;
     this.servicioImpresion = servicioImpresion;
+    this.servicioProduccion = servicioProduccion;
   }
 
   @Override
@@ -88,6 +92,8 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
       cantidadUsada,
       TipoMovimientoStock.EGRESO
     );
+
+    servicioProduccion.procesarProduccion(producto, timer, cantidadUsada);
 
     ImpresionHelper.intentarImpresionDeVencimiento(timer, servicioImpresion);
 

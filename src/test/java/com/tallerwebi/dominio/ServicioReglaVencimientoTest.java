@@ -25,6 +25,7 @@ public class ServicioReglaVencimientoTest {
   private ServicioControlStock servicioControlStockMock;
   private Clock clock;
   private ServicioImpresion servicioImpresionMock;
+  private ServicioProduccion servicioProduccionMock;
 
   @BeforeEach
   public void init() {
@@ -34,6 +35,7 @@ public class ServicioReglaVencimientoTest {
     servicioProductoMock = mock(ServicioProducto.class);
     servicioControlStockMock = mock(ServicioControlStock.class);
     servicioImpresionMock = mock(ServicioImpresion.class);
+    servicioProduccionMock = mock(ServicioProduccion.class);
     servicioReglaVencimiento =
       new ServicioReglaVencimientoImpl(
         repositorioReglaVencimientoMock,
@@ -41,7 +43,8 @@ public class ServicioReglaVencimientoTest {
         servicioProductoMock,
         servicioControlStockMock,
         clock,
-        servicioImpresionMock
+        servicioImpresionMock,
+        servicioProduccionMock
       );
   }
 

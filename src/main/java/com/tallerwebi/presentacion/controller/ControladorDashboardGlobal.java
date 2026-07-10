@@ -32,7 +32,9 @@ public class ControladorDashboardGlobal {
   }
 
   @GetMapping("/dashboard/global")
-  public ModelAndView dashboardGlobal() {
+  public ModelAndView dashboardGlobal(
+    org.springframework.security.core.Authentication authentication
+  ) {
     try {
       ModelAndView mav = new ModelAndView("dashboard/global");
 
@@ -55,8 +57,26 @@ public class ControladorDashboardGlobal {
         .stream()
         .anyMatch(timers -> timers != null && !timers.isEmpty());
 
+      boolean isAdmin =
+        authentication != null &&
+        authentication.isAuthenticated() &&
+        authentication
+          .getAuthorities()
+          .stream()
+          .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+      List<Long> categoriasAsignadasIds = new java.util.ArrayList<>();
+      if (authentication != null && authentication.isAuthenticated()) {
+        String email = authentication.getName();
+        List<CategoriaDto> categoriasUsuario = servicioCategoria.obtenerCategoriasPorUsuario(email);
+        for (CategoriaDto c : categoriasUsuario) {
+          categoriasAsignadasIds.add(c.getId());
+        }
+      }
+
       mav.addObject("categorias", categorias);
       mav.addObject("timersPorCategoria", timersPorCategoria); // 👈 SIEMPRE
+      mav.addObject("categoriasAsignadasIds", categoriasAsignadasIds);
+      mav.addObject("isAdmin", isAdmin);
 
       if (!anyTimers) {
         mav.addObject("error", "No hay timers activos");

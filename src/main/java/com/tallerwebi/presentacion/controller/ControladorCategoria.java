@@ -29,22 +29,13 @@ public class ControladorCategoria {
       String email = authentication.getName();
       mav.addObject("userEmail", email);
 
-      boolean isAdmin = authentication
-        .getAuthorities()
-        .stream()
-        .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
-
-      if (isAdmin) {
-        categorias = this.servicioCategoria.obtenerLasCategoriasParaElMenu();
-      } else {
-        categorias = this.servicioCategoria.obtenerCategoriasPorUsuario(authentication.getName());
-      }
+      categorias = this.servicioCategoria.obtenerLasCategoriasParaElMenu();
     } else {
       categorias = new ArrayList<>();
     }
 
     if (categorias == null || categorias.isEmpty()) {
-      mav.addObject("mensajeVacio", "Todavía no te asignaron una categoría");
+      mav.addObject("mensajeVacio", "No hay categorías disponibles");
     }
 
     mav.addObject("categorias", categorias);

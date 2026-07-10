@@ -53,4 +53,13 @@ public class ServicioCategoriaImpl implements ServicioCategoria {
     }
     return new ArrayList<>();
   }
+
+  @Override
+  public List<Usuario> obtenerUsuariosPorCategoria(Long categoriaId) {
+    List<Usuario> usuarios = repositorioUsuario.listarLosUsuariosDeLasCategorias(categoriaId);
+    if (usuarios != null) {
+      return usuarios;
+    }
+    return new ArrayList<>();
+  }
 }
