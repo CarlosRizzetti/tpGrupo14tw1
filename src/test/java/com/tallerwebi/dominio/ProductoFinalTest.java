@@ -18,14 +18,8 @@ public class ProductoFinalTest {
     pf.setNombre("Milanesa");
     pf.setPrecio(BigDecimal.valueOf(1500));
 
-    Receta receta = new Receta();
-    receta.setId(5L);
-    pf.setReceta(receta);
-
     assertThat(pf.getId(), equalTo(10L));
     assertThat(pf.getNombre(), equalTo("Milanesa"));
     assertThat(pf.getPrecio(), equalTo(BigDecimal.valueOf(1500)));
-    assertThat(pf.getReceta(), notNullValue());
-    assertThat(pf.getReceta().getId(), equalTo(5L));
   }
 }

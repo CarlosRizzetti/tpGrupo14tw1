@@ -31,93 +31,93 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 @ContextConfiguration(classes = { HibernateInfraestructuraTestConfig.class })
 public class RepositorioComandaTest {
 
-    @Autowired
-    private SessionFactory sessionFactory;
+  @Autowired
+  private SessionFactory sessionFactory;
 
-    private RepositorioComanda repositorioComanda;
+  private RepositorioComanda repositorioComanda;
 
-    @BeforeEach
-    public void init() {
-        repositorioComanda = new RepositorioComandaImpl(sessionFactory);
-    }
+  @BeforeEach
+  public void init() {
+    repositorioComanda = new RepositorioComandaImpl(sessionFactory);
+  }
 
-    @Test
-    @Transactional
-    @Rollback
-    public void queSePuedaGuardarYBuscarComanda() {
-        Comanda comanda = new Comanda();
-        comanda.setEstado(EstadoComanda.PENDIENTE);
-        
-        sessionFactory.getCurrentSession().save(comanda);
-        
-        Comanda obtenida = repositorioComanda.buscarPorId(comanda.getId());
-        
-        assertThat(obtenida, notNullValue());
-        assertThat(obtenida.getEstado(), equalTo(EstadoComanda.PENDIENTE));
-    }
+  @Test
+  @Transactional
+  @Rollback
+  public void queSePuedaGuardarYBuscarComanda() {
+    Comanda comanda = new Comanda();
+    comanda.setEstado(EstadoComanda.PENDIENTE);
 
-    @Test
-    @Transactional
-    @Rollback
-    public void queSePuedaListarComandasPendientes() {
-        Pedido pedido = new Pedido();
-        pedido.setHoraCobro(OffsetDateTime.now());
-        sessionFactory.getCurrentSession().save(pedido);
+    sessionFactory.getCurrentSession().save(comanda);
 
-        Comanda comanda = new Comanda();
-        comanda.setEstado(EstadoComanda.PENDIENTE);
-        comanda.setPedido(pedido);
-        sessionFactory.getCurrentSession().save(comanda);
+    Comanda obtenida = repositorioComanda.buscarPorId(comanda.getId());
 
-        List<Comanda> pendientes = repositorioComanda.listarPendientes();
-        
-        assertThat(pendientes.size(), is(1));
-    }
+    assertThat(obtenida, notNullValue());
+    assertThat(obtenida.getEstado(), equalTo(EstadoComanda.PENDIENTE));
+  }
 
-    @Test
-    @Transactional
-    @Rollback
-    public void queSePuedaListarPendientesPorCategoria() {
-        Categoria cat = new Categoria();
-        cat.setNombre("Cocina");
-        sessionFactory.getCurrentSession().save(cat);
-        
-        ProductoFinal pf = new ProductoFinal();
-        pf.setNombre("Papas");
-        pf.setCategorias(new HashSet<>(Arrays.asList(cat)));
-        sessionFactory.getCurrentSession().save(pf);
-        
-        Pedido pedido = new Pedido();
-        pedido.setHoraCobro(OffsetDateTime.now());
-        sessionFactory.getCurrentSession().save(pedido);
-        
-        DetallePedido detalle = new DetallePedido();
-        detalle.setPedido(pedido);
-        detalle.setProductoFinal(pf);
-        sessionFactory.getCurrentSession().save(detalle);
-        
-        Comanda comanda = new Comanda();
-        comanda.setEstado(EstadoComanda.PENDIENTE);
-        comanda.setPedido(pedido);
-        sessionFactory.getCurrentSession().save(comanda);
-        
-        List<Comanda> pendientes = repositorioComanda.listarPendientesPorCategoria(cat.getId());
-        
-        assertThat(pendientes.size(), is(1));
-    }
+  @Test
+  @Transactional
+  @Rollback
+  public void queSePuedaListarComandasPendientes() {
+    Pedido pedido = new Pedido();
+    pedido.setHoraCobro(OffsetDateTime.now());
+    sessionFactory.getCurrentSession().save(pedido);
 
-    @Test
-    @Transactional
-    @Rollback
-    public void queSePuedaActualizarComanda() {
-        Comanda comanda = new Comanda();
-        comanda.setEstado(EstadoComanda.PENDIENTE);
-        sessionFactory.getCurrentSession().save(comanda);
-        
-        comanda.setEstado(EstadoComanda.COMPLETADA);
-        repositorioComanda.actualizar(comanda);
-        
-        Comanda obtenida = repositorioComanda.buscarPorId(comanda.getId());
-        assertThat(obtenida.getEstado(), equalTo(EstadoComanda.COMPLETADA));
-    }
+    Comanda comanda = new Comanda();
+    comanda.setEstado(EstadoComanda.PENDIENTE);
+    comanda.setPedido(pedido);
+    sessionFactory.getCurrentSession().save(comanda);
+
+    List<Comanda> pendientes = repositorioComanda.listarPendientes();
+
+    assertThat(pendientes.size(), is(1));
+  }
+
+  @Test
+  @Transactional
+  @Rollback
+  public void queSePuedaListarPendientesPorCategoria() {
+    Categoria cat = new Categoria();
+    cat.setNombre("Cocina");
+    sessionFactory.getCurrentSession().save(cat);
+
+    ProductoFinal pf = new ProductoFinal();
+    pf.setNombre("Papas");
+    pf.setCategorias(new HashSet<>(Arrays.asList(cat)));
+    sessionFactory.getCurrentSession().save(pf);
+
+    Pedido pedido = new Pedido();
+    pedido.setHoraCobro(OffsetDateTime.now());
+    sessionFactory.getCurrentSession().save(pedido);
+
+    DetallePedido detalle = new DetallePedido();
+    detalle.setPedido(pedido);
+    detalle.setProductoFinal(pf);
+    sessionFactory.getCurrentSession().save(detalle);
+
+    Comanda comanda = new Comanda();
+    comanda.setEstado(EstadoComanda.PENDIENTE);
+    comanda.setPedido(pedido);
+    sessionFactory.getCurrentSession().save(comanda);
+
+    List<Comanda> pendientes = repositorioComanda.listarPendientesPorCategoria(cat.getId());
+
+    assertThat(pendientes.size(), is(1));
+  }
+
+  @Test
+  @Transactional
+  @Rollback
+  public void queSePuedaActualizarComanda() {
+    Comanda comanda = new Comanda();
+    comanda.setEstado(EstadoComanda.PENDIENTE);
+    sessionFactory.getCurrentSession().save(comanda);
+
+    comanda.setEstado(EstadoComanda.SACADA);
+    repositorioComanda.actualizar(comanda);
+
+    Comanda obtenida = repositorioComanda.buscarPorId(comanda.getId());
+    assertThat(obtenida.getEstado(), equalTo(EstadoComanda.SACADA));
+  }
 }
