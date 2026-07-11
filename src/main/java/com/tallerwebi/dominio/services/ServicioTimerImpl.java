@@ -92,6 +92,31 @@ public class ServicioTimerImpl implements ServicioTimer {
   }
 
   @Override
+  public void descontarStock(Long timerId, Integer cantidad) {
+    Timer timer = repositorioTimer.buscarPorId(timerId);
+    ValidacionHelper.queNoSeaNull(timer, TIMER);
+
+    if (cantidad == null || cantidad <= 0) {
+      throw new CantidadInvalidaException("La cantidad a descontar debe ser positiva");
+    }
+    if (cantidad > timer.getCantidadProducto()) {
+      throw new CantidadInvalidaException(
+        "No se puede descontar más stock del disponible en el timer"
+      );
+    }
+
+    int restante = timer.getCantidadProducto() - cantidad;
+    timer.setCantidadProducto(restante);
+
+    // Si el timer se agotó, transiciona a ELIMINADO (sale del pool de activos)
+    if (restante == 0) {
+      timer.setEstado(EstadoTimer.CONSUMIDO);
+    }
+
+    repositorioTimer.guardar(timer);
+  }
+
+  @Override
   public CategoriaDto importarTimer(
     Long timerId,
     Long categoriaId,

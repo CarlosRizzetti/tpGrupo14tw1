@@ -96,7 +96,6 @@ public class ControladorCajeroApi {
     return respuesta;
   }
 
-  // POST /api/cajero/cobrar?documento=40123456 -> ejecuta el cobro y devuelve el ID del pedido
   @PostMapping("/cobrar")
   public ResponseEntity<Map<String, Object>> cobrar(
     @RequestParam(required = false) String documento,
