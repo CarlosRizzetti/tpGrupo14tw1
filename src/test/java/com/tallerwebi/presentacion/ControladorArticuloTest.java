@@ -142,4 +142,49 @@ public class ControladorArticuloTest {
     assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/admin"));
     verify(servicioArticuloMock, times(1)).registrarArticulo(articulo);
   }
+
+  @Test
+  public void mostrarFormularioDescontarStockDeberiaRetornarVistaYListaDeArticulos() {
+    // preparacion
+    List<Articulos> esperados = Collections.singletonList(new Articulos());
+    when(servicioArticuloMock.obtenerTodosLosArticulos()).thenReturn(esperados);
+
+    // ejecucion
+    ModelAndView mav = controladorArticulo.mostrarFormularioDescontarStock();
+
+    // validacion
+    assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/articulos-descontar"));
+    assertThat(mav.getModel().get("articulos"), equalTo(esperados));
+  }
+
+  @Test
+  public void descontarStockExitosoDeberiaLlamarAlServicioYRedirigirConExito() {
+    // ejecucion
+    ModelAndView mav = controladorArticulo.descontarStock(1L, 5.0);
+
+    // validacion
+    assertThat(
+      mav.getViewName(),
+      equalToIgnoringCase("redirect:/admin/articulos/descontar?exito=true")
+    );
+    verify(servicioArticuloMock, times(1)).descontarStock(1L, 5.0);
+  }
+
+  @Test
+  public void descontarStockConErrorDeberiaRetornarVistaConMensajeDeError() {
+    // preparacion
+    List<Articulos> esperados = Collections.singletonList(new Articulos());
+    when(servicioArticuloMock.obtenerTodosLosArticulos()).thenReturn(esperados);
+    doThrow(new IllegalArgumentException("Stock insuficiente"))
+      .when(servicioArticuloMock)
+      .descontarStock(1L, 10.0);
+
+    // ejecucion
+    ModelAndView mav = controladorArticulo.descontarStock(1L, 10.0);
+
+    // validacion
+    assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/articulos-descontar"));
+    assertThat(mav.getModel().get("articulos"), equalTo(esperados));
+    assertThat(mav.getModel().get("error"), equalTo("Stock insuficiente"));
+  }
 }

@@ -1,5 +1,5 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, _, _)}">
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, _, ~{::scripts})}">
 <head>
   <title>Categorías</title>
 </head>
@@ -90,6 +90,7 @@
        </div>
      </div>
      </body>
+<th:block th:fragment="scripts">
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         var btn = document.getElementById('profileBtn');
@@ -108,4 +109,5 @@
         });
     });
 </script>
+</th:block>
      </html>

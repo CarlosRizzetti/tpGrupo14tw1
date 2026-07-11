@@ -3,7 +3,10 @@ package com.tallerwebi.presentacion;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
+import com.tallerwebi.dominio.interfaces.ServicioArticulo;
 import com.tallerwebi.presentacion.controller.ControladorAdminPanel;
+import com.tallerwebi.presentacion.dto.NotificacionVencimientoDto;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,10 +18,12 @@ public class ControladorAdminPanelTest {
 
   private ControladorAdminPanel controlador;
   private Authentication authenticationMock;
+  private ServicioArticulo servicioArticuloMock;
 
   @BeforeEach
   public void init() {
-    controlador = new ControladorAdminPanel();
+    servicioArticuloMock = mock(ServicioArticulo.class);
+    controlador = new ControladorAdminPanel(servicioArticuloMock);
     authenticationMock = mock(Authentication.class);
   }
 
@@ -61,10 +66,16 @@ public class ControladorAdminPanelTest {
       .when(authenticationMock)
       .getAuthorities();
 
+    List<NotificacionVencimientoDto> notificacionesMock = Collections.singletonList(
+      new NotificacionVencimientoDto()
+    );
+    when(servicioArticuloMock.obtenerNotificacionesVencimiento()).thenReturn(notificacionesMock);
+
     ModelAndView mav = controlador.panelDeControl(authenticationMock);
 
     assertEquals("funcionalidadesAdmin/panel", mav.getViewName());
     assertEquals("admin@test.com", mav.getModel().get("email"));
+    assertEquals(notificacionesMock, mav.getModel().get("notificaciones"));
   }
 
   @Test

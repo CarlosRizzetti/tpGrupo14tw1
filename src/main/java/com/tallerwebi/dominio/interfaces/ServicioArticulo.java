@@ -9,4 +9,8 @@ public interface ServicioArticulo {
   Articulos buscarPorId(Long id);
   List<Articulos> buscarPorNombre(String nombre);
   List<com.tallerwebi.presentacion.dto.StockArticuloDto> obtenerStockAgrupado();
+  void descontarStock(Long id, Double cantidadADescontar);
+  java.util.List<
+    com.tallerwebi.presentacion.dto.NotificacionVencimientoDto
+  > obtenerNotificacionesVencimiento();
 }

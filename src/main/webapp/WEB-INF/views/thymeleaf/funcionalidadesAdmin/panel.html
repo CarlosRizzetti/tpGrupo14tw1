@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, _, _)}">
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, ~{::scripts}, _)}">
 <head>
     <title>Panel de Control - Administrador</title>
 </head>
@@ -19,7 +19,58 @@
     <span class="text-puesto-header-text font-bold uppercase tracking-widest">Panel de Control</span>
 </div>
 
-<div th:fragment="header_right"></div>
+<div th:fragment="header_right" class="relative">
+    <!-- Notification Bell Button -->
+    <button id="notificationBellBtn" class="relative p-2 text-white hover:bg-white/10 rounded-full transition focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+        <!-- Red Dot Badge -->
+        <span th:if="${notificaciones != null && !notificaciones.isEmpty()}" 
+              th:text="${#lists.size(notificaciones)}"
+              class="absolute -top-0.5 -right-0.5 flex items-center justify-center h-4 w-4 rounded-full bg-red-600 text-white font-black text-[9px] border border-white dark:border-gray-800 shadow">
+        </span>
+    </button>
+
+    <!-- Dropdown Menu -->
+    <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 py-2 z-50 overflow-hidden">
+        <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center">
+            <span class="font-bold text-gray-800 dark:text-white text-xs">Alertas de Vencimiento</span>
+            <span th:if="${notificaciones != null && !notificaciones.isEmpty()}" th:text="${#lists.size(notificaciones)} + ' lotes'" class="text-[10px] bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 font-bold px-2 py-0.5 rounded-full"></span>
+        </div>
+        <div class="max-h-64 overflow-y-auto">
+            <!-- Empty state -->
+            <div th:if="${notificaciones == null || notificaciones.isEmpty()}" class="px-4 py-6 text-center text-gray-500 dark:text-gray-400 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                No hay alertas de vencimiento.
+            </div>
+
+            <!-- List of notification items -->
+            <div th:unless="${notificaciones == null || notificaciones.isEmpty()}" th:each="notif : ${notificaciones}" 
+                 class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition flex items-start space-x-3 text-left">
+                
+                <!-- Icon colored by urgency -->
+                <div class="mt-1 flex-shrink-0">
+                    <span th:if="${notif.nivelUrgencia == 'ALTA'}" class="flex h-2.5 w-2.5 rounded-full bg-red-600 ring-4 ring-red-100 dark:ring-red-900/20"></span>
+                    <span th:if="${notif.nivelUrgencia == 'MEDIA'}" class="flex h-2.5 w-2.5 rounded-full bg-orange-500 ring-4 ring-orange-100 dark:ring-orange-950/20"></span>
+                    <span th:if="${notif.nivelUrgencia == 'BAJA'}" class="flex h-2.5 w-2.5 rounded-full bg-yellow-400 ring-4 ring-yellow-100 dark:ring-yellow-950/20"></span>
+                </div>
+
+                <div class="flex-grow min-w-0">
+                    <p class="text-xs font-bold text-gray-800 dark:text-white truncate" th:text="${notif.articulo.nombre}"></p>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400">
+                        Lote: <span class="font-medium" th:text="${notif.articulo.numeroDeLote}"></span> | Cant: <span class="font-medium" th:text="${notif.articulo.cantidad}"></span>
+                    </p>
+                    <p class="text-[10px] font-bold mt-0.5" 
+                       th:classappend="${notif.nivelUrgencia == 'ALTA' ? 'text-red-600 dark:text-red-400' : (notif.nivelUrgencia == 'MEDIA' ? 'text-orange-500 dark:text-orange-400' : 'text-yellow-600 dark:text-yellow-400')}"
+                       th:text="${notif.diasRestantes < 0 ? 'VENCIDO hace ' + (-notif.diasRestantes) + ' días' : (notif.diasRestantes == 0 ? 'Vence HOY' : (notif.diasRestantes == 1 ? 'Vence mañana' : 'Vence en ' + notif.diasRestantes + ' días'))}"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div th:fragment="content" class="p-6 max-w-7xl mx-auto">
 
@@ -141,8 +192,39 @@
             <p class="text-sm opacity-85 flex-grow">Gestiona las recetas e ingredientes de los productos para descontar stock.</p>
         </a>
 
+        <a th:href="@{/admin/articulos/descontar}"
+           class="group relative flex flex-col items-start p-6 bg-puesto-btn text-puesto-btn-text border-b-[8px] border-puesto-btn-border rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-200 hover:-translate-y-2 min-h-[200px]">
+            <div class="mb-4 bg-black/10 p-3 rounded-full w-max">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-8 w-8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-black mb-2 uppercase tracking-tighter">Descontar Stock</h3>
+            <p class="text-sm opacity-85 flex-grow">Reduce de forma manual la cantidad disponible de un artículo en el almacén.</p>
+        </a>
+
     </div>
 </div>
+
+<script th:fragment="scripts">
+    document.addEventListener('DOMContentLoaded', function() {
+        const bellBtn = document.getElementById('notificationBellBtn');
+        const dropdown = document.getElementById('notificationDropdown');
+
+        if (bellBtn && dropdown) {
+            bellBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target) && !bellBtn.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+        }
+    });
+</script>
 
 </body>
 </html>

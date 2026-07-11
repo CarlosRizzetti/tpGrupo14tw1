@@ -15,6 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 public class ControladorArticulo {
 
+  private static final String ARTICULOS = "articulos";
   private final ServicioArticulo servicioArticulo;
 
   @Autowired
@@ -28,9 +29,9 @@ public class ControladorArticulo {
     List<Articulos> articulos = servicioArticulo.obtenerTodosLosArticulos();
     List<com.tallerwebi.presentacion.dto.StockArticuloDto> stockArticulos =
       servicioArticulo.obtenerStockAgrupado();
-    modelo.put("articulos", articulos);
+    modelo.put(ARTICULOS, articulos);
     modelo.put("stockArticulos", stockArticulos);
-    return new ModelAndView("articulos", modelo);
+    return new ModelAndView(ARTICULOS, modelo);
   }
 
   @RequestMapping(path = "/admin/stock", method = RequestMethod.GET)
@@ -79,6 +80,31 @@ public class ControladorArticulo {
       modelo.put("articulo", articulo);
       modelo.put("error", "Error al registrar el articulo: " + e.getMessage());
       return new ModelAndView("nuevo-articulo", modelo);
+    }
+  }
+
+  @RequestMapping(path = "/admin/articulos/descontar", method = RequestMethod.GET)
+  public ModelAndView mostrarFormularioDescontarStock() {
+    ModelMap modelo = new ModelMap();
+    List<Articulos> articulos = servicioArticulo.obtenerTodosLosArticulos();
+    modelo.put(ARTICULOS, articulos);
+    return new ModelAndView("funcionalidadesAdmin/articulos-descontar", modelo);
+  }
+
+  @RequestMapping(path = "/admin/articulos/descontar", method = RequestMethod.POST)
+  public ModelAndView descontarStock(
+    @org.springframework.web.bind.annotation.RequestParam("id") Long id,
+    @org.springframework.web.bind.annotation.RequestParam("cantidad") Double cantidad
+  ) {
+    try {
+      servicioArticulo.descontarStock(id, cantidad);
+      return new ModelAndView("redirect:/admin/articulos/descontar?exito=true");
+    } catch (Exception e) {
+      ModelMap modelo = new ModelMap();
+      List<Articulos> articulos = servicioArticulo.obtenerTodosLosArticulos();
+      modelo.put(ARTICULOS, articulos);
+      modelo.put("error", e.getMessage());
+      return new ModelAndView("funcionalidadesAdmin/articulos-descontar", modelo);
     }
   }
 }
