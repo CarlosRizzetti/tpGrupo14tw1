@@ -10,5 +10,8 @@ public interface RepositorioUsuario {
   Usuario buscarPorTokenValidacion(String tokenValidacion);
   void modificar(Usuario usuario);
   List<Usuario> listarTodos();
+
+  List<Usuario> listarLosUsuariosDeLasCategorias(Long categoriaId);
+
   Usuario obtenerPorId(Long id);
 }

@@ -8,7 +8,7 @@ ENV TOMCAT_HOME=/opt/tomcat
 # Descarga y extrae Tomcat
 RUN apt-get update && apt-get install -y wget && \
     mkdir -p $TOMCAT_HOME && \
-    wget https://dlcdn.apache.org/tomcat/tomcat-9/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz && \
+    wget https://archive.apache.org/dist/tomcat/tomcat-9/v${TOMCAT_VERSION}/bin/apache-tomcat-${TOMCAT_VERSION}.tar.gz && \
     tar -xzvf apache-tomcat-${TOMCAT_VERSION}.tar.gz -C $TOMCAT_HOME --strip-components=1 && \
     rm apache-tomcat-${TOMCAT_VERSION}.tar.gz
 

@@ -38,6 +38,11 @@
     <div class="p-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-20">
 
+            <div th:if="${error}" class="col-span-full bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">¡Atención!</strong>
+                <span class="block sm:inline" th:text="${error}"></span>
+            </div>
+
             <div th:each="rule : ${reglas}" class="bg-white rounded-[2rem] shadow-xl overflow-hidden flex flex-col border border-gray-100">
 
                 <form th:action="@{/producto/{id}/generar(id=${producto.id})}"
@@ -97,7 +102,6 @@
                                        name="cantidad"
                                        value="1"
                                        min="1"
-                                       th:max="${producto.cantidad}"
                                        class="w-full text-center text-4xl font-black bg-white border-2 border-gray-200 rounded-2xl p-3 focus:outline-none focus:border-gray-400 text-gray-800"
                                        required>
                                 <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 font-bold text-[10px] uppercase tracking-wider italic">
@@ -112,13 +116,16 @@
                     </div>
 
                     <div class="p-4 bg-gray-50/50">
-                        <button type="submit"
+                        <button th:if="${puedeGenerarTimer}" type="submit"
                                 class="w-full py-4 bg-puesto-btn text-puesto-btn-text border-b-[6px] border-puesto-btn-border rounded-2xl text-xl font-black uppercase tracking-wider active:border-b-0 active:translate-y-1.5 transition-all flex items-center justify-center gap-3 shadow-md hover:opacity-95">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 00-2 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                             </svg>
                             GENERAR
                         </button>
+                        <div th:unless="${puedeGenerarTimer}" class="text-center p-3 bg-red-50 text-red-600 rounded-xl font-bold border border-red-200 text-sm">
+                            No tienes permisos para generar
+                        </div>
                     </div>
                 </form>
             </div>

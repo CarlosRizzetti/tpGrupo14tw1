@@ -1,8 +1,12 @@
 package com.tallerwebi.presentacion;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.text.IsEqualIgnoringCase.equalToIgnoringCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.entity.Categoria;
@@ -13,6 +17,7 @@ import com.tallerwebi.dominio.interfaces.*;
 import com.tallerwebi.presentacion.controller.ControladorProducto;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpSession;
@@ -152,21 +157,266 @@ public class ControladorProductoTest {
   // --- GET /category/{id}/products ---
 
   @Test
-  public void mostrarProductosPorCategoriaDeberiaRetornarVistaProductosConLista() {
+  public void mostrarProductosPorCategoriaSiNoEstaAutenticadoDeberiaRedirigirALogin() {
     // preparacion
-    Long categoriaId = 1L;
-    List<com.tallerwebi.dominio.entity.Producto> productosMock = Collections.singletonList(
-      new com.tallerwebi.dominio.entity.Producto()
-    );
-    when(servicioProductoMock.obtenerProductosPorCategoria(categoriaId)).thenReturn(productosMock);
+    org.springframework.security.core.Authentication auth = null;
 
     // ejecucion
-    ModelAndView mav = controladorProducto.mostrarProductosPorCategoria(categoriaId, sessionMock);
+    ModelAndView mav = controladorProducto.mostrarProductosPorCategoria(1L, sessionMock, auth);
+
+    // validacion
+    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/login"));
+  }
+
+  @Test
+  public void mostrarProductosPorCategoriaSiNoEstaAutenticadoPeroAuthExisteDeberiaRedirigirALogin() {
+    // preparacion
+    org.springframework.security.core.Authentication auth = mock(
+      org.springframework.security.core.Authentication.class
+    );
+    when(auth.isAuthenticated()).thenReturn(false);
+
+    // ejecucion
+    ModelAndView mav = controladorProducto.mostrarProductosPorCategoria(1L, sessionMock, auth);
+
+    // validacion
+    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/login"));
+  }
+
+  @Test
+  public void mostrarProductosPorCategoriaSiEsAdminDeberiaRetornarVista() {
+    // preparacion
+    org.springframework.security.core.Authentication auth = mock(
+      org.springframework.security.core.Authentication.class
+    );
+    when(auth.isAuthenticated()).thenReturn(true);
+    org.springframework.security.core.GrantedAuthority authority = mock(
+      org.springframework.security.core.GrantedAuthority.class
+    );
+    when(authority.getAuthority()).thenReturn("ROLE_ADMIN");
+    doReturn(Collections.singleton(authority)).when(auth).getAuthorities();
+
+    Long categoriaId = 1L;
+    when(servicioCategoriaMock.obtenerCategoriaPorId(categoriaId)).thenReturn(new CategoriaDto());
+    when(servicioProductoMock.obtenerProductosPorCategoria(categoriaId))
+      .thenReturn(Collections.emptyList());
+    when(servicioCategoriaMock.obtenerUsuariosPorCategoria(categoriaId))
+      .thenReturn(Collections.emptyList());
+
+    // ejecucion
+    ModelAndView mav = controladorProducto.mostrarProductosPorCategoria(
+      categoriaId,
+      sessionMock,
+      auth
+    );
 
     // validacion
     assertThat(mav.getViewName(), equalToIgnoringCase("listadoDeProductosYReglas/productos"));
+  }
+
+  @Test
+  public void mostrarProductosPorCategoriaSiUsuarioAutenticadoDeberiaRetornarVista() {
+    // preparacion
+    org.springframework.security.core.Authentication auth = mock(
+      org.springframework.security.core.Authentication.class
+    );
+    when(auth.isAuthenticated()).thenReturn(true);
+    when(auth.getName()).thenReturn("user@test.com");
+    org.springframework.security.core.GrantedAuthority authority = mock(
+      org.springframework.security.core.GrantedAuthority.class
+    );
+    when(authority.getAuthority()).thenReturn("ROLE_USER");
+    doReturn(Collections.singleton(authority)).when(auth).getAuthorities();
+
+    Long categoriaId = 1L;
+    when(servicioCategoriaMock.obtenerCategoriaPorId(categoriaId)).thenReturn(new CategoriaDto());
+    when(servicioProductoMock.obtenerProductosPorCategoria(categoriaId))
+      .thenReturn(Collections.emptyList());
+    when(servicioCategoriaMock.obtenerUsuariosPorCategoria(categoriaId))
+      .thenReturn(Collections.emptyList());
+
+    // ejecucion
+    ModelAndView mav = controladorProducto.mostrarProductosPorCategoria(1L, sessionMock, auth);
+
+    // validacion
+    assertThat(mav.getViewName(), equalToIgnoringCase("listadoDeProductosYReglas/productos"));
+  }
+
+  @Test
+  public void mostrarProductosPorCategoriaSiUsuarioConPermisoDeberiaRetornarVista() {
+    // preparacion
+    org.springframework.security.core.Authentication auth = mock(
+      org.springframework.security.core.Authentication.class
+    );
+    when(auth.isAuthenticated()).thenReturn(true);
+    when(auth.getName()).thenReturn("user@test.com");
+    org.springframework.security.core.GrantedAuthority authority = mock(
+      org.springframework.security.core.GrantedAuthority.class
+    );
+    when(authority.getAuthority()).thenReturn("ROLE_USER");
+    doReturn(Collections.singleton(authority)).when(auth).getAuthorities();
+
+    // El usuario tiene la categoria solicitada
+    Long categoriaId = 1L;
+    CategoriaDto catUsuario = new CategoriaDto();
+    catUsuario.setId(categoriaId);
+    when(servicioCategoriaMock.obtenerCategoriasPorUsuario("user@test.com"))
+      .thenReturn(Collections.singletonList(catUsuario));
+    when(servicioCategoriaMock.obtenerCategoriaPorId(categoriaId)).thenReturn(catUsuario);
+    when(servicioProductoMock.obtenerProductosPorCategoria(categoriaId))
+      .thenReturn(Collections.emptyList());
+    when(servicioCategoriaMock.obtenerUsuariosPorCategoria(categoriaId))
+      .thenReturn(Collections.emptyList());
+
+    // ejecucion
+    ModelAndView mav = controladorProducto.mostrarProductosPorCategoria(
+      categoriaId,
+      sessionMock,
+      auth
+    );
+
+    // validacion
+    assertThat(mav.getViewName(), equalToIgnoringCase("listadoDeProductosYReglas/productos"));
+  }
+
+  // --- /admin/producto/exito ---
+  @Test
+  public void exitoDeberiaRetornarVistaExito() {
+    ModelAndView mav = controladorProducto.exito();
+    assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/producto/exito"));
+  }
+
+  // --- /admin/productos ---
+  @Test
+  public void gestionProductosDeberiaRetornarVistaYModeloCorrectos() {
+    Long categoriaId = 1L;
+    when(servicioProductoMock.listarProductos(categoriaId)).thenReturn(Collections.emptyList());
+    when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu())
+      .thenReturn(Collections.emptyList());
+
+    ModelAndView mav = controladorProducto.gestionProductos(categoriaId);
+
+    assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/producto/gestion"));
     assertThat(mav.getModel().get("productos"), notNullValue());
-    assertThat((List<?>) mav.getModel().get("productos"), hasSize(1));
-    verify(servicioProductoMock, times(1)).obtenerProductosPorCategoria(categoriaId);
+    assertThat(mav.getModel().get("categorias"), notNullValue());
+    assertThat(mav.getModel().get("categoriaSeleccionada"), equalTo(categoriaId));
+  }
+
+  // --- agregarStock ---
+  @Test
+  public void agregarStockDeberiaRedirigirConCategoria() {
+    String redirect = controladorProducto.agregarStock(1L, 10, 2L);
+    verify(servicioProductoMock).agregarStock(1L, 10);
+    assertThat(redirect, equalToIgnoringCase("redirect:/admin/productos?categoriaId=2"));
+  }
+
+  @Test
+  public void agregarStockDeberiaRedirigirSinCategoria() {
+    String redirect = controladorProducto.agregarStock(1L, 10, null);
+    verify(servicioProductoMock).agregarStock(1L, 10);
+    assertThat(redirect, equalToIgnoringCase("redirect:/admin/productos"));
+  }
+
+  // --- quitarStock ---
+  @Test
+  public void quitarStockDeberiaRedirigirConCategoria() {
+    String redirect = controladorProducto.quitarStock(1L, 10, 2L);
+    verify(servicioProductoMock).quitarStock(1L, 10);
+    assertThat(redirect, equalToIgnoringCase("redirect:/admin/productos?categoriaId=2"));
+  }
+
+  @Test
+  public void quitarStockDeberiaRedirigirSinCategoria() {
+    String redirect = controladorProducto.quitarStock(1L, 10, null);
+    verify(servicioProductoMock).quitarStock(1L, 10);
+    assertThat(redirect, equalToIgnoringCase("redirect:/admin/productos"));
+  }
+
+  // --- mostrarVencimientoProducto ---
+  @Test
+  public void mostrarVencimientoProductoDeberiaRetornarVista() {
+    Long productoId = 1L;
+    Producto producto = new Producto();
+    producto.setReglas(Collections.emptySet());
+    when(servicioProductoMock.obtenerProductoConReglas(productoId)).thenReturn(producto);
+
+    CategoriaDto catDto = new CategoriaDto();
+    when(sessionMock.getAttribute("categoria")).thenReturn(catDto);
+
+    org.springframework.security.core.Authentication auth = mock(
+      org.springframework.security.core.Authentication.class
+    );
+    when(auth.isAuthenticated()).thenReturn(true);
+    when(auth.getName()).thenReturn("user@test.com");
+    org.springframework.security.core.GrantedAuthority authority = mock(
+      org.springframework.security.core.GrantedAuthority.class
+    );
+    when(authority.getAuthority()).thenReturn("ROLE_USER");
+    doReturn(Collections.singleton(authority)).when(auth).getAuthorities();
+
+    ModelAndView mav = controladorProducto.mostrarVencimientoProducto(
+      productoId,
+      sessionMock,
+      auth
+    );
+
+    assertThat(
+      mav.getViewName(),
+      equalToIgnoringCase("listadoDeProductosYReglas/producto-vencimiento")
+    );
+    assertThat(mav.getModel().get("producto"), notNullValue());
+    assertThat(mav.getModel().get("reglas"), notNullValue());
+    assertThat(mav.getModel().get("categoria"), equalTo(catDto));
+  }
+
+  // --- imprimirConstancia ---
+  @Test
+  public void imprimirConstanciaDeberiaGenerarVencimientoYRedirigir() {
+    org.springframework.security.core.Authentication auth = mock(
+      org.springframework.security.core.Authentication.class
+    );
+    org.springframework.security.core.userdetails.User principalMock = mock(
+      org.springframework.security.core.userdetails.User.class
+    );
+    when(principalMock.getUsername()).thenReturn("test@test.com");
+    when(auth.getPrincipal()).thenReturn(principalMock);
+    when(auth.getName()).thenReturn("test@test.com");
+
+    org.springframework.security.core.GrantedAuthority authority = mock(
+      org.springframework.security.core.GrantedAuthority.class
+    );
+    when(authority.getAuthority()).thenReturn("ROLE_USER");
+    doReturn(Collections.singleton(authority)).when(auth).getAuthorities();
+
+    Producto producto = new Producto();
+    Categoria categoria = new Categoria();
+    categoria.setId(2L);
+    producto.setCategorias(Collections.singleton(categoria));
+
+    CategoriaDto catDto = new CategoriaDto();
+    catDto.setId(2L);
+    when(servicioCategoriaMock.obtenerCategoriasPorUsuario("test@test.com"))
+      .thenReturn(Collections.singletonList(catDto));
+
+    when(servicioProductoMock.obtenerProductoConReglas(1L)).thenReturn(producto);
+    Usuario usuario = new Usuario();
+    when(servicioUsuarioMock.obtenerUsuarioPorEmail(anyString())).thenReturn(usuario);
+
+    org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttrsMock = mock(
+      org.springframework.web.servlet.mvc.support.RedirectAttributes.class
+    );
+    String redirect = controladorProducto.imprimirConstancia(
+      1L,
+      30,
+      2L,
+      3L,
+      5,
+      auth,
+      redirectAttrsMock
+    );
+
+    verify(servicioReglaVencimientoMock)
+      .generarVencimiento(producto, categoria, 3L, 30, 5, usuario);
+    assertThat(redirect, equalToIgnoringCase("redirect:/dashboard"));
   }
 }

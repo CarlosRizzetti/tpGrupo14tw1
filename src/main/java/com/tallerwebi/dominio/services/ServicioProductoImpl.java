@@ -121,6 +121,11 @@ public class ServicioProductoImpl implements ServicioProducto {
   }
 
   @Override
+  public List<Producto> obtenerTodosLosProductos() {
+    return repositorioProducto.obtenerTodos();
+  }
+
+  @Override
   public Producto obtenerProductoConReglas(Long id) {
     return this.repositorioProducto.obtenerProductoConReglasYCategorias(id);
   }

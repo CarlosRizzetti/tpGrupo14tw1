@@ -1,2 +1,4 @@
 INSERT IGNORE INTO Usuario(id, email, password, rol, estado) VALUES(null, 'test@unlam.edu.ar', 'test', 'ADMIN', 'ACTIVO');
 INSERT IGNORE INTO Usuario(id, email, password, rol, estado) VALUES(null, 'santi@mail.com', '0000', 'ADMIN', 'ACTIVO');
+
+

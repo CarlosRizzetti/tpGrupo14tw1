@@ -21,11 +21,13 @@ public class ControladorDashboardGlobalTest {
   private ServicioCategoria servicioCategoriaMock;
   private ServicioTimer servicioDashboardMock;
   private ControladorDashboardGlobal controlador;
+  private org.springframework.security.core.Authentication authenticationMock;
 
   @BeforeEach
   public void init() {
     servicioCategoriaMock = mock(ServicioCategoria.class);
     servicioDashboardMock = mock(ServicioTimer.class);
+    authenticationMock = mock(org.springframework.security.core.Authentication.class);
     controlador = new ControladorDashboardGlobal(servicioCategoriaMock, servicioDashboardMock);
   }
 
@@ -34,7 +36,7 @@ public class ControladorDashboardGlobalTest {
   void dashboardGlobal_deberiaMostrarErrorCuandoNoHayCategorias() {
     when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu()).thenReturn(List.of());
 
-    ModelAndView mav = controlador.dashboardGlobal();
+    ModelAndView mav = controlador.dashboardGlobal(authenticationMock);
 
     Map<String, Object> model = mav.getModel();
     assertTrue(model.containsKey("error"));
@@ -49,7 +51,7 @@ public class ControladorDashboardGlobalTest {
     when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu()).thenReturn(List.of(c1));
     when(servicioDashboardMock.obtenerTimersActivos(anyLong())).thenReturn(List.of());
 
-    ModelAndView mav = controlador.dashboardGlobal();
+    ModelAndView mav = controlador.dashboardGlobal(authenticationMock);
     Map<String, Object> model = mav.getModel();
 
     assertTrue(model.containsKey("error"));
@@ -74,7 +76,7 @@ public class ControladorDashboardGlobalTest {
     when(servicioDashboardMock.obtenerTimersActivos(1L)).thenReturn(List.of(t1));
     when(servicioDashboardMock.obtenerTimersActivos(2L)).thenReturn(List.of());
 
-    ModelAndView mav = controlador.dashboardGlobal();
+    ModelAndView mav = controlador.dashboardGlobal(authenticationMock);
     Map<String, Object> model = mav.getModel();
 
     assertTrue(model.containsKey("categorias"));
@@ -95,7 +97,7 @@ public class ControladorDashboardGlobalTest {
     when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu())
       .thenThrow(new RuntimeException("boom"));
 
-    ModelAndView mav = controlador.dashboardGlobal();
+    ModelAndView mav = controlador.dashboardGlobal(authenticationMock);
     Map<String, Object> model = mav.getModel();
 
     assertTrue(model.containsKey("error"));

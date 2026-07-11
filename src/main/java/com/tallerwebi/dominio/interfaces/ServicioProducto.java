@@ -11,6 +11,7 @@ public interface ServicioProducto {
   void agregarStock(Long productoId, Integer cantidad);
   void quitarStock(Long productoId, Integer cantidad);
   Producto obtenerProductoPorId(Long id);
+  List<Producto> obtenerTodosLosProductos();
   List<Producto> obtenerProductosPorCategoria(Long categoriaId);
   Producto obtenerProductoConReglas(Long id);
   List<CategoriaDto> obtenerCategoriasDeUnProducto(Long idProducto);

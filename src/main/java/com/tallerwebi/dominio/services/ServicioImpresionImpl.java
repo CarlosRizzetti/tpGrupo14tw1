@@ -57,13 +57,7 @@ public class ServicioImpresionImpl implements ServicioImpresion {
       Doc documento = new SimpleDoc(comandos, DocFlavor.BYTE_ARRAY.AUTOSENSE, null);
       trabajo.print(documento, null);
     } catch (Exception e) {
-      throw new ImpresionException(
-        "Error al imprimir ticket de vencimiento para '{}': {}" +
-        producto.getNombre() +
-        " " +
-        e.getMessage(),
-        e
-      );
+      log.error("No se pudo imprimir el ticket", e);
     }
   }
 
