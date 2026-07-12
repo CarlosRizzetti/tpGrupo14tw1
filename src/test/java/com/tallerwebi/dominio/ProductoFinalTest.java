@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 import com.tallerwebi.dominio.entity.ProductoFinal;
-import com.tallerwebi.dominio.entity.Receta;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 

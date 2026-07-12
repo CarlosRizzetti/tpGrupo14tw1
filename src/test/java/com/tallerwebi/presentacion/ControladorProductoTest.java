@@ -34,6 +34,7 @@ public class ControladorProductoTest {
   private Usuario usuarioAdminMock;
   private ServicioReglaVencimiento servicioReglaVencimientoMock;
   private ServicioUsuario servicioUsuarioMock;
+  private ServicioLote servicioLoteMock;
 
   @BeforeEach
   public void init() {
@@ -42,12 +43,14 @@ public class ControladorProductoTest {
     servicioReglaVencimientoMock = mock(ServicioReglaVencimiento.class);
     sessionMock = mock(HttpSession.class);
     servicioUsuarioMock = mock(ServicioUsuario.class);
+    servicioLoteMock = mock(ServicioLote.class);
     controladorProducto =
       new ControladorProducto(
         servicioProductoMock,
         servicioCategoriaMock,
         servicioReglaVencimientoMock,
-        servicioUsuarioMock
+        servicioUsuarioMock,
+        servicioLoteMock
       );
     Categoria categoriaDefault = new Categoria("default.png", true, "default");
     CategoriaDto categoriaDefaultDTO = new CategoriaDto(categoriaDefault);
@@ -300,36 +303,6 @@ public class ControladorProductoTest {
     assertThat(mav.getModel().get("productos"), notNullValue());
     assertThat(mav.getModel().get("categorias"), notNullValue());
     assertThat(mav.getModel().get("categoriaSeleccionada"), equalTo(categoriaId));
-  }
-
-  // --- agregarStock ---
-  @Test
-  public void agregarStockDeberiaRedirigirConCategoria() {
-    String redirect = controladorProducto.agregarStock(1L, 10, 2L);
-    verify(servicioProductoMock).agregarStock(1L, 10);
-    assertThat(redirect, equalToIgnoringCase("redirect:/admin/productos?categoriaId=2"));
-  }
-
-  @Test
-  public void agregarStockDeberiaRedirigirSinCategoria() {
-    String redirect = controladorProducto.agregarStock(1L, 10, null);
-    verify(servicioProductoMock).agregarStock(1L, 10);
-    assertThat(redirect, equalToIgnoringCase("redirect:/admin/productos"));
-  }
-
-  // --- quitarStock ---
-  @Test
-  public void quitarStockDeberiaRedirigirConCategoria() {
-    String redirect = controladorProducto.quitarStock(1L, 10, 2L);
-    verify(servicioProductoMock).quitarStock(1L, 10);
-    assertThat(redirect, equalToIgnoringCase("redirect:/admin/productos?categoriaId=2"));
-  }
-
-  @Test
-  public void quitarStockDeberiaRedirigirSinCategoria() {
-    String redirect = controladorProducto.quitarStock(1L, 10, null);
-    verify(servicioProductoMock).quitarStock(1L, 10);
-    assertThat(redirect, equalToIgnoringCase("redirect:/admin/productos"));
   }
 
   // --- mostrarVencimientoProducto ---

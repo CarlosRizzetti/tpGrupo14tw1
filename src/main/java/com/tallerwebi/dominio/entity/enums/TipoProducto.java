@@ -1,6 +1,6 @@
 package com.tallerwebi.dominio.entity.enums;
 
-public enum TipoArticulo {
+public enum TipoProducto {
   LACTEOS,
   SECO,
   CONGELADO,

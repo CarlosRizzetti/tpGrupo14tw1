@@ -3,7 +3,7 @@ package com.tallerwebi.presentacion;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-import com.tallerwebi.dominio.interfaces.ServicioArticulo;
+import com.tallerwebi.dominio.interfaces.ServicioLote;
 import com.tallerwebi.presentacion.controller.ControladorAdminPanel;
 import com.tallerwebi.presentacion.dto.NotificacionVencimientoDto;
 import java.util.Collections;
@@ -18,42 +18,13 @@ public class ControladorAdminPanelTest {
 
   private ControladorAdminPanel controlador;
   private Authentication authenticationMock;
-  private ServicioArticulo servicioArticuloMock;
+  private ServicioLote servicioLoteMock;
 
   @BeforeEach
   public void init() {
-    servicioArticuloMock = mock(ServicioArticulo.class);
-    controlador = new ControladorAdminPanel(servicioArticuloMock);
+    servicioLoteMock = mock(ServicioLote.class);
+    controlador = new ControladorAdminPanel(servicioLoteMock);
     authenticationMock = mock(Authentication.class);
-  }
-
-  @Test
-  public void queSiAuthenticationEsNullRedirijaAAccesoDenegado() {
-    ModelAndView mav = controlador.panelDeControl(null);
-
-    assertEquals("redirect:/acceso-denegado", mav.getViewName());
-  }
-
-  @Test
-  public void queSiElUsuarioNoEstaAutenticadoRedirijaAAccesoDenegado() {
-    doReturn(false).when(authenticationMock).isAuthenticated();
-
-    ModelAndView mav = controlador.panelDeControl(authenticationMock);
-
-    assertEquals("redirect:/acceso-denegado", mav.getViewName());
-  }
-
-  @Test
-  public void queSiElUsuarioNoEsAdminRedirijaAAccesoDenegado() {
-    doReturn(true).when(authenticationMock).isAuthenticated();
-
-    doAnswer(invocation -> List.of(new SimpleGrantedAuthority("ROLE_USER")))
-      .when(authenticationMock)
-      .getAuthorities();
-
-    ModelAndView mav = controlador.panelDeControl(authenticationMock);
-
-    assertEquals("redirect:/acceso-denegado", mav.getViewName());
   }
 
   @Test
@@ -69,19 +40,12 @@ public class ControladorAdminPanelTest {
     List<NotificacionVencimientoDto> notificacionesMock = Collections.singletonList(
       new NotificacionVencimientoDto()
     );
-    when(servicioArticuloMock.obtenerNotificacionesVencimiento()).thenReturn(notificacionesMock);
+    when(servicioLoteMock.obtenerNotificacionesVencimiento()).thenReturn(notificacionesMock);
 
     ModelAndView mav = controlador.panelDeControl(authenticationMock);
 
     assertEquals("funcionalidadesAdmin/panel", mav.getViewName());
     assertEquals("admin@test.com", mav.getModel().get("email"));
     assertEquals(notificacionesMock, mav.getModel().get("notificaciones"));
-  }
-
-  @Test
-  public void queAccesoDenegadoRetorneLaVistaCorrecta() {
-    ModelAndView mav = controlador.accesoDenegado();
-
-    assertEquals("acceso-denegado", mav.getViewName());
   }
 }

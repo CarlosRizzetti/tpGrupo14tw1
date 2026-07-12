@@ -59,9 +59,9 @@
                 </div>
 
                 <div class="flex-grow min-w-0">
-                    <p class="text-xs font-bold text-gray-800 dark:text-white truncate" th:text="${notif.articulo.nombre}"></p>
+                    <p class="text-xs font-bold text-gray-800 dark:text-white truncate" th:text="${notif.lote.producto.nombre}"></p>
                     <p class="text-[10px] text-gray-500 dark:text-gray-400">
-                        Lote: <span class="font-medium" th:text="${notif.articulo.numeroDeLote}"></span> | Cant: <span class="font-medium" th:text="${notif.articulo.cantidad}"></span>
+                        Lote: <span class="font-medium" th:text="${notif.lote.numeroDeLote}"></span> | Cant: <span class="font-medium" th:text="${notif.lote.cantidadDisponible}"></span>
                     </p>
                     <p class="text-[10px] font-bold mt-0.5" 
                        th:classappend="${notif.nivelUrgencia == 'ALTA' ? 'text-red-600 dark:text-red-400' : (notif.nivelUrgencia == 'MEDIA' ? 'text-orange-500 dark:text-orange-400' : 'text-yellow-600 dark:text-yellow-400')}"
@@ -143,7 +143,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                 </svg>
             </div>
-            <h3 class="text-2xl font-black mb-2 uppercase tracking-tighter">Lista de articulos</h3>
+            <h3 class="text-2xl font-black mb-2 uppercase tracking-tighter">Lista de Lotes</h3>
             <p class="text-sm opacity-85 flex-grow"> Muestra la lista de los articulos </p>
         </a>
 

@@ -35,11 +35,24 @@
         <input type="text" id="nombre" th:field="*{nombre}" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-puesto focus:border-puesto" required>
       </div>
 
-      <!-- Cantidad en stock -->
-      <div>
-        <label for="cantidad" class="block text-sm font-bold text-gray-700">Cantidad en Stock</label>
-        <input type="number" id="cantidad" th:field="*{cantidad}" min="0" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-puesto focus:border-puesto" placeholder="0">
-        <p class="text-xs text-gray-500 mt-1">Unidades disponibles al momento de crear el producto.</p>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label for="unidadDeMedida" class="block text-sm font-bold text-gray-700">Unidad de Medida</label>
+          <select id="unidadDeMedida" th:field="*{unidadDeMedida}" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-puesto focus:border-puesto" required>
+            <option value="">Seleccionar...</option>
+            <option th:each="unidad : ${T(com.tallerwebi.dominio.entity.enums.UnidadDeMedida).values()}"
+                    th:value="${unidad}" th:text="${unidad}"></option>
+          </select>
+        </div>
+
+        <div>
+          <label for="tipoProducto" class="block text-sm font-bold text-gray-700">Tipo de Producto</label>
+          <select id="tipoProducto" th:field="*{tipoProducto}" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-puesto focus:border-puesto" required>
+            <option value="">Seleccionar...</option>
+            <option th:each="tipo : ${T(com.tallerwebi.dominio.entity.enums.TipoProducto).values()}"
+                    th:value="${tipo}" th:text="${tipo}"></option>
+          </select>
+        </div>
       </div>
 
       <!-- Ubicación -->

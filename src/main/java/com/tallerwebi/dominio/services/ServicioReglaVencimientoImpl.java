@@ -5,19 +5,14 @@ import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.dominio.entity.Usuario;
-import com.tallerwebi.dominio.entity.enums.TipoMovimientoStock;
 import com.tallerwebi.dominio.interfaces.RepositorioReglaVencimiento;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
-import com.tallerwebi.dominio.interfaces.ServicioControlStock;
 import com.tallerwebi.dominio.interfaces.ServicioImpresion;
-import com.tallerwebi.dominio.interfaces.ServicioProduccion;
-import com.tallerwebi.dominio.interfaces.ServicioProducto;
+import com.tallerwebi.dominio.interfaces.ServicioLote;
 import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
 import com.tallerwebi.dominio.utils.ImpresionHelper;
 import java.time.Clock;
 import java.time.OffsetDateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,32 +21,25 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
 
-  private static final Logger log = LoggerFactory.getLogger(ServicioReglaVencimientoImpl.class);
   private final RepositorioReglaVencimiento repositorioReglaVencimiento;
   private final RepositorioTimer repositorioTimer;
-  private final ServicioProducto servicioProducto;
-  private final ServicioControlStock servicioControlStock;
+  private final ServicioLote servicioLote;
   private final Clock clock;
   private final ServicioImpresion servicioImpresion;
-  private final ServicioProduccion servicioProduccion;
 
   @Autowired
   public ServicioReglaVencimientoImpl(
     RepositorioReglaVencimiento repositorioReglaVencimiento,
     RepositorioTimer repositorioTimer,
-    ServicioProducto servicioProducto,
-    ServicioControlStock servicioControlStock,
+    ServicioLote servicioLote,
     Clock clock,
-    ServicioImpresion servicioImpresion,
-    ServicioProduccion servicioProduccion
+    ServicioImpresion servicioImpresion
   ) {
     this.repositorioReglaVencimiento = repositorioReglaVencimiento;
     this.repositorioTimer = repositorioTimer;
-    this.servicioProducto = servicioProducto;
-    this.servicioControlStock = servicioControlStock;
+    this.servicioLote = servicioLote;
     this.clock = clock;
     this.servicioImpresion = servicioImpresion;
-    this.servicioProduccion = servicioProduccion;
   }
 
   @Override
@@ -76,7 +64,6 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
   ) {
     ReglaVencimiento regla = obtenerReglaValidada(reglaId);
     validarCantidadUsada(cantidadUsada);
-    servicioProducto.descontarStock(producto, cantidadUsada);
 
     Timer timer = crearYGuardarTimer(
       producto,
@@ -86,14 +73,9 @@ public class ServicioReglaVencimientoImpl implements ServicioReglaVencimiento {
       cantidadUsada,
       usuario
     );
-    servicioControlStock.registrarMovimiento(
-      producto,
-      timer,
-      cantidadUsada,
-      TipoMovimientoStock.EGRESO
-    );
 
-    servicioProduccion.procesarProduccion(producto, timer, cantidadUsada);
+    // Descuenta stock FIFO de los Lotes del producto y genera ConsumoLote (trazabilidad Timer -> Lote).
+    servicioLote.consumirCantidad(producto, cantidadUsada, timer);
 
     ImpresionHelper.intentarImpresionDeVencimiento(timer, servicioImpresion);
 
