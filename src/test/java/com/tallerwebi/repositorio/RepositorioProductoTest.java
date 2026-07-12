@@ -189,6 +189,45 @@ public class RepositorioProductoTest {
     assertNull(resultado);
   }
 
+  // ===================== actualizar =====================
+
+  @Test
+  @DisplayName("HP-07 | actualizar | Actualiza un producto en la base de datos")
+  @Transactional
+  @Rollback
+  void actualizar_deberiaActualizarUnProducto() {
+    Producto producto = buildProducto("Original");
+    repositorioProducto.guardar(producto);
+
+    producto.setNombre("Modificado");
+    repositorioProducto.actualizar(producto);
+
+    Producto resultado = repositorioProducto.obtenerProductoPorId(producto.getId());
+    assertEquals("Modificado", resultado.getNombre());
+  }
+
+  // ===================== obtenerTodos =====================
+
+  @Test
+  @DisplayName("HP-08 | obtenerTodos | Retorna todos los productos activos en orden alfabético")
+  @Transactional
+  @Rollback
+  void obtenerTodos_deberiaRetornarProductosActivosOrdenados() {
+    Producto p1 = buildProducto("Zanahoria");
+    Producto p2 = buildProducto("Apple");
+    Producto p3 = buildProducto("Inactivo");
+    p3.setEstaActivo(false);
+
+    repositorioProducto.guardar(p1);
+    repositorioProducto.guardar(p2);
+    repositorioProducto.guardar(p3);
+
+    List<Producto> lista = repositorioProducto.obtenerTodos();
+    assertNotNull(lista);
+    assertTrue(lista.size() >= 2);
+    assertTrue(lista.stream().noneMatch(p -> "Inactivo".equals(p.getNombre())));
+  }
+
   // ===================== helpers =====================
 
   private Producto buildProducto(String nombre) {

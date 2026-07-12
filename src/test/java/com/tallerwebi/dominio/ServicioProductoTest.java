@@ -468,6 +468,20 @@ public class ServicioProductoTest {
     assertTrue(resultado.isEmpty());
   }
 
+  // --- obtenerTodosLosProductos ---
+
+  @Test
+  @DisplayName("HAP-11 | obtenerTodosLosProductos | Delega a repositorio.obtenerTodos")
+  public void obtenerTodosLosProductosDeberiaDelegarARepositorio() {
+    List<Producto> todos = Arrays.asList(new Producto(), new Producto());
+    when(repositorioProductoMock.obtenerTodos()).thenReturn(todos);
+
+    List<Producto> resultado = servicioProducto.obtenerTodosLosProductos();
+
+    assertEquals(2, resultado.size());
+    verify(repositorioProductoMock, times(1)).obtenerTodos();
+  }
+
   // --- Helper ---
 
   private ProductoDto datoValidos() {

@@ -376,4 +376,119 @@ public class RepositorioTimerTest {
     assertThat(categoria.getNombre(), is(timers.get(0).getCategoria().getNombre()));
     assertThat("group-1", is(timers.get(0).getGroupId()));
   }
+
+  // ===================== obtenerTimersActivosConStockPorProducto =====================
+
+  @Test
+  @Transactional
+  @Rollback
+  @DisplayName(
+    "HP-06 | obtenerTimersActivosConStockPorProducto | Retorna timers activos con stock > 0"
+  )
+  public void obtenerTimersActivosConStockPorProducto_deberiaRetornarSoloActivosConStock() {
+    Categoria categoria = buildCategoria();
+    Producto producto = buildProducto();
+    ReglaVencimiento regla = buildRegla();
+
+    Timer t1 = buildTimer("g1", categoria, producto, regla, 5, usuarioTest);
+    t1.setEstado(EstadoTimer.ACTIVO);
+    sessionFactory.getCurrentSession().save(t1);
+
+    Timer tSinStock = buildTimer("g2", categoria, producto, regla, 0, usuarioTest);
+    tSinStock.setEstado(EstadoTimer.ACTIVO);
+    sessionFactory.getCurrentSession().save(tSinStock);
+
+    List<Timer> resultado = repositorioTimer.obtenerTimersActivosConStockPorProducto(
+      producto.getId()
+    );
+    assertEquals(1, resultado.size());
+    assertEquals("g1", resultado.get(0).getGroupId());
+  }
+
+  // ===================== obtenerTodosLosTimers =====================
+
+  @Test
+  @Transactional
+  @Rollback
+  @DisplayName(
+    "HP-07 | obtenerTodosLosTimers | Retorna todos los timers ordenados por fechaCreacion"
+  )
+  public void obtenerTodosLosTimers_deberiaRetornarTodos() {
+    Categoria categoria = buildCategoria();
+    Producto producto = buildProducto();
+    ReglaVencimiento regla = buildRegla();
+
+    buildTimer("g1", categoria, producto, regla, 1, usuarioTest);
+    buildTimer("g2", categoria, producto, regla, 1, usuarioTest);
+
+    List<Timer> resultado = repositorioTimer.obtenerTodosLosTimers();
+    assertTrue(resultado.size() >= 2);
+  }
+
+  // ===================== obtenerFechasCreacionDesde =====================
+
+  @Test
+  @Transactional
+  @Rollback
+  @DisplayName("HP-08 | obtenerFechasCreacionDesde | Retorna fechas desde el límite indicado")
+  public void obtenerFechasCreacionDesde_deberiaRetornarFechas() {
+    Categoria categoria = buildCategoria();
+    Producto producto = buildProducto();
+    ReglaVencimiento regla = buildRegla();
+
+    Timer t = buildTimer("g1", categoria, producto, regla, 1, usuarioTest);
+    t.getCicloVida().setFechaCreacion(OffsetDateTime.now());
+    sessionFactory.getCurrentSession().save(t);
+
+    List<OffsetDateTime> fechas = repositorioTimer.obtenerFechasCreacionDesde(
+      OffsetDateTime.now().minusDays(1)
+    );
+    assertFalse(fechas.isEmpty());
+  }
+
+  // ===================== contarVencimientosPorProducto =====================
+
+  @Test
+  @Transactional
+  @Rollback
+  @DisplayName(
+    "HP-09 | contarVencimientosPorProducto | Retorna conteo agrupado por nombre de producto"
+  )
+  public void contarVencimientosPorProducto_deberiaRetornarAgrupación() {
+    Categoria categoria = buildCategoria();
+    Producto producto = buildProducto();
+    producto.setNombre("Hamburguesa");
+    sessionFactory.getCurrentSession().save(producto);
+    ReglaVencimiento regla = buildRegla();
+
+    Timer t = buildTimer("g1", categoria, producto, regla, 1, usuarioTest);
+    t.getCicloVida().setFechaCreacion(OffsetDateTime.now());
+    sessionFactory.getCurrentSession().save(t);
+
+    List<Object[]> conteos = repositorioTimer.contarVencimientosPorProducto(
+      OffsetDateTime.now().minusDays(1)
+    );
+    assertFalse(conteos.isEmpty());
+    assertEquals("Hamburguesa", conteos.get(0)[0]);
+  }
+
+  // ===================== contarPorEstado =====================
+
+  @Test
+  @Transactional
+  @Rollback
+  @DisplayName("HP-10 | contarPorEstado | Retorna conteo agrupado por estado")
+  public void contarPorEstado_deberiaRetornarConteoPorEstado() {
+    Categoria categoria = buildCategoria();
+    Producto producto = buildProducto();
+    ReglaVencimiento regla = buildRegla();
+
+    Timer t = buildTimer("g1", categoria, producto, regla, 1, usuarioTest);
+    t.setEstado(EstadoTimer.ACTIVO);
+    t.getCicloVida().setFechaCreacion(OffsetDateTime.now());
+    sessionFactory.getCurrentSession().save(t);
+
+    List<Object[]> conteos = repositorioTimer.contarPorEstado(OffsetDateTime.now().minusDays(1));
+    assertFalse(conteos.isEmpty());
+  }
 }
