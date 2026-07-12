@@ -11,6 +11,7 @@ import com.tallerwebi.dominio.entity.enums.EstadoPedido;
 import com.tallerwebi.dominio.excepcion.IngredientesNoDisponiblesException;
 import com.tallerwebi.dominio.interfaces.RepositorioComanda;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
+import com.tallerwebi.dominio.interfaces.ServicioTimer;
 import com.tallerwebi.dominio.services.ServicioComandaImpl;
 import com.tallerwebi.presentacion.dto.ComandaCocinaDTO;
 import java.util.ArrayList;
@@ -23,13 +24,15 @@ public class ServicioComandaImplTest {
 
   private RepositorioComanda repositorioComanda;
   private RepositorioTimer repositorioTimer;
+  private ServicioTimer servicioTimer;
   private ServicioComandaImpl servicioComanda;
 
   @BeforeEach
   public void setUp() {
     repositorioComanda = mock(RepositorioComanda.class);
     repositorioTimer = mock(RepositorioTimer.class);
-    servicioComanda = new ServicioComandaImpl(repositorioComanda, repositorioTimer);
+    servicioTimer = mock(ServicioTimer.class);
+    servicioComanda = new ServicioComandaImpl(repositorioComanda, repositorioTimer, servicioTimer);
   }
 
   @Test
@@ -92,6 +95,14 @@ public class ServicioComandaImplTest {
     timer.setCantidadProducto(5);
     List<Timer> timers = Arrays.asList(timer);
     when(repositorioTimer.obtenerTimersActivosConStockPorProducto(10L)).thenReturn(timers);
+
+    doAnswer(invocation -> {
+        Integer cant = invocation.getArgument(1);
+        timer.setCantidadProducto(timer.getCantidadProducto() - cant);
+        return null;
+      })
+      .when(servicioTimer)
+      .descontarStock(eq(1L), anyInt());
 
     servicioComanda.sacarComanda(1L);
 
