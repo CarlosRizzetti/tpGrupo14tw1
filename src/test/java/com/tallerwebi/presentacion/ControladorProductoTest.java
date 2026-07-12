@@ -392,4 +392,162 @@ public class ControladorProductoTest {
       .generarVencimiento(producto, categoria, 3L, 30, 5, usuario);
     assertThat(redirect, equalToIgnoringCase("redirect:/dashboard"));
   }
+
+  @Test
+  public void gestionProductosConListaDeProductosDeberiaPoblarStockPorProducto() {
+    Long categoriaId = 1L;
+    Producto producto = new Producto();
+    producto.setId(10L);
+    when(servicioProductoMock.listarProductos(categoriaId))
+      .thenReturn(Collections.singletonList(producto));
+    when(servicioLoteMock.stockDisponibleDe(producto)).thenReturn(15);
+    when(servicioCategoriaMock.obtenerLasCategoriasParaElMenu())
+      .thenReturn(Collections.emptyList());
+
+    ModelAndView mav = controladorProducto.gestionProductos(categoriaId);
+
+    assertThat(mav.getViewName(), equalToIgnoringCase("funcionalidadesAdmin/producto/gestion"));
+    java.util.Map<Long, Integer> stockMap = (java.util.Map<Long, Integer>) mav
+      .getModel()
+      .get("stockPorProducto");
+    assertThat(stockMap.get(10L), equalTo(15));
+  }
+
+  @Test
+  public void mostrarVencimientoProductoConUsuarioAdminDeberiaPermitirGenerarTimer() {
+    Producto producto = new Producto();
+    producto.setReglas(Collections.emptySet());
+    when(servicioProductoMock.obtenerProductoConReglas(1L)).thenReturn(producto);
+    CategoriaDto catDto = new CategoriaDto();
+    when(sessionMock.getAttribute("categoria")).thenReturn(catDto);
+
+    org.springframework.security.core.Authentication auth = mock(
+      org.springframework.security.core.Authentication.class
+    );
+    org.springframework.security.core.GrantedAuthority authority = mock(
+      org.springframework.security.core.GrantedAuthority.class
+    );
+    when(authority.getAuthority()).thenReturn("ROLE_ADMIN");
+    doReturn(Collections.singleton(authority)).when(auth).getAuthorities();
+
+    ModelAndView mav = controladorProducto.mostrarVencimientoProducto(1L, sessionMock, auth);
+
+    assertThat(mav.getModel().get("puedeGenerarTimer"), equalTo(true));
+  }
+
+  @Test
+  public void mostrarVencimientoProductoSinPermisoNiAdminDeberiaNoPermitirGenerarTimer() {
+    Producto producto = new Producto();
+    producto.setReglas(Collections.emptySet());
+    when(servicioProductoMock.obtenerProductoConReglas(1L)).thenReturn(producto);
+    CategoriaDto catDto = new CategoriaDto();
+    catDto.setId(5L);
+    when(sessionMock.getAttribute("categoria")).thenReturn(catDto);
+
+    org.springframework.security.core.Authentication auth = mock(
+      org.springframework.security.core.Authentication.class
+    );
+    when(auth.getName()).thenReturn("user@test.com");
+    org.springframework.security.core.GrantedAuthority authority = mock(
+      org.springframework.security.core.GrantedAuthority.class
+    );
+    when(authority.getAuthority()).thenReturn("ROLE_USER");
+    doReturn(Collections.singleton(authority)).when(auth).getAuthorities();
+    when(servicioCategoriaMock.obtenerCategoriasPorUsuario("user@test.com"))
+      .thenReturn(Collections.emptyList());
+
+    ModelAndView mav = controladorProducto.mostrarVencimientoProducto(1L, sessionMock, auth);
+
+    assertThat(mav.getModel().get("puedeGenerarTimer"), equalTo(false));
+  }
+
+  @Test
+  public void imprimirConstanciaSinPermisoNiAdminDeberiaRedirigirConError() {
+    org.springframework.security.core.Authentication auth = mock(
+      org.springframework.security.core.Authentication.class
+    );
+    org.springframework.security.core.userdetails.User principalMock = mock(
+      org.springframework.security.core.userdetails.User.class
+    );
+    when(principalMock.getUsername()).thenReturn("test@test.com");
+    when(auth.getPrincipal()).thenReturn(principalMock);
+    when(auth.getName()).thenReturn("test@test.com");
+
+    org.springframework.security.core.GrantedAuthority authority = mock(
+      org.springframework.security.core.GrantedAuthority.class
+    );
+    when(authority.getAuthority()).thenReturn("ROLE_USER");
+    doReturn(Collections.singleton(authority)).when(auth).getAuthorities();
+
+    Producto producto = new Producto();
+    Categoria categoria = new Categoria();
+    categoria.setId(2L);
+    producto.setCategorias(Collections.singleton(categoria));
+
+    when(servicioProductoMock.obtenerProductoConReglas(1L)).thenReturn(producto);
+    when(servicioCategoriaMock.obtenerCategoriasPorUsuario("test@test.com"))
+      .thenReturn(Collections.emptyList());
+
+    org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttrsMock = mock(
+      org.springframework.web.servlet.mvc.support.RedirectAttributes.class
+    );
+
+    String redirect = controladorProducto.imprimirConstancia(
+      1L,
+      30,
+      2L,
+      3L,
+      5,
+      auth,
+      redirectAttrsMock
+    );
+
+    verify(redirectAttrsMock).addFlashAttribute(eq("error"), anyString());
+    assertThat(redirect, equalToIgnoringCase("redirect:/product/1"));
+  }
+
+  @Test
+  public void imprimirConstanciaCuandoGenerarLanzaExcepcionDeberiaRedirigirConError() {
+    org.springframework.security.core.Authentication auth = mock(
+      org.springframework.security.core.Authentication.class
+    );
+    org.springframework.security.core.userdetails.User principalMock = mock(
+      org.springframework.security.core.userdetails.User.class
+    );
+    when(principalMock.getUsername()).thenReturn("test@test.com");
+    when(auth.getPrincipal()).thenReturn(principalMock);
+    when(auth.getName()).thenReturn("test@test.com");
+
+    org.springframework.security.core.GrantedAuthority authority = mock(
+      org.springframework.security.core.GrantedAuthority.class
+    );
+    when(authority.getAuthority()).thenReturn("ROLE_ADMIN");
+    doReturn(Collections.singleton(authority)).when(auth).getAuthorities();
+
+    Producto producto = new Producto();
+    when(servicioProductoMock.obtenerProductoConReglas(1L)).thenReturn(producto);
+    Usuario usuario = new Usuario();
+    when(servicioUsuarioMock.obtenerUsuarioPorEmail(anyString())).thenReturn(usuario);
+
+    doThrow(new com.tallerwebi.dominio.excepcion.SinStockSuficienteException("Stock insuficiente"))
+      .when(servicioReglaVencimientoMock)
+      .generarVencimiento(any(), any(), any(), any(), any(), any());
+
+    org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttrsMock = mock(
+      org.springframework.web.servlet.mvc.support.RedirectAttributes.class
+    );
+
+    String redirect = controladorProducto.imprimirConstancia(
+      1L,
+      30,
+      null,
+      3L,
+      5,
+      auth,
+      redirectAttrsMock
+    );
+
+    verify(redirectAttrsMock).addFlashAttribute(eq("error"), eq("Stock insuficiente"));
+    assertThat(redirect, equalToIgnoringCase("redirect:/product/1"));
+  }
 }
