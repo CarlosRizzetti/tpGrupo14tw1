@@ -29,7 +29,6 @@ public class DetallePedidoIngrediente {
 
   private Integer cantidad;
 
-  // Vacío hasta que cocina "saca" la comanda y se registra qué timer(s) se consumieron
   @OneToMany(mappedBy = "detallePedidoIngrediente", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<ConsumoTimer> consumos = new ArrayList<>();
 }
