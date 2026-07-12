@@ -25,7 +25,7 @@ public class Producto {
   @Column(nullable = false)
   private Integer cantidad = 0;
 
-  @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<Timer> timers;
 
   @ManyToMany

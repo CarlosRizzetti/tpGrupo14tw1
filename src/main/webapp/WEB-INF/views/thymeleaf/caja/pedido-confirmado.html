@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><title>Pedido cobrado - Caja</title></head>
+<body>
+<div th:replace="~{layouts/appCaja :: layout('Pedido cobrado', ~{::section})}">
+    <section class="max-w-xl mx-auto">
+        <div class="bg-white rounded-lg border border-puesto-btn-border shadow-sm p-8 text-center space-y-4">
+            <div class="mx-auto w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                     stroke-width="2.5" stroke="currentColor" class="w-8 h-8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                </svg>
+            </div>
+
+            <div>
+                <h2 class="text-2xl font-bold text-slate-900">Pedido cobrado</h2>
+                <p class="text-slate-500 text-sm mt-1">
+                    Pedido #<span th:text="${pedido.id}">0</span> — ya se generó la comanda para cocina.
+                </p>
+            </div>
+
+            <div class="text-3xl font-bold text-slate-900">
+                $<span th:text="${#numbers.formatDecimal(pedido.precioFinal, 1, 2)}">0,00</span>
+            </div>
+
+            <div th:if="${avisoCliente}" role="status"
+                 class="rounded-md bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 text-sm text-left"
+                 th:text="${avisoCliente}">
+                aviso
+            </div>
+
+            <a th:href="@{/cajero/menu}"
+               class="inline-block mt-4 bg-puesto-btn text-puesto-btn-text border border-puesto-btn-border rounded-md px-6 py-3 font-semibold hover:bg-puesto-btn-hover-bg transition">
+                Nuevo pedido
+            </a>
+        </div>
+    </section>
+</div>
+</body>
+</html>

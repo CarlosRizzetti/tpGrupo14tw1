@@ -41,6 +41,7 @@ public class ControladorDashboardTest {
   private ServicioProducto servicioProductoMock;
 
   private ServicioUsuario servicioUsuarioMock;
+  private com.tallerwebi.dominio.interfaces.ServicioCategoria servicioCategoriaMock;
   Authentication authenticationMock;
   Usuario usuarioTest;
 
@@ -50,9 +51,15 @@ public class ControladorDashboardTest {
     this.servicioTimerMock = mock(ServicioTimer.class);
     this.servicioProductoMock = mock(ServicioProducto.class);
     this.servicioUsuarioMock = mock(ServicioUsuario.class);
+    this.servicioCategoriaMock = mock(com.tallerwebi.dominio.interfaces.ServicioCategoria.class);
     this.authenticationMock = mock(Authentication.class);
     controladorDashboard =
-      new ControladorDashboard(servicioTimerMock, servicioProductoMock, servicioUsuarioMock);
+      new ControladorDashboard(
+        servicioTimerMock,
+        servicioProductoMock,
+        servicioUsuarioMock,
+        servicioCategoriaMock
+      );
 
     User user = new User(
       "user",
@@ -441,11 +448,11 @@ public class ControladorDashboardTest {
     when(servicioTimerMock.obtenerTimersActivos(anyLong())).thenReturn(timersActivos);
     when(sessionMock.getAttribute(anyString())).thenReturn(categoriaDTO);
 
-    ModelAndView mav = controladorDashboard.index(sessionMock);
+    ModelAndView mav = controladorDashboard.index(sessionMock, authenticationMock);
     Map<String, Object> model = mav.getModel();
-
-    assertEquals(2, model.size());
+    assertEquals(4, model.size());
     assertTrue(model.containsKey("timers"));
+    assertTrue(model.containsKey("tieneCategoriaAsignada"));
     List<TimerDTO> timers = (List<TimerDTO>) model.get("timers");
     assertEquals(1, timers.size());
     assertEquals(1L, timers.get(0).getId());
@@ -790,7 +797,7 @@ public class ControladorDashboardTest {
   public void queSiNoHayCategoriaEnSesionRedirijaAHome() {
     when(sessionMock.getAttribute("categoria")).thenReturn(null);
 
-    ModelAndView mav = controladorDashboard.index(sessionMock);
+    ModelAndView mav = controladorDashboard.index(sessionMock, authenticationMock);
 
     assertEquals("redirect:/home", mav.getViewName());
 
@@ -807,7 +814,7 @@ public class ControladorDashboardTest {
     when(sessionMock.getAttribute("categoria")).thenReturn(categoriaDto);
     when(servicioTimerMock.obtenerTimersActivos(1L)).thenReturn(Collections.emptyList());
 
-    ModelAndView mav = controladorDashboard.index(sessionMock);
+    ModelAndView mav = controladorDashboard.index(sessionMock, authenticationMock);
 
     assertEquals("dashboard/dashboard", mav.getViewName());
 

@@ -12,6 +12,7 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.jasmine,
+        grecaptcha: "readonly",
       },
     },
     plugins: {
@@ -19,7 +20,6 @@ export default [
     },
     rules: {
       "indent": ["error", 2],
-      "linebreak-style": ["error", "unix"],
       "quotes": ["error", "double"],
       "semi": ["error", "always"],
       "no-unused-vars": "warn",

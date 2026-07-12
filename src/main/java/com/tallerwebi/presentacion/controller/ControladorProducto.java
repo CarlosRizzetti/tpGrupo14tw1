@@ -4,6 +4,7 @@ import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Usuario;
+import com.tallerwebi.dominio.excepcion.SinStockSuficienteException;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class ControladorProducto {
@@ -117,24 +119,57 @@ public class ControladorProducto {
   }
 
   @RequestMapping(path = "/category/{id}/products", method = RequestMethod.GET)
-  public ModelAndView mostrarProductosPorCategoria(@PathVariable Long id, HttpSession session) {
+  public ModelAndView mostrarProductosPorCategoria(
+    @PathVariable Long id,
+    HttpSession session,
+    org.springframework.security.core.Authentication authentication
+  ) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return new ModelAndView("redirect:/login");
+    }
+
     ModelMap modelo = new ModelMap();
     CategoriaDto categoria = servicioCategoria.obtenerCategoriaPorId(id);
     session.setAttribute(CATEGORIA, categoria);
     List<Producto> productos = servicioProducto.obtenerProductosPorCategoria(id);
 
+    // Obtener los usuarios de la categoría para mostrarlos en la vista
+    List<com.tallerwebi.dominio.entity.Usuario> usuarios =
+      servicioCategoria.obtenerUsuariosPorCategoria(id);
+
     modelo.put(CATEGORIA, categoria);
     modelo.put("productos", productos);
+    modelo.put("usuarios", usuarios);
     return new ModelAndView("listadoDeProductosYReglas/productos", modelo);
   }
 
   @RequestMapping(path = "/product/{id}", method = RequestMethod.GET)
-  public ModelAndView mostrarVencimientoProducto(@PathVariable Long id, HttpSession session) {
+  public ModelAndView mostrarVencimientoProducto(
+    @PathVariable Long id,
+    HttpSession session,
+    Authentication authentication
+  ) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+      return new ModelAndView("redirect:/login");
+    }
+
     ModelMap modelo = new ModelMap();
     Producto producto = servicioProducto.obtenerProductoConReglas(id);
     Set<ReglaVencimiento> reglas = producto.getReglas();
     CategoriaDto categoriaDto = (CategoriaDto) session.getAttribute(CATEGORIA);
 
+    boolean isAdmin = authentication
+      .getAuthorities()
+      .stream()
+      .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+    boolean tienePermiso =
+      categoriaDto != null &&
+      servicioCategoria
+        .obtenerCategoriasPorUsuario(authentication.getName())
+        .stream()
+        .anyMatch(c -> c.getId().equals(categoriaDto.getId()));
+
+    modelo.put("puedeGenerarTimer", isAdmin || tienePermiso);
     modelo.put("producto", producto);
     modelo.put("reglas", reglas);
     modelo.put(CATEGORIA, categoriaDto);
@@ -149,20 +184,47 @@ public class ControladorProducto {
     @RequestParam(name = "categoryId", required = false) Long categoryId,
     @RequestParam(name = "reglaId") Long reglaId,
     @RequestParam(name = "cantidad") Integer cantidad,
-    Authentication authentication
+    Authentication authentication,
+    RedirectAttributes redirectAttributes
   ) {
-    String email = AuthenticationUtils.obtenerEmailDeAutenticacion(authentication);
+    final String email = AuthenticationUtils.obtenerEmailDeAutenticacion(authentication);
     Producto producto = servicioProducto.obtenerProductoConReglas(id);
     Categoria categoria = determinarCategoria(producto, categoryId);
+
+    boolean isAdmin = authentication
+      .getAuthorities()
+      .stream()
+      .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+    boolean tienePermiso =
+      categoria != null &&
+      servicioCategoria
+        .obtenerCategoriasPorUsuario(email)
+        .stream()
+        .anyMatch(c -> c.getId().equals(categoria.getId()));
+
+    if (!isAdmin && !tienePermiso) {
+      redirectAttributes.addFlashAttribute(
+        "error",
+        "No tienes permisos para generar timers en esta categoría"
+      );
+      return "redirect:/product/" + id;
+    }
+
     Usuario usuario = servicioUsuario.obtenerUsuarioPorEmail(email);
-    servicioReglaVencimiento.generarVencimiento(
-      producto,
-      categoria,
-      reglaId,
-      offsetMinutes,
-      cantidad,
-      usuario
-    );
+
+    try {
+      servicioReglaVencimiento.generarVencimiento(
+        producto,
+        categoria,
+        reglaId,
+        offsetMinutes,
+        cantidad,
+        usuario
+      );
+    } catch (SinStockSuficienteException | IllegalArgumentException e) {
+      redirectAttributes.addFlashAttribute("error", e.getMessage());
+      return "redirect:/product/" + id;
+    }
 
     return "redirect:/dashboard";
   }

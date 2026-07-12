@@ -7,6 +7,7 @@ import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.excepcion.CantidadInvalidaException;
 import com.tallerwebi.dominio.excepcion.IdInvalido;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
+import com.tallerwebi.dominio.interfaces.ServicioCategoria;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
@@ -34,6 +35,7 @@ public class ControladorDashboard {
 
   private static final Logger logger = LoggerFactory.getLogger(ControladorDashboard.class);
   private final ServicioUsuario servicioUsuario;
+  private final ServicioCategoria servicioCategoria;
   private ServicioProducto servicioProducto;
   public ServicioTimer servicioTimer;
 
@@ -41,15 +43,17 @@ public class ControladorDashboard {
   public ControladorDashboard(
     ServicioTimer servicioTimer,
     ServicioProducto servicioProducto,
-    ServicioUsuario servicioUsuario
+    ServicioUsuario servicioUsuario,
+    ServicioCategoria servicioCategoria
   ) {
     this.servicioTimer = servicioTimer;
     this.servicioProducto = servicioProducto;
     this.servicioUsuario = servicioUsuario;
+    this.servicioCategoria = servicioCategoria;
   }
 
   @GetMapping("/dashboard")
-  public ModelAndView index(HttpSession session) {
+  public ModelAndView index(HttpSession session, Authentication authentication) {
     CategoriaDto categoria = (CategoriaDto) session.getAttribute("categoria");
 
     if (categoria == null) {
@@ -58,6 +62,21 @@ public class ControladorDashboard {
 
     ModelAndView mav = new ModelAndView("dashboard/dashboard");
     mav.addObject("categoria", categoria);
+
+    boolean isAdmin =
+      authentication != null &&
+      authentication.isAuthenticated() &&
+      authentication.getAuthorities().stream().anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+    boolean tieneCategoriaAsignada =
+      authentication != null &&
+      authentication.isAuthenticated() &&
+      servicioCategoria
+        .obtenerCategoriasPorUsuario(authentication.getName())
+        .stream()
+        .anyMatch(c -> c.getId().equals(categoria.getId()));
+
+    mav.addObject("isAdmin", isAdmin);
+    mav.addObject("tieneCategoriaAsignada", tieneCategoriaAsignada);
     List<TimerDTO> timersActivos = servicioTimer.obtenerTimersActivos(categoria.getId());
 
     if (timersActivos.isEmpty()) {

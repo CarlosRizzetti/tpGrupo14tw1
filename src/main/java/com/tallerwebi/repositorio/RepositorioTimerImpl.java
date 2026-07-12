@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository("RepositorioTimer")
 public class RepositorioTimerImpl implements RepositorioTimer {
 
+  private static final String ESTADO = "estado";
   private static final String PARAM_DESDE = "desde";
 
   public SessionFactory sessionFactory;
@@ -27,8 +28,22 @@ public class RepositorioTimerImpl implements RepositorioTimer {
     return sessionFactory
       .getCurrentSession()
       .createQuery(hql, Timer.class)
-      .setParameter("estado", estado)
+      .setParameter(ESTADO, estado)
       .setParameter("idCat", id)
+      .list();
+  }
+
+  @Override
+  public List<Timer> obtenerTimersActivosConStockPorProducto(Long productoId) {
+    String hql =
+      "FROM Timer t WHERE t.producto.id = :productoId " +
+      "AND t.estado = :estado AND t.cantidadProducto > 0 " +
+      "ORDER BY t.cicloVida.fechaVencimiento ASC";
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery(hql, Timer.class)
+      .setParameter("productoId", productoId)
+      .setParameter(ESTADO, EstadoTimer.ACTIVO)
       .list();
   }
 
@@ -56,7 +71,7 @@ public class RepositorioTimerImpl implements RepositorioTimer {
       .createQuery(hql.toString(), Timer.class);
 
     if (estado != null) {
-      query.setParameter("estado", estado);
+      query.setParameter(ESTADO, estado);
     }
 
     if (categoriaId != null) {
@@ -86,7 +101,7 @@ public class RepositorioTimerImpl implements RepositorioTimer {
       .createQuery(hql, Boolean.class)
       .setParameter("categoriaId", categoriaId)
       .setParameter("groupId", groupId)
-      .setParameter("estado", EstadoTimer.ACTIVO)
+      .setParameter(ESTADO, EstadoTimer.ACTIVO)
       .getSingleResult();
   }
 
