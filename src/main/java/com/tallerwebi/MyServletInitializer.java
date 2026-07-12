@@ -34,6 +34,8 @@ public class MyServletInitializer extends AbstractAnnotationConfigDispatcherServ
       DatabaseInitializationConfig.class,
       MailConfig.class,
       SecurityConfig.class,
+      com.tallerwebi.config.ClienteAuthenticationProvider.class,
+      com.tallerwebi.config.ClienteSecurityConfig.class,
     };
   }
 

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, _, ~{::scripts})}">
+
+<head>
+    <title>Portal de Clientes / MCD</title>
+</head>
+
+<body>
+
+    <!-- FRAGMENTO IZQUIERDO: Botón Cerrar Sesión / Perfil -->
+    <div th:fragment="header_left" class="relative">
+        <a th:href="@{/portal/clientes/logout}"
+           class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-red-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Salir del Portal
+        </a>
+    </div>
+
+    <!-- FRAGMENTO CENTRAL -->
+    <div th:fragment="header_center">
+        <span class="text-puesto-header-text font-bold uppercase tracking-widest text-lg">Portal de Clientes MCD</span>
+    </div>
+
+    <!-- FRAGMENTO DERECHO -->
+    <div th:fragment="header_right" class="flex items-center gap-3">
+        <a th:href="@{/portal/clientes/perfil}"
+           class="text-xs font-black uppercase tracking-wider bg-white/20 hover:bg-white/30 text-white px-3.5 py-1.5 rounded-full border border-white/30 transition shadow-sm flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+            </svg>
+            Mi Perfil
+        </a>
+        <span class="text-xs font-bold uppercase tracking-wider bg-white/10 px-3 py-1.5 rounded-full border border-white/20 hidden sm:inline-block">
+            <span th:text="${#authentication.name}">Cliente</span>
+        </span>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div th:fragment="content" class="p-6 max-w-6xl mx-auto flex flex-col justify-center min-h-[calc(100vh-8rem)]">
+
+        <!-- ALERTA SI FALTAN DATOS EN EL PERFIL (EJ: GOOGLE LOGIN) -->
+        <div th:if="${faltanDatos}" 
+             class="mb-8 p-4 bg-amber-50 border-l-4 border-amber-500 text-amber-900 rounded-2xl shadow-md flex flex-col sm:flex-row items-center justify-between gap-4 border border-amber-200">
+            <div class="flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                    <h4 class="font-bold text-sm uppercase tracking-wider">Aviso importante</h4>
+                    <p class="text-xs opacity-90 font-medium mt-0.5">Te recomendamos agregar tu <b>DNI</b> o <b>Teléfono</b> para poder identificarte fácilmente.</p>
+                </div>
+            </div>
+            <a th:href="@{/portal/clientes/perfil}" 
+               class="shrink-0 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-black text-xs uppercase tracking-widest rounded-xl transition shadow">
+                Completar mis datos →
+            </a>
+        </div>
+
+        <div class="text-center mb-10">
+            <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tighter text-slate-800 mb-2">
+                ¿Qué deseas hacer hoy?
+            </h2>
+            <p class="text-slate-600 font-medium text-base">
+                Supervisa el estado en vivo de tus pedidos o ponte en contacto con la cocina si hubo algún inconveniente.
+            </p>
+        </div>
+
+        <!-- GRILLA DE 2 TARJETAS ESTILO VENCIMIENTOS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 pb-10">
+
+            <!-- TARJETA 1: HISTORIAL DE PEDIDOS -->
+            <a th:href="@{/portal/clientes/historial}"
+               class="group relative flex flex-col items-center justify-center p-8 bg-puesto-btn text-puesto-btn-text border-b-[8px] border-puesto-btn-border rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-200 hover:-translate-y-2 min-h-[240px]">
+                
+                <div class="mb-5 text-puesto-accent transition-transform duration-200 group-hover:scale-110">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                </div>
+
+                <span class="text-3xl md:text-4xl font-black uppercase tracking-tighter text-center">
+                    Historial de Pedidos
+                </span>
+
+                <span class="text-sm opacity-80 font-bold uppercase tracking-wider mt-2 text-center">
+                    Ver estado en cocina y tickets pasados
+                </span>
+
+                <div class="w-16 h-1.5 mt-5 rounded-full opacity-60 bg-puesto-accent"></div>
+            </a>
+
+            <!-- TARJETA 2: REPORTAR UN PEDIDO -->
+            <a th:href="@{/portal/clientes/reportar}"
+               class="group relative flex flex-col items-center justify-center p-8 bg-puesto-btn text-puesto-btn-text border-b-[8px] border-puesto-btn-border rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-200 hover:-translate-y-2 min-h-[240px]">
+                
+                <div class="mb-5 text-puesto-accent transition-transform duration-200 group-hover:scale-110">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+
+                <span class="text-3xl md:text-4xl font-black uppercase tracking-tighter text-center">
+                    Reportar un Pedido
+                </span>
+
+                <span class="text-sm opacity-80 font-bold uppercase tracking-wider mt-2 text-center">
+                    Avisar a cocina por demoras o errores
+                </span>
+
+                <div class="w-16 h-1.5 mt-5 rounded-full opacity-60 bg-puesto-accent"></div>
+            </a>
+
+        </div>
+    </div>
+
+</body>
+
+<div th:fragment="scripts"></div>
+</html>
