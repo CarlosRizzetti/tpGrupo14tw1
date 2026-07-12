@@ -10,7 +10,7 @@ import com.tallerwebi.dominio.entity.enums.EstadoComanda;
 import com.tallerwebi.dominio.entity.enums.EstadoPedido;
 import com.tallerwebi.dominio.excepcion.IngredientesNoDisponiblesException;
 import com.tallerwebi.dominio.interfaces.RepositorioComanda;
-import com.tallerwebi.dominio.interfaces.RepositorioTimer;
+import com.tallerwebi.dominio.interfaces.ServicioTimer;
 import com.tallerwebi.dominio.services.ServicioComandaImpl;
 import com.tallerwebi.presentacion.dto.ComandaCocinaDTO;
 import java.util.ArrayList;
@@ -22,14 +22,14 @@ import org.junit.jupiter.api.Test;
 public class ServicioComandaImplTest {
 
   private RepositorioComanda repositorioComanda;
-  private RepositorioTimer repositorioTimer;
+  private ServicioTimer servicioTimer;
   private ServicioComandaImpl servicioComanda;
 
   @BeforeEach
   public void setUp() {
     repositorioComanda = mock(RepositorioComanda.class);
-    repositorioTimer = mock(RepositorioTimer.class);
-    servicioComanda = new ServicioComandaImpl(repositorioComanda, repositorioTimer);
+    servicioTimer = mock(ServicioTimer.class);
+    servicioComanda = new ServicioComandaImpl(repositorioComanda, servicioTimer);
   }
 
   @Test
@@ -91,13 +91,13 @@ public class ServicioComandaImplTest {
     timer.setId(1L);
     timer.setCantidadProducto(5);
     List<Timer> timers = Arrays.asList(timer);
-    when(repositorioTimer.obtenerTimersActivosConStockPorProducto(10L)).thenReturn(timers);
+    when(servicioTimer.obtenerTimersActivosConStockPorProducto(10L)).thenReturn(timers);
 
     servicioComanda.sacarComanda(1L);
 
     assertThat(comanda.getEstado(), equalTo(EstadoComanda.SACADA));
     assertThat(pedido.getEstado(), equalTo(EstadoPedido.ENTREGADO));
-    assertThat(timer.getCantidadProducto(), equalTo(3));
+    verify(servicioTimer, times(1)).descontarStock(timer.getId(), 2);
     assertThat(ingrediente.getConsumos().size(), equalTo(1));
     verify(repositorioComanda, times(1)).actualizar(comanda);
   }
@@ -130,7 +130,7 @@ public class ServicioComandaImplTest {
     timer.setId(1L);
     timer.setCantidadProducto(3);
     List<Timer> timers = Arrays.asList(timer);
-    when(repositorioTimer.obtenerTimersActivosConStockPorProducto(10L)).thenReturn(timers);
+    when(servicioTimer.obtenerTimersActivosConStockPorProducto(10L)).thenReturn(timers);
 
     assertThrows(
       IngredientesNoDisponiblesException.class,
@@ -163,8 +163,7 @@ public class ServicioComandaImplTest {
     detalle.getIngredientes().add(ingrediente);
 
     when(repositorioComanda.buscarPorId(1L)).thenReturn(comanda);
-    when(repositorioTimer.obtenerTimersActivosConStockPorProducto(10L))
-      .thenReturn(new ArrayList<>());
+    when(servicioTimer.obtenerTimersActivosConStockPorProducto(10L)).thenReturn(new ArrayList<>());
 
     assertThrows(
       IngredientesNoDisponiblesException.class,

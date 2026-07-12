@@ -11,7 +11,6 @@ import com.tallerwebi.dominio.entity.enums.EstadoComanda;
 import com.tallerwebi.dominio.entity.enums.EstadoPedido;
 import com.tallerwebi.dominio.excepcion.IngredientesNoDisponiblesException;
 import com.tallerwebi.dominio.interfaces.RepositorioComanda;
-import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioComanda;
 import com.tallerwebi.dominio.interfaces.ServicioTimer;
 import com.tallerwebi.presentacion.dto.ComandaCocinaDTO;
@@ -30,17 +29,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ServicioComandaImpl implements ServicioComanda {
 
   private final RepositorioComanda repositorioComanda;
-  private final RepositorioTimer repositorioTimer;
   private final ServicioTimer servicioTimer;
 
   @Autowired
-  public ServicioComandaImpl(
-    RepositorioComanda repositorioComanda,
-    RepositorioTimer repositorioTimer,
-    ServicioTimer servicioTimer
-  ) {
+  public ServicioComandaImpl(RepositorioComanda repositorioComanda, ServicioTimer servicioTimer) {
     this.repositorioComanda = repositorioComanda;
-    this.repositorioTimer = repositorioTimer;
     this.servicioTimer = servicioTimer;
   }
 
@@ -117,7 +110,7 @@ public class ServicioComandaImpl implements ServicioComanda {
     DetallePedidoIngrediente ingrediente,
     Map<Long, Integer> reservadoPorTimer
   ) {
-    List<Timer> timersActivos = repositorioTimer.obtenerTimersActivosConStockPorProducto(
+    List<Timer> timersActivos = servicioTimer.obtenerTimersActivosConStockPorProducto(
       ingrediente.getProducto().getId()
     );
 

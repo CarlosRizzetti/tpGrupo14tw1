@@ -254,4 +254,9 @@ public class ServicioTimerImpl implements ServicioTimer {
 
     return clon;
   }
+
+  @Override
+  public List<Timer> obtenerTimersActivosConStockPorProducto(Long idProducto) {
+    return repositorioTimer.obtenerTimersActivosConStockPorProducto(idProducto);
+  }
 }
