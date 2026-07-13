@@ -14,9 +14,10 @@
     <div class="w-full max-w-lg bg-puesto-btn text-puesto-btn-text p-8 rounded-3xl border-b-[8px] border-puesto-btn-border shadow-2xl relative">
         <div class="text-center mb-6">
             <h2 class="text-3xl font-black uppercase tracking-tighter mb-1">Crear Cuenta</h2>
+            <p class="text-xs opacity-85 font-medium">Sumate para gestionar tus pedidos y alertas de vencimiento al instante.</p>
         </div>
 
-        <div th:if="${error != null}" id="error-container" class="mb-6 p-4 bg-red-100/90 border-l-4 border-red-500 text-red-800 rounded shadow-inner">
+        <div th:if="${error != null}" class="mb-6 p-4 bg-red-100/90 border-l-4 border-red-500 text-red-800 rounded-xl shadow-inner">
             <span class="font-bold text-sm" th:text="${error}"></span>
         </div>
 
@@ -48,14 +49,20 @@
                     <label for="documento" class="block text-xs font-bold uppercase tracking-wider mb-1.5">Número de DNI</label>
                     <input th:field="*{documento}" id="documento" type="text"
                            class="w-full px-4 py-3 rounded-xl text-black bg-white focus:ring-4 focus:ring-puesto-btn-border outline-none transition-shadow font-bold text-sm"
-                           placeholder="Ej: 38492012" required />
+                           placeholder="Ej: 38492012" pattern="[0-9]{8}" minlength="8" maxlength="8"
+                           title="Debe ingresar exactamente 8 dígitos numéricos."
+                           oninvalid="this.setCustomValidity('Por favor, ingresa tu DNI sin puntos ni espacios.')"
+                           oninput="this.setCustomValidity('')" required />
                 </div>
 
                 <div>
                     <label for="telefono" class="block text-xs font-bold uppercase tracking-wider mb-1.5">Teléfono</label>
                     <input th:field="*{telefono}" id="telefono" type="tel"
                            class="w-full px-4 py-3 rounded-xl text-black bg-white focus:ring-4 focus:ring-puesto-btn-border outline-none transition-shadow font-bold text-sm"
-                           placeholder="Ej: 1149201923" required />
+                           placeholder="Ej: 1149201923" pattern="[0-9]{10}" minlength="10" maxlength="10"
+                           title="Debe ingresar exactamente 10 dígitos numéricos."
+                           oninvalid="this.setCustomValidity('Por favor, ingresa tu teléfono celular (código de área + número).')"
+                           oninput="this.setCustomValidity('')" required />
                 </div>
             </div>
 

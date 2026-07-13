@@ -161,7 +161,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         request
           .getSession()
           .setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-        response.sendRedirect(request.getContextPath() + "/portal/clientes/mis-pedidos");
+
+        boolean faltanDatos =
+          cliente.getDocumento() == null ||
+          cliente.getDocumento().trim().isEmpty() ||
+          cliente.getTelefono() == null ||
+          cliente.getTelefono().trim().isEmpty();
+
+        if (faltanDatos) {
+          response.sendRedirect(request.getContextPath() + "/portal/clientes/completar-datos");
+        } else {
+          response.sendRedirect(request.getContextPath() + "/portal/clientes/mis-pedidos");
+        }
       } else {
         servicioOAuth2.procesarUsuarioGoogle(email, nombre, response);
       }

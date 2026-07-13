@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app :: layout(~{::content}, _, ~{::header_center}, _, _, ~{::scripts})}">
+<head>
+    <title>Completar Datos / Portal de Clientes MCD</title>
+</head>
+<body>
+
+<div th:fragment="header_center">
+    <span class="text-puesto-header-text font-bold uppercase tracking-widest">Completa tu Perfil</span>
+</div>
+
+<div th:fragment="content" class="p-6 flex flex-col items-center justify-center min-h-[calc(100vh-7rem)] my-6">
+    <div class="w-full max-w-lg bg-puesto-btn text-puesto-btn-text p-8 rounded-3xl border-b-[8px] border-puesto-btn-border shadow-2xl relative">
+        <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl mb-3 shadow-sm" style="border: 1.5px solid rgb(30, 58, 138); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+            </div>
+            <h2 class="text-2xl font-black uppercase tracking-tighter mb-1.5">Completar Registro</h2>
+            <p class="text-xs opacity-90 leading-relaxed font-medium">
+                ¡Hola, <b th:text="${cliente != null && cliente.nombre != null ? cliente.nombre : 'Cliente'}"></b>!<br>
+                Para poder asociar tus pedidos, facturas y avisos por caja, es obligatorio registrar tu <b>DNI</b> y <b>Número de Celular</b>.
+            </p>
+        </div>
+
+        <div th:if="${error != null}" class="mb-6 p-4 bg-red-100/90 border-l-4 border-red-500 text-red-800 rounded-xl shadow-inner">
+            <span class="font-bold text-xs" th:text="${error}"></span>
+        </div>
+
+        <form th:action="@{/portal/clientes/completar-datos-procesar}" method="POST" class="space-y-5">
+            <div>
+                <label for="documento" class="block text-xs font-bold uppercase tracking-wider mb-1.5 text-blue-800">
+                    Número de DNI *
+                </label>
+                <input id="documento" name="documento" type="text"
+                       th:value="${cliente != null ? cliente.documento : ''}"
+                       class="w-full px-4 py-3.5 rounded-xl text-black bg-white focus:ring-4 focus:ring-amber-400 outline-none transition-all font-black text-sm shadow"
+                       placeholder="Ej: 38492012" pattern="[0-9]{8}" minlength="8" maxlength="8"
+                       title="Debe ingresar exactamente 8 dígitos numéricos."
+                       oninvalid="this.setCustomValidity('Por favor, ingresa tu DNI sin puntos ni espacios.')"
+                       oninput="this.setCustomValidity('')" required autofocus />
+            </div>
+
+            <div>
+                <label for="telefono" class="block text-xs font-bold uppercase tracking-wider mb-1.5 text-blue-800">
+                    Teléfono Celular *
+                </label>
+                <input id="telefono" name="telefono" type="tel"
+                       th:value="${cliente != null ? cliente.telefono : ''}"
+                       class="w-full px-4 py-3.5 rounded-xl text-black bg-white focus:ring-4 focus:ring-amber-400 outline-none transition-all font-black text-sm shadow"
+                       placeholder="Ej: 1149201923" pattern="[0-9]{10}" minlength="10" maxlength="10"
+                       title="Debe ingresar exactamente 10 dígitos numéricos."
+                       oninvalid="this.setCustomValidity('Por favor, ingresa tu teléfono celular (código de área + número).')"
+                       oninput="this.setCustomValidity('')" required />
+            </div>
+
+            <div class="pt-2">
+                <button type="submit"
+                        class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white font-black text-sm uppercase tracking-widest rounded-2xl shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2">
+                    <span>Guardar y Continuar</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor font-bold">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:fragment="scripts"></div>
+</body>
+</html>
