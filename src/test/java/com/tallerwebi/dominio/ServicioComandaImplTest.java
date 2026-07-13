@@ -93,6 +93,14 @@ public class ServicioComandaImplTest {
     List<Timer> timers = Arrays.asList(timer);
     when(servicioTimer.obtenerTimersActivosConStockPorProducto(10L)).thenReturn(timers);
 
+    doAnswer(invocation -> {
+        Integer cant = invocation.getArgument(1);
+        timer.setCantidadProducto(timer.getCantidadProducto() - cant);
+        return null;
+      })
+      .when(servicioTimer)
+      .descontarStock(eq(1L), anyInt());
+
     servicioComanda.sacarComanda(1L);
 
     assertThat(comanda.getEstado(), equalTo(EstadoComanda.SACADA));

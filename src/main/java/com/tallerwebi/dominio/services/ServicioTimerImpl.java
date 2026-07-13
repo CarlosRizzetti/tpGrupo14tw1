@@ -11,6 +11,7 @@ import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioImpresion;
 import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
+import com.tallerwebi.dominio.interfaces.ServicioTelegram;
 import com.tallerwebi.dominio.interfaces.ServicioTimer;
 import com.tallerwebi.dominio.utils.ImpresionHelper;
 import com.tallerwebi.dominio.utils.ValidacionHelper;
@@ -27,8 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ServicioTimerImpl implements ServicioTimer {
 
-  private final String TIMER = "timer";
+  private static final String TIMER = "timer";
+  private static final String NOT_AVAILABLE = "N/A";
   private final ServicioReglaVencimiento servicioReglaVencimiento;
+  private final ServicioTelegram servicioTelegram;
   private RepositorioTimer repositorioTimer;
   private RepositorioCategoria repositorioCategoria;
   private ServicioImpresion servicioImpresion;
@@ -38,12 +41,14 @@ public class ServicioTimerImpl implements ServicioTimer {
     RepositorioTimer repositorioTimer,
     RepositorioCategoria repositorioCategoria,
     ServicioReglaVencimiento servicioReglaVencimiento,
-    ServicioImpresion servicioImpresion
+    ServicioImpresion servicioImpresion,
+    ServicioTelegram servicioTelegram
   ) {
     this.repositorioTimer = repositorioTimer;
     this.repositorioCategoria = repositorioCategoria;
     this.servicioReglaVencimiento = servicioReglaVencimiento;
     this.servicioImpresion = servicioImpresion;
+    this.servicioTelegram = servicioTelegram;
   }
 
   @Override
@@ -82,6 +87,30 @@ public class ServicioTimerImpl implements ServicioTimer {
     }
 
     repositorioTimer.guardar(timer);
+
+    if (estado == EstadoTimer.ELIMINADO) {
+      org.springframework.security.core.Authentication auth =
+        org.springframework.security.core.context.SecurityContextHolder
+          .getContext()
+          .getAuthentication();
+      String nombreUsuario = (auth != null && auth.isAuthenticated())
+        ? auth.getName()
+        : "Usuario desconocido";
+      String productoNombre = timer.getProducto() != null
+        ? timer.getProducto().getNombre()
+        : NOT_AVAILABLE;
+      String categoriaNombre = timer.getCategoria() != null
+        ? timer.getCategoria().getNombre()
+        : NOT_AVAILABLE;
+      servicioTelegram.enviarMensaje(
+        String.format(
+          "🗑️ El usuario %s eliminó el timer del producto '%s' (Categoría: %s).",
+          nombreUsuario,
+          productoNombre,
+          categoriaNombre
+        )
+      );
+    }
   }
 
   public void modificarCantidad(Long timerId, Integer cantidad) {
@@ -132,6 +161,20 @@ public class ServicioTimerImpl implements ServicioTimer {
     actualizarTimerOriginal(timer, timerId, cantidad);
     repositorioTimer.guardar(clon);
     ImpresionHelper.intentarImpresionDeVencimiento(clon, servicioImpresion);
+
+    String nombreUsuario = obtenerNombreUsuario(usuario);
+    String productoNombre = timer.getProducto() != null
+      ? timer.getProducto().getNombre()
+      : NOT_AVAILABLE;
+    servicioTelegram.enviarMensaje(
+      String.format(
+        "📥 El usuario %s importó el timer del producto '%s' a la categoría '%s' (Cantidad: %d).",
+        nombreUsuario,
+        productoNombre,
+        categoriaDestino.getNombre(),
+        cantidad
+      )
+    );
 
     return new CategoriaDto(categoriaDestino);
   }
@@ -191,6 +234,23 @@ public class ServicioTimerImpl implements ServicioTimer {
       null,
       cantidad,
       usuario
+    );
+
+    String nombreUsuario = obtenerNombreUsuario(usuario);
+    String productoNombre = timer.getProducto() != null
+      ? timer.getProducto().getNombre()
+      : NOT_AVAILABLE;
+    String categoriaNombre = timer.getCategoria() != null
+      ? timer.getCategoria().getNombre()
+      : NOT_AVAILABLE;
+    servicioTelegram.enviarMensaje(
+      String.format(
+        "🔄 El usuario %s renovó el timer del producto '%s' (Categoría: %s) por una cantidad de %d.",
+        nombreUsuario,
+        productoNombre,
+        categoriaNombre,
+        cantidad
+      )
     );
 
     return mapearATimerDTO(nuevoTimer);
@@ -253,6 +313,19 @@ public class ServicioTimerImpl implements ServicioTimer {
     }
 
     return clon;
+  }
+
+  private String obtenerNombreUsuario(Usuario usuario) {
+    if (usuario == null) {
+      return "Usuario desconocido";
+    }
+    if (usuario.getNombre() != null && !usuario.getNombre().isEmpty()) {
+      return usuario.getNombre();
+    }
+    if (usuario.getEmail() != null && !usuario.getEmail().isEmpty()) {
+      return usuario.getEmail();
+    }
+    return "Usuario desconocido";
   }
 
   @Override
