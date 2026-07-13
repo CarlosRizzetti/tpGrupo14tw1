@@ -83,7 +83,7 @@
     </div>
 
     <div class="mb-8">
-        <h2 class="text-3xl font-black text-black opacity-80 mb-2">Bienvenido, <span class="font-black" th:text="${email != null ? #strings.capitalize(#strings.substring(email, 0, email.indexOf('@'))) : 'Administrador'}">Admin</span></h2>
+        <h2 class="text-3xl font-black text-black opacity-80 mb-2">Bienvenido, <span class="font-black" th:text="${email != null && email.contains('@') ? #strings.capitalize(#strings.substring(email, 0, email.indexOf('@'))) : (email != null ? email : 'Administrador')}">Admin</span></h2>
         <p class="font-black mb-2 opacity-80">¿Qué deseas gestionar hoy?</p>
     </div>
 

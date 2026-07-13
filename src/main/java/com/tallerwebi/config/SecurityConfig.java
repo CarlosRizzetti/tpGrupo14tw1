@@ -98,7 +98,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
       .accessDeniedPage("/home")
       .and()
       .authorizeRequests()
-      .antMatchers("/admin/**")
+      .antMatchers("/admin", "/admin/**")
       .hasRole("ADMIN")
       .antMatchers(
         "/login",

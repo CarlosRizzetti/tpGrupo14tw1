@@ -137,4 +137,10 @@ public class ControladorAdminPanelTest {
 
     assertEquals("acceso-denegado", mav.getViewName());
   }
+
+  @Test
+  public void deberiaRedirigirALoginSiLaAutenticacionEsNula() {
+    ModelAndView mav = controlador.panelDeControl(null);
+    assertEquals("redirect:/login", mav.getViewName());
+  }
 }
