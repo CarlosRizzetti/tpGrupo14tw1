@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import com.tallerwebi.dominio.interfaces.ServicioLote;
-import com.tallerwebi.dominio.interfaces.ServicioLote;
 import com.tallerwebi.dominio.interfaces.ServicioTelegram;
 import com.tallerwebi.presentacion.controller.ControladorAdminPanel;
 import com.tallerwebi.presentacion.dto.NotificacionVencimientoDto;
@@ -108,5 +107,26 @@ public class ControladorAdminPanelTest {
   public void deberiaRedirigirALoginSiLaAutenticacionEsNula() {
     ModelAndView mav = controlador.panelDeControl(null);
     assertEquals("redirect:/login", mav.getViewName());
+  }
+
+  @Test
+  public void quePanelDeControlSiElUsuarioNoEstaAutenticadoRedirijaAAccesoDenegado() {
+    doReturn(false).when(authenticationMock).isAuthenticated();
+
+    ModelAndView mav = controlador.panelDeControl(authenticationMock);
+
+    assertEquals("redirect:/acceso-denegado", mav.getViewName());
+  }
+
+  @Test
+  public void quePanelDeControlSiElUsuarioNoEsAdminRedirijaAAccesoDenegado() {
+    doReturn(true).when(authenticationMock).isAuthenticated();
+    doAnswer(invocation -> List.of(new SimpleGrantedAuthority("ROLE_USER")))
+      .when(authenticationMock)
+      .getAuthorities();
+
+    ModelAndView mav = controlador.panelDeControl(authenticationMock);
+
+    assertEquals("redirect:/acceso-denegado", mav.getViewName());
   }
 }
