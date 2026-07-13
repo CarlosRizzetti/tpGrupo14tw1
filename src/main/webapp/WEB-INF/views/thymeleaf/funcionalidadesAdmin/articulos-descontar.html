@@ -1,0 +1,178 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, ~{}, _)}">
+<head>
+    <title>Descontar Stock de Artículos</title>
+</head>
+<body>
+
+<div th:fragment="header_center">
+    <span class="text-puesto-header-text font-bold uppercase tracking-widest">
+        Descontar Stock de Artículos
+    </span>
+</div>
+
+<div th:fragment="header_left">
+    <a th:href="@{/admin}" class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+        </svg>
+        Volver
+    </a>
+</div>
+
+<div th:fragment="header_right">
+    <a th:href="@{/dashboard}"
+       class="hidden md:flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg border border-white/20 transition text-xs font-bold uppercase tracking-wider">
+        Dashboard
+    </a>
+</div>
+
+<div th:fragment="content" class="p-6 max-w-6xl mx-auto">
+    
+    <div class="mb-6 md:hidden">
+        <a th:href="@{/admin}" class="inline-flex items-center px-4 py-2 bg-puesto-btn text-puesto-btn-text text-sm font-bold uppercase rounded-lg border border-puesto-btn-border shadow">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+            </svg>
+            Volver
+        </a>
+    </div>
+
+    <!-- Alertas de éxito y error -->
+    <div th:if="${param.exito}" class="mb-6 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded-lg shadow-sm">
+        <p class="font-bold">¡Stock descontado con éxito!</p>
+    </div>
+    <div th:if="${error != null}" class="mb-6 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-lg shadow-sm">
+        <p class="font-bold" th:text="${error}"></p>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                Descuento de Stock en Almacén
+            </h2>
+            <div class="flex items-center space-x-3">
+                <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded-lg dark:bg-indigo-200 dark:text-indigo-900" th:text="${#lists.size(articulos)} + ' Lotes'"></span>
+            </div>
+        </div>
+        
+        <div th:if="${#lists.isEmpty(articulos)}" class="text-center p-10 bg-white dark:bg-gray-800">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+            <p class="text-lg text-gray-500 dark:text-gray-400 font-medium">No hay artículos registrados en el almacén.</p>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(articulos)}" class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-wrap gap-4 items-end">
+            <div class="flex-1 min-w-[200px]">
+                <label for="filterCodigo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Filtrar por Código</label>
+                <input type="text" id="filterCodigo" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm" placeholder="Ingrese código...">
+            </div>
+            <div class="flex-1 min-w-[200px]">
+                <label for="filterDescripcion" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Filtrar por Nombre</label>
+                <input type="text" id="filterDescripcion" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm" placeholder="Ingrese nombre...">
+            </div>
+            <div class="bg-indigo-100 dark:bg-indigo-900 px-4 py-2 rounded-lg shadow-sm border border-indigo-200 dark:border-indigo-800 flex items-center justify-center">
+                <span class="text-sm font-semibold text-indigo-800 dark:text-indigo-200 mr-2">Cantidad Total Filtrada:</span>
+                <span id="cantidadTotal" class="text-lg font-bold text-indigo-900 dark:text-indigo-100">0</span>
+            </div>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(articulos)}" class="overflow-x-auto">
+            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-300">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 rounded-tl-lg">Código</th>
+                        <th scope="col" class="px-6 py-3">Nombre</th>
+                        <th scope="col" class="px-6 py-3">Marca</th>
+                        <th scope="col" class="px-6 py-3">Proveedor</th>
+                        <th scope="col" class="px-6 py-3 text-center">Stock Actual</th>
+                        <th scope="col" class="px-6 py-3 text-center">Nº Lote</th>
+                        <th scope="col" class="px-6 py-3 text-center">Vencimiento</th>
+                        <th scope="col" class="px-6 py-3 text-center rounded-tr-lg w-72">Descontar</th>
+                    </tr>
+                </thead>
+                <tbody id="articulosTableBody">
+                    <tr th:each="articulo : ${articulos}" class="articulo-row bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white articulo-codigo" th:text="${articulo.codigo != null ? articulo.codigo : '-'}"></td>
+                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white articulo-nombre" th:text="${articulo.nombre}"></td>
+                        <td class="px-6 py-4" th:text="${articulo.marca}"></td>
+                        <td class="px-6 py-4" th:text="${articulo.proveedor}"></td>
+                        <td class="px-6 py-4 text-center font-semibold text-indigo-600 dark:text-indigo-400 articulo-cantidad" th:text="${articulo.cantidad != null ? (articulo.cantidad % 1 == 0 ? #numbers.formatInteger(articulo.cantidad, 1) : articulo.cantidad) + ' ' + (articulo.unidadDeMedida != null ? articulo.unidadDeMedida.name() : '') : '-'}" th:data-cantidad="${articulo.cantidad != null ? articulo.cantidad : 0}"></td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600" th:text="${articulo.numeroDeLote}"></span>
+                        </td>
+                        <td class="px-6 py-4 text-center text-red-600 dark:text-red-400 font-semibold" th:text="${#temporals.format(articulo.fechaDeVencimiento, 'dd/MM/yyyy')}"></td>
+                        <td class="px-6 py-4 text-center">
+                            <form th:action="@{/admin/articulos/descontar}" method="post" class="flex items-center space-x-2 justify-center m-0">
+                                <input type="hidden" name="id" th:value="${articulo.id}" />
+                                <input type="number" 
+                                       name="cantidad" 
+                                       placeholder="Cant." 
+                                       min="0.01" 
+                                       step="any" 
+                                       required="required"
+                                       class="w-20 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white" />
+                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow hover:shadow-md flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0" />
+                                    </svg>
+                                    Descontar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const filterCodigo = document.getElementById('filterCodigo');
+                const filterDescripcion = document.getElementById('filterDescripcion');
+                const cantidadTotalSpan = document.getElementById('cantidadTotal');
+                const rows = document.querySelectorAll('.articulo-row');
+
+                function filterTable() {
+                    if (!filterCodigo || !filterDescripcion) return;
+                    const textCodigo = filterCodigo.value.toLowerCase().trim();
+                    const textDesc = filterDescripcion.value.toLowerCase().trim();
+                    let sum = 0;
+
+                    rows.forEach(row => {
+                        const codigoCell = row.querySelector('.articulo-codigo');
+                        const nombreCell = row.querySelector('.articulo-nombre');
+                        
+                        const codigo = codigoCell ? codigoCell.textContent.toLowerCase() : '';
+                        const nombre = nombreCell ? nombreCell.textContent.toLowerCase() : '';
+
+                        const matchesCodigo = codigo.includes(textCodigo);
+                        const matchesDesc = nombre.includes(textDesc);
+
+                        if (matchesCodigo && matchesDesc) {
+                            row.style.display = '';
+                            const cantCell = row.querySelector('.articulo-cantidad');
+                            if (cantCell && cantCell.dataset.cantidad) {
+                                sum += parseFloat(cantCell.dataset.cantidad) || 0;
+                            }
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    cantidadTotalSpan.textContent = Number.isInteger(sum) ? sum : sum.toFixed(2);
+                }
+
+                if (filterCodigo) filterCodigo.addEventListener('input', filterTable);
+                if (filterDescripcion) filterDescripcion.addEventListener('input', filterTable);
+
+                // Initial sum
+                filterTable();
+            });
+        </script>
+    </div>
+</div>
+</body>
+</html>

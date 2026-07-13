@@ -13,6 +13,7 @@ import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioImpresion;
 import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
+import com.tallerwebi.dominio.interfaces.ServicioTelegram;
 import com.tallerwebi.dominio.services.ServicioTimerImpl;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.TimerDTO;
@@ -34,6 +35,7 @@ public class ServicioTimerTest {
   public ServicioReglaVencimiento servicioReglaVencimientoMock;
   private Usuario usuarioTest;
   private ServicioImpresion servicioImpresionMock;
+  private ServicioTelegram servicioTelegramMock;
 
   @BeforeEach
   public void init() {
@@ -41,12 +43,14 @@ public class ServicioTimerTest {
     this.repositorioCategoriaMock = mock(RepositorioCategoria.class);
     this.servicioReglaVencimientoMock = mock(ServicioReglaVencimiento.class);
     this.servicioImpresionMock = mock(ServicioImpresion.class);
+    this.servicioTelegramMock = mock(ServicioTelegram.class);
     this.servicioTimer =
       new ServicioTimerImpl(
         repositorioTimerMock,
         repositorioCategoriaMock,
         servicioReglaVencimientoMock,
-        servicioImpresionMock
+        servicioImpresionMock,
+        servicioTelegramMock
       );
     usuarioTest = new Usuario();
   }
@@ -1080,5 +1084,87 @@ public class ServicioTimerTest {
     assertNotNull(resultado);
     assertEquals(1, resultado.size());
     verify(repositorioTimerMock, times(1)).obtenerTimersConFiltro(estado, categoriaId);
+  }
+
+  @Test
+  public void deberiaEnviarNotificacionTelegramAlEliminarTimer() {
+    OffsetDateTime fechaVencimientoFutura = OffsetDateTime.now().plusHours(1);
+    CicloVida fechaValida = new CicloVida(OffsetDateTime.now(), fechaVencimientoFutura);
+
+    Producto producto = new Producto();
+    producto.setNombre("Producto Eliminado");
+
+    Categoria categoria = new Categoria();
+    categoria.setNombre("Categoria Eliminacion");
+
+    Timer timer = new Timer();
+    timer.setId(1L);
+    timer.setProducto(producto);
+    timer.setCategoria(categoria);
+    timer.setCicloVida(fechaValida);
+    timer.setEstado(EstadoTimer.ACTIVO);
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+
+    servicioTimer.modificarEstado(1L, EstadoTimer.ELIMINADO);
+
+    verify(servicioTelegramMock, times(1)).enviarMensaje(argThat(s -> s.contains("eliminó")));
+  }
+
+  @Test
+  public void deberiaEnviarNotificacionTelegramAlRenovarTimer() {
+    Timer timer = buildTimerCompleto(1L);
+    Timer nuevoTimer = buildTimerGenerado();
+    usuarioTest.setNombre("Carlos");
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(
+      servicioReglaVencimientoMock.generarVencimiento(
+        timer.getProducto(),
+        timer.getCategoria(),
+        1L,
+        null,
+        5,
+        usuarioTest
+      )
+    )
+      .thenReturn(nuevoTimer);
+
+    servicioTimer.renovarTimer(timer, 5, usuarioTest);
+
+    verify(servicioTelegramMock, times(1)).enviarMensaje(argThat(s -> s.contains("renovó")));
+  }
+
+  @Test
+  public void deberiaEnviarNotificacionTelegramAlImportarTimer() {
+    OffsetDateTime fechaCreacion = OffsetDateTime.now();
+    Categoria categoriaOrigen = new Categoria("cocina.png", true, "Cocina");
+    categoriaOrigen.setId(1L);
+    Categoria categoriaDestino = new Categoria("isla.png", true, "Isla");
+    categoriaDestino.setId(2L);
+
+    Producto producto = new Producto();
+    producto.setNombre("Producto Importado");
+
+    Timer timer = new Timer(
+      fechaCreacion,
+      fechaCreacion.plusHours(2),
+      "GROUP-01",
+      producto,
+      categoriaOrigen,
+      new ReglaVencimiento(),
+      2,
+      usuarioTest
+    );
+    timer.setId(1L);
+    usuarioTest.setNombre("Carlos");
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(repositorioCategoriaMock.buscarPorId(2L)).thenReturn(categoriaDestino);
+    when(repositorioTimerMock.existeTimerActivoEnCategoriaYGrupo(2L, "GROUP-01")).thenReturn(false);
+
+    servicioTimer.importarTimer(1L, 2L, 1, usuarioTest);
+
+    verify(servicioTelegramMock, times(1)).enviarMensaje(argThat(s -> s.contains("importó")));
   }
 }

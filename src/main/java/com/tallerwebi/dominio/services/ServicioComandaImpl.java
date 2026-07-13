@@ -11,8 +11,8 @@ import com.tallerwebi.dominio.entity.enums.EstadoComanda;
 import com.tallerwebi.dominio.entity.enums.EstadoPedido;
 import com.tallerwebi.dominio.excepcion.IngredientesNoDisponiblesException;
 import com.tallerwebi.dominio.interfaces.RepositorioComanda;
-import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioComanda;
+import com.tallerwebi.dominio.interfaces.ServicioTimer;
 import com.tallerwebi.presentacion.dto.ComandaCocinaDTO;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -29,15 +29,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class ServicioComandaImpl implements ServicioComanda {
 
   private final RepositorioComanda repositorioComanda;
-  private final RepositorioTimer repositorioTimer;
+  private final ServicioTimer servicioTimer;
 
   @Autowired
-  public ServicioComandaImpl(
-    RepositorioComanda repositorioComanda,
-    RepositorioTimer repositorioTimer
-  ) {
+  public ServicioComandaImpl(RepositorioComanda repositorioComanda, ServicioTimer servicioTimer) {
     this.repositorioComanda = repositorioComanda;
-    this.repositorioTimer = repositorioTimer;
+    this.servicioTimer = servicioTimer;
   }
 
   private static class PlanDeConsumo {
@@ -89,12 +86,19 @@ public class ServicioComandaImpl implements ServicioComanda {
     return ingredientes;
   }
 
+  @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
   private Map<DetallePedidoIngrediente, List<PlanDeConsumo>> planificarConsumos(
     List<DetallePedidoIngrediente> ingredientes
   ) {
     Map<DetallePedidoIngrediente, List<PlanDeConsumo>> plan = new HashMap<>();
+
+    Map<Long, Integer> reservadoPorTimer = new HashMap<>();
+
     for (DetallePedidoIngrediente ingrediente : ingredientes) {
-      List<PlanDeConsumo> consumos = planificarConsumoParaIngrediente(ingrediente);
+      List<PlanDeConsumo> consumos = planificarConsumoParaIngrediente(
+        ingrediente,
+        reservadoPorTimer
+      );
       if (consumos != null) {
         plan.put(ingrediente, consumos);
       }
@@ -103,9 +107,10 @@ public class ServicioComandaImpl implements ServicioComanda {
   }
 
   private List<PlanDeConsumo> planificarConsumoParaIngrediente(
-    DetallePedidoIngrediente ingrediente
+    DetallePedidoIngrediente ingrediente,
+    Map<Long, Integer> reservadoPorTimer
   ) {
-    List<Timer> timersActivos = repositorioTimer.obtenerTimersActivosConStockPorProducto(
+    List<Timer> timersActivos = servicioTimer.obtenerTimersActivosConStockPorProducto(
       ingrediente.getProducto().getId()
     );
 
@@ -114,9 +119,17 @@ public class ServicioComandaImpl implements ServicioComanda {
 
     for (Timer timer : timersActivos) {
       if (necesario == 0) break;
-      int aConsumir = Math.min(necesario, timer.getCantidadProducto());
+
+      int yaReservado = reservadoPorTimer.getOrDefault(timer.getId(), 0);
+      int disponibleReal = timer.getCantidadProducto() - yaReservado;
+      if (disponibleReal <= 0) continue;
+
+      int aConsumir = Math.min(necesario, disponibleReal);
       consumos.add(new PlanDeConsumo(timer, aConsumir));
       necesario -= aConsumir;
+
+      // Registra la reserva para las próximas planificaciones
+      reservadoPorTimer.merge(timer.getId(), aConsumir, Integer::sum);
     }
 
     return necesario > 0 ? null : consumos;
@@ -146,8 +159,14 @@ public class ServicioComandaImpl implements ServicioComanda {
   }
 
   private void aplicarConsumo(DetallePedidoIngrediente ingrediente, PlanDeConsumo consumo) {
-    consumo.timer.setCantidadProducto(consumo.timer.getCantidadProducto() - consumo.cantidad);
+    servicioTimer.descontarStock(consumo.timer.getId(), consumo.cantidad);
+    registrarConsumoEnIngrediente(ingrediente, consumo);
+  }
 
+  private void registrarConsumoEnIngrediente(
+    DetallePedidoIngrediente ingrediente,
+    PlanDeConsumo consumo
+  ) {
     ConsumoTimer registro = new ConsumoTimer();
     registro.setDetallePedidoIngrediente(ingrediente);
     registro.setTimer(consumo.timer);

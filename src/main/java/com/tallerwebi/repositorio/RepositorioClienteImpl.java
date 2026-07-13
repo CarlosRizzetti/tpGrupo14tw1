@@ -31,4 +31,18 @@ public class RepositorioClienteImpl implements RepositorioCliente {
       .setParameter("documento", documento)
       .uniqueResult();
   }
+
+  @Override
+  public Cliente buscarPorEmail(String email) {
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery("from Cliente c where c.email = :email", Cliente.class)
+      .setParameter("email", email)
+      .uniqueResult();
+  }
+
+  @Override
+  public void guardar(Cliente cliente) {
+    sessionFactory.getCurrentSession().saveOrUpdate(cliente);
+  }
 }

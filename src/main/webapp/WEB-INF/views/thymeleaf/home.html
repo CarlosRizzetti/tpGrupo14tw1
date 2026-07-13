@@ -22,7 +22,7 @@
             <p class="text-sm text-gray-500">Sesión iniciada como</p>
             <p class="text-sm font-bold text-gray-800 truncate"
                th:if="${userEmail != null}"
-               th:text="${#strings.capitalize(#strings.substring(userEmail, 0, userEmail.indexOf('@')))}">
+               th:text="${userEmail.contains('@') ? #strings.capitalize(#strings.substring(userEmail, 0, userEmail.indexOf('@'))) : userEmail}">
 
                 Usuario
             </p>

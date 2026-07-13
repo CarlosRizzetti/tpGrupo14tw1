@@ -69,7 +69,6 @@ public class UserDetailsServiceImpl
       repositorioUsuario.guardar(usuario);
     }
 
-    // Devuelve el usuario con sus roles de tu BD a Spring Security
     return new DefaultOAuth2User(
       Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + usuario.getRol())),
       oAuth2User.getAttributes(),

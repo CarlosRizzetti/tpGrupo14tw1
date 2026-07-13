@@ -1,13 +1,13 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, ~{}, _)}">
 <head>
-    <title>Ingresar Producto</title>
+    <title>Ingresar Lote</title>
 </head>
 <body>
 
 <div th:fragment="header_center">
     <span class="text-puesto-header-text font-bold uppercase tracking-widest">
-        Nuevo Articulo
+        Nuevo Lote
     </span>
 </div>
 
@@ -26,27 +26,27 @@
 <div th:fragment="content" class="p-6">
     <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
         <div class="p-6">
-            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 border-b pb-4">Ingresar Nuevo Articulo</h2>
-            
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-gray-100 border-b pb-4">Ingresar Nuevo Lote</h2>
+
             <div th:if="${error}" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
                 <strong class="font-bold">Error!</strong>
                 <span class="block sm:inline" th:text="${error}"></span>
             </div>
 
             <form th:action="@{/admin/nuevo-articulo}" th:object="${articulo}" method="post" class="space-y-4">
-                
+
                 <div>
-                    <label for="codigo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Código del Articulo</label>
-                    <input type="text" id="codigo" th:field="*{codigo}" required
-                           class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                    <label for="productoId" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Producto</label>
+                    <select id="productoId" name="productoId" required
+                            class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                        <option value="">Seleccioná un producto</option>
+                        <option th:each="p : ${productos}"
+                                th:value="${p.id}"
+                                th:text="${p.nombre}"
+                                th:selected="${articulo.producto != null and articulo.producto.id == p.id}"></option>
+                    </select>
                 </div>
-                
-                <div>
-                    <label for="nombre" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre del Articulo</label>
-                    <input type="text" id="nombre" th:field="*{nombre}" required
-                           class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
-                </div>
-                
+
                 <div>
                     <label for="marca" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Marca</label>
                     <input type="text" id="marca" th:field="*{marca}" required
@@ -59,7 +59,7 @@
                         <input type="text" id="proveedor" th:field="*{proveedor}" required
                                class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
                     </div>
-                    
+
                     <div>
                         <label for="numeroDeLote" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Numero de Lote</label>
                         <input type="number" id="numeroDeLote" th:field="*{numeroDeLote}" required
@@ -67,30 +67,10 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label for="cantidad" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad</label>
-                        <input type="number" step="0.01" id="cantidad" th:field="*{cantidad}" required
-                               class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
-                    </div>
-                    
-                    <div>
-                        <label for="unidadDeMedida" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Unidad de Medida</label>
-                        <select id="unidadDeMedida" th:field="*{unidadDeMedida}" required
-                                class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
-                            <option th:each="unidad : ${T(com.tallerwebi.dominio.entity.enums.UnidadDeMedida).values()}"
-                                    th:value="${unidad}" th:text="${unidad}"></option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="tipoArticulo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Categoría</label>
-                        <select id="tipoArticulo" th:field="*{tipoArticulo}" required
-                                class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
-                            <option th:each="tipo : ${T(com.tallerwebi.dominio.entity.enums.TipoArticulo).values()}"
-                                    th:value="${tipo}" th:text="${tipo}"></option>
-                        </select>
-                    </div>
+                <div>
+                    <label for="cantidadInicial" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Cantidad</label>
+                    <input type="number" id="cantidadInicial" th:field="*{cantidadInicial}" required min="1"
+                           class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -99,7 +79,7 @@
                         <input type="datetime-local" id="fechaDeIngreso" name="fechaIngresoStr" required
                                class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
                     </div>
-                    
+
                     <div>
                         <label for="fechaDeVencimiento" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de Vencimiento</label>
                         <input type="datetime-local" id="fechaDeVencimiento" name="fechaVencimientoStr" required
@@ -110,10 +90,10 @@
                 <div class="pt-4 flex items-center justify-end">
                     <button type="submit"
                             class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-bold rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Guardar Articulo
+                        Guardar Lote
                     </button>
                 </div>
-                
+
             </form>
         </div>
     </div>

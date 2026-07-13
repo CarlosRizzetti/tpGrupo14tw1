@@ -211,4 +211,40 @@ public class RepositorioUsuarioTest {
     // 4. Validate
     assertThat(usuarios.size(), is(2));
   }
+
+  @Test
+  @Transactional
+  @Rollback
+  public void deberiaBuscarPorTokenValidacion() {
+    Usuario u = dadoQueTengoUnUsuario("token@test.com", "123", "USER");
+    u.setTokenValidacion("token-abc-123");
+    repositorioUsuario.guardar(u);
+
+    Usuario obtenido = repositorioUsuario.buscarPorTokenValidacion("token-abc-123");
+    assertThat(obtenido, is(equalTo(u)));
+  }
+
+  @Test
+  @Transactional
+  @Rollback
+  public void deberiaListarTodosLosUsuarios() {
+    Usuario u1 = dadoQueTengoUnUsuario("all1@test.com", "123", "USER");
+    Usuario u2 = dadoQueTengoUnUsuario("all2@test.com", "123", "USER");
+    repositorioUsuario.guardar(u1);
+    repositorioUsuario.guardar(u2);
+
+    java.util.List<Usuario> lista = repositorioUsuario.listarTodos();
+    assertThat(lista.size() >= 2, is(true));
+  }
+
+  @Test
+  @Transactional
+  @Rollback
+  public void deberiaObtenerPorId() {
+    Usuario u = dadoQueTengoUnUsuario("id@test.com", "123", "USER");
+    repositorioUsuario.guardar(u);
+
+    Usuario obtenido = repositorioUsuario.obtenerPorId(u.getId());
+    assertThat(obtenido, is(equalTo(u)));
+  }
 }

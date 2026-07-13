@@ -6,4 +6,5 @@ public enum EstadoTimer {
   ELIMINADO,
   IMPORTADO,
   RENOVADO,
+  CONSUMIDO,
 }
