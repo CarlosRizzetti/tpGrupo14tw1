@@ -1,5 +1,6 @@
 package com.tallerwebi.presentacion.controller;
 
+import com.tallerwebi.dominio.interfaces.ServicioLote;
 import com.tallerwebi.dominio.interfaces.ServicioTelegram;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -9,10 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
-/**
- * Controlador para gestionar el panel de administración y sus funcionalidades
- * relacionadas.
- */
 @Controller
 public class ControladorAdminPanel {
 
@@ -28,10 +25,7 @@ public class ControladorAdminPanel {
    * @param servicioTelegram servicio para el envío de mensajes a Telegram
    */
   @Autowired
-  public ControladorAdminPanel(
-          ServicioLote servicioLote;
-    ServicioTelegram servicioTelegram
-  ) {
+  public ControladorAdminPanel(ServicioLote servicioLote, ServicioTelegram servicioTelegram) {
     this.servicioLote = servicioLote;
     this.servicioTelegram = servicioTelegram;
   }
@@ -46,9 +40,9 @@ public class ControladorAdminPanel {
     }
 
     boolean isAdmin = authentication
-        .getAuthorities()
-        .stream()
-        .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+      .getAuthorities()
+      .stream()
+      .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
     if (!isAdmin) {
       return new ModelAndView(REDIRECT_ACCESO_DENEGADO);
     }
@@ -74,15 +68,16 @@ public class ControladorAdminPanel {
     }
 
     boolean isAdmin = authentication
-        .getAuthorities()
-        .stream()
-        .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+      .getAuthorities()
+      .stream()
+      .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
     if (!isAdmin) {
       return new ModelAndView(REDIRECT_ACCESO_DENEGADO);
     }
 
     servicioTelegram.enviarMensaje(
-        "🔔 ¡Prueba de conexión de Telegram exitosa desde el Panel de Administración!");
+      "🔔 ¡Prueba de conexión de Telegram exitosa desde el Panel de Administración!"
+    );
     servicioTelegram.enviarNotificacionesVencimiento();
 
     return new ModelAndView("redirect:/admin?telegramOk=true");
@@ -97,13 +92,4 @@ public class ControladorAdminPanel {
   public ModelAndView accesoDenegado() {
     return new ModelAndView("acceso-denegado");
   }
-
 }
-        
-        
-        
-   *         
-        
-        
-        
-        

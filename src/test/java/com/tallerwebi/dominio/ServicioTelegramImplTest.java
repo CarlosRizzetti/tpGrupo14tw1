@@ -9,9 +9,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.tallerwebi.dominio.entity.Articulos;
+import com.tallerwebi.dominio.entity.Lote;
+import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
-import com.tallerwebi.dominio.interfaces.ServicioArticulo;
+import com.tallerwebi.dominio.interfaces.ServicioLote;
 import com.tallerwebi.dominio.services.ServicioTelegramImpl;
 import com.tallerwebi.presentacion.dto.NotificacionVencimientoDto;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ import org.springframework.web.client.RestTemplate;
 public class ServicioTelegramImplTest {
 
   private ServicioTelegramImpl servicioTelegram;
-  private ServicioArticulo servicioArticuloMock;
+  private ServicioLote servicioLoteMock;
   private RestTemplate restTemplateMock;
   private RepositorioTimer repositorioTimerMock;
 
@@ -37,11 +38,11 @@ public class ServicioTelegramImplTest {
    */
   @BeforeEach
   public void init() {
-    servicioArticuloMock = mock(ServicioArticulo.class);
+    servicioLoteMock = mock(ServicioLote.class);
     restTemplateMock = mock(RestTemplate.class);
     repositorioTimerMock = mock(RepositorioTimer.class);
     servicioTelegram =
-      new ServicioTelegramImpl(servicioArticuloMock, restTemplateMock, repositorioTimerMock);
+      new ServicioTelegramImpl(servicioLoteMock, restTemplateMock, repositorioTimerMock);
 
     ReflectionTestUtils.setField(servicioTelegram, "botToken", "test-token");
     ReflectionTestUtils.setField(servicioTelegram, "chatId", "test-chat-id");
@@ -71,21 +72,27 @@ public class ServicioTelegramImplTest {
   public void enviarNotificacionesVencimientoDeberiaEnviarMensajeCuandoHayProductosConDiasEspecificos() {
     List<NotificacionVencimientoDto> notifs = new ArrayList<>();
 
-    Articulos a1 = new Articulos();
-    a1.setNombre("Articulo 1");
+    Producto p1 = new Producto();
+    p1.setNombre("Articulo 1");
+    Lote a1 = new Lote();
+    a1.setProducto(p1);
     a1.setNumeroDeLote(123L);
     notifs.add(new NotificacionVencimientoDto(a1, 5, "MEDIA"));
 
-    Articulos a2 = new Articulos();
-    a2.setNombre("Articulo 2");
+    Producto p2 = new Producto();
+    p2.setNombre("Articulo 2");
+    Lote a2 = new Lote();
+    a2.setProducto(p2);
     a2.setNumeroDeLote(456L);
     notifs.add(new NotificacionVencimientoDto(a2, 2, "ALTA"));
 
-    Articulos a3 = new Articulos();
-    a3.setNombre("Articulo 3");
+    Producto p3 = new Producto();
+    p3.setNombre("Articulo 3");
+    Lote a3 = new Lote();
+    a3.setProducto(p3);
     notifs.add(new NotificacionVencimientoDto(a3, 3, "ALTA")); // No reportar (no es 2, 5, 9 o 10)
 
-    when(servicioArticuloMock.obtenerNotificacionesVencimiento()).thenReturn(notifs);
+    when(servicioLoteMock.obtenerNotificacionesVencimiento()).thenReturn(notifs);
 
     servicioTelegram.enviarNotificacionesVencimiento();
 
@@ -105,15 +112,19 @@ public class ServicioTelegramImplTest {
   public void enviarNotificacionesVencimientoNoDeberiaEnviarMensajeSiNoHayProductosConDiasEspecificos() {
     List<NotificacionVencimientoDto> notifs = new ArrayList<>();
 
-    Articulos a1 = new Articulos();
-    a1.setNombre("Articulo 1");
+    Producto p1 = new Producto();
+    p1.setNombre("Articulo 1");
+    Lote a1 = new Lote();
+    a1.setProducto(p1);
     notifs.add(new NotificacionVencimientoDto(a1, 3, "ALTA"));
 
-    Articulos a2 = new Articulos();
-    a2.setNombre("Articulo 2");
+    Producto p2 = new Producto();
+    p2.setNombre("Articulo 2");
+    Lote a2 = new Lote();
+    a2.setProducto(p2);
     notifs.add(new NotificacionVencimientoDto(a2, 7, "MEDIA"));
 
-    when(servicioArticuloMock.obtenerNotificacionesVencimiento()).thenReturn(notifs);
+    when(servicioLoteMock.obtenerNotificacionesVencimiento()).thenReturn(notifs);
 
     servicioTelegram.enviarNotificacionesVencimiento();
 

@@ -327,4 +327,9 @@ public class ServicioTimerImpl implements ServicioTimer {
     }
     return "Usuario desconocido";
   }
+
+  @Override
+  public List<Timer> obtenerTimersActivosConStockPorProducto(Long idProducto) {
+    return repositorioTimer.obtenerTimersActivosConStockPorProducto(idProducto);
+  }
 }

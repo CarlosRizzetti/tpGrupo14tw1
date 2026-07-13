@@ -11,7 +11,7 @@ import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.dominio.entity.embeddables.CicloVida;
 import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
-import com.tallerwebi.dominio.interfaces.ServicioArticulo;
+import com.tallerwebi.dominio.interfaces.ServicioLote;
 import com.tallerwebi.dominio.services.ServicioTelegramImpl;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -28,17 +28,17 @@ import org.springframework.web.client.RestTemplate;
 public class ServicioTelegramImplTimerTest {
 
   private ServicioTelegramImpl servicioTelegram;
-  private ServicioArticulo servicioArticuloMock;
+  private ServicioLote servicioLoteMock;
   private RestTemplate restTemplateMock;
   private RepositorioTimer repositorioTimerMock;
 
   @BeforeEach
   public void init() {
-    servicioArticuloMock = mock(ServicioArticulo.class);
+    servicioLoteMock = mock(ServicioLote.class);
     restTemplateMock = mock(RestTemplate.class);
     repositorioTimerMock = mock(RepositorioTimer.class);
     servicioTelegram =
-      new ServicioTelegramImpl(servicioArticuloMock, restTemplateMock, repositorioTimerMock);
+      new ServicioTelegramImpl(servicioLoteMock, restTemplateMock, repositorioTimerMock);
 
     ReflectionTestUtils.setField(servicioTelegram, "botToken", "test-token");
     ReflectionTestUtils.setField(servicioTelegram, "chatId", "test-chat-id");

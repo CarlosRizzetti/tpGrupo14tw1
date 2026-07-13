@@ -3,7 +3,7 @@ package com.tallerwebi.dominio.services;
 import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
-import com.tallerwebi.dominio.interfaces.ServicioArticulo;
+import com.tallerwebi.dominio.interfaces.ServicioLote;
 import com.tallerwebi.dominio.interfaces.ServicioTelegram;
 import com.tallerwebi.presentacion.dto.NotificacionVencimientoDto;
 import java.util.HashMap;
@@ -33,7 +33,7 @@ public class ServicioTelegramImpl implements ServicioTelegram {
   private static final Logger log = LoggerFactory.getLogger(ServicioTelegramImpl.class);
   private static final String NOT_AVAILABLE = "N/A";
 
-  private final ServicioArticulo servicioArticulo;
+  private final ServicioLote servicioLote;
   private final RestTemplate restTemplate;
   private final RepositorioTimer repositorioTimer;
   private final Set<Long> timersNotificados = ConcurrentHashMap.newKeySet();
@@ -47,17 +47,17 @@ public class ServicioTelegramImpl implements ServicioTelegram {
   /**
    * Constructor del servicio.
    *
-   * @param servicioArticulo el servicio de artículos
+   * @param servicioLote el servicio de lotes
    * @param restTemplate     plantilla para consumo de APIs REST
    * @param repositorioTimer el repositorio de timers
    */
   @Autowired
   public ServicioTelegramImpl(
-    ServicioArticulo servicioArticulo,
+    ServicioLote servicioLote,
     RestTemplate restTemplate,
     RepositorioTimer repositorioTimer
   ) {
-    this.servicioArticulo = servicioArticulo;
+    this.servicioLote = servicioLote;
     this.restTemplate = restTemplate;
     this.repositorioTimer = repositorioTimer;
   }
@@ -98,7 +98,7 @@ public class ServicioTelegramImpl implements ServicioTelegram {
   @Scheduled(cron = "0 40 19 * * *") // Todos los días a las 9:00 AM
   public void enviarNotificacionesVencimiento() {
     List<NotificacionVencimientoDto> notificaciones =
-      servicioArticulo.obtenerNotificacionesVencimiento();
+      servicioLote.obtenerNotificacionesVencimiento();
 
     if (notificaciones == null || notificaciones.isEmpty()) {
       if (log.isInfoEnabled()) {
@@ -141,13 +141,13 @@ public class ServicioTelegramImpl implements ServicioTelegram {
     if (sb.length() == 0) {
       sb.append("⚠️ Alerta de Vencimiento de Productos:\n");
     }
-    String lote = notif.getArticulo().getNumeroDeLote() != null
-      ? notif.getArticulo().getNumeroDeLote().toString()
+    String lote = notif.getLote().getNumeroDeLote() != null
+      ? notif.getLote().getNumeroDeLote().toString()
       : NOT_AVAILABLE;
     sb.append(
       String.format(
         "- %s (Lote: %s) vence en %d días.\n",
-        notif.getArticulo().getNombre(),
+        notif.getLote().getProducto().getNombre(),
         lote,
         dias
       )

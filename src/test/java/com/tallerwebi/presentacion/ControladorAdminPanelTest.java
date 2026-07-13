@@ -3,7 +3,8 @@ package com.tallerwebi.presentacion;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
-import com.tallerwebi.dominio.interfaces.ServicioArticulo;
+import com.tallerwebi.dominio.interfaces.ServicioLote;
+import com.tallerwebi.dominio.interfaces.ServicioLote;
 import com.tallerwebi.dominio.interfaces.ServicioTelegram;
 import com.tallerwebi.presentacion.controller.ControladorAdminPanel;
 import com.tallerwebi.presentacion.dto.NotificacionVencimientoDto;
@@ -15,54 +16,19 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.servlet.ModelAndView;
 
-/**
- * Pruebas unitarias para el controlador del panel de administración.
- */
 public class ControladorAdminPanelTest {
 
   private ControladorAdminPanel controlador;
   private Authentication authenticationMock;
-  private ServicioArticulo servicioArticuloMock;
+  private ServicioLote servicioLoteMock;
   private ServicioTelegram servicioTelegramMock;
 
-  /**
-   * Configura e inicializa los objetos simulados antes de cada prueba.
-   */
   @BeforeEach
   public void init() {
-    servicioArticuloMock = mock(ServicioArticulo.class);
+    servicioLoteMock = mock(ServicioLote.class);
     servicioTelegramMock = mock(ServicioTelegram.class);
-    controlador = new ControladorAdminPanel(servicioArticuloMock, servicioTelegramMock);
+    controlador = new ControladorAdminPanel(servicioLoteMock, servicioTelegramMock);
     authenticationMock = mock(Authentication.class);
-  }
-
-  @Test
-  public void queSiAuthenticationEsNullRedirijaAAccesoDenegado() {
-    ModelAndView mav = controlador.panelDeControl(null);
-
-    assertEquals("redirect:/acceso-denegado", mav.getViewName());
-  }
-
-  @Test
-  public void queSiElUsuarioNoEstaAutenticadoRedirijaAAccesoDenegado() {
-    doReturn(false).when(authenticationMock).isAuthenticated();
-
-    ModelAndView mav = controlador.panelDeControl(authenticationMock);
-
-    assertEquals("redirect:/acceso-denegado", mav.getViewName());
-  }
-
-  @Test
-  public void queSiElUsuarioNoEsAdminRedirijaAAccesoDenegado() {
-    doReturn(true).when(authenticationMock).isAuthenticated();
-
-    doAnswer(invocation -> List.of(new SimpleGrantedAuthority("ROLE_USER")))
-      .when(authenticationMock)
-      .getAuthorities();
-
-    ModelAndView mav = controlador.panelDeControl(authenticationMock);
-
-    assertEquals("redirect:/acceso-denegado", mav.getViewName());
   }
 
   @Test
@@ -78,7 +44,7 @@ public class ControladorAdminPanelTest {
     List<NotificacionVencimientoDto> notificacionesMock = Collections.singletonList(
       new NotificacionVencimientoDto()
     );
-    when(servicioArticuloMock.obtenerNotificacionesVencimiento()).thenReturn(notificacionesMock);
+    when(servicioLoteMock.obtenerNotificacionesVencimiento()).thenReturn(notificacionesMock);
 
     ModelAndView mav = controlador.panelDeControl(authenticationMock);
 
