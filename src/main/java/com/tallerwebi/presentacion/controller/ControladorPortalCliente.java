@@ -23,6 +23,10 @@ public class ControladorPortalCliente {
 
   private static final String ATTR_ERROR = "error";
   private static final String ATTR_CLIENTE = "cliente";
+  private static final String REDIRECT_PORTAL_CLIENTES = "redirect:/portal/clientes";
+  private static final String REDIRECT_COMPLETAR_DATOS =
+    "redirect:/portal/clientes/completar-datos";
+  private static final String REDIRECT_MIS_PEDIDOS = "redirect:/portal/clientes/mis-pedidos";
 
   private final ServicioCliente servicioCliente;
 
@@ -79,7 +83,7 @@ public class ControladorPortalCliente {
         .getSession()
         .setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
-      return "redirect:/portal/clientes/mis-pedidos";
+      return REDIRECT_MIS_PEDIDOS;
     } catch (Exception e) {
       model.addAttribute(ATTR_ERROR, e.getMessage());
       model.addAttribute(ATTR_CLIENTE, cliente);
@@ -93,14 +97,69 @@ public class ControladorPortalCliente {
     return "redirect:/oauth2/authorization/google";
   }
 
+  @GetMapping("/portal/clientes/completar-datos")
+  public String mostrarCompletarDatosCliente(Authentication authentication, Model model) {
+    Cliente cliente = obtenerClienteSesion(authentication);
+    if (cliente == null) {
+      return REDIRECT_PORTAL_CLIENTES;
+    }
+    if (!faltanDatosObligatorios(cliente)) {
+      return REDIRECT_MIS_PEDIDOS;
+    }
+    model.addAttribute(ATTR_CLIENTE, cliente);
+    return "portalCliente/completar-datos";
+  }
+
+  @PostMapping("/portal/clientes/completar-datos-procesar")
+  public String procesarCompletarDatosCliente(
+    @RequestParam(value = "documento", required = false) String documento,
+    @RequestParam(value = "telefono", required = false) String telefono,
+    Authentication authentication,
+    Model model,
+    HttpServletRequest request
+  ) {
+    Cliente cliente = obtenerClienteSesion(authentication);
+    if (cliente == null) {
+      return REDIRECT_PORTAL_CLIENTES;
+    }
+    try {
+      if (
+        documento == null ||
+        documento.trim().isEmpty() ||
+        telefono == null ||
+        telefono.trim().isEmpty()
+      ) {
+        throw new Exception("Por favor, ingresa tanto tu número de DNI como tu teléfono celular.");
+      }
+      servicioCliente.actualizarDatosCliente(cliente, documento, telefono, cliente.getNombre());
+
+      // Actualizar sesión de seguridad en Spring Security
+      UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+        cliente,
+        authentication.getCredentials(),
+        authentication.getAuthorities()
+      );
+      SecurityContextHolder.getContext().setAuthentication(auth);
+      request
+        .getSession()
+        .setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+
+      return REDIRECT_MIS_PEDIDOS;
+    } catch (Exception e) {
+      model.addAttribute(ATTR_ERROR, e.getMessage());
+      model.addAttribute(ATTR_CLIENTE, cliente);
+      return "portalCliente/completar-datos";
+    }
+  }
+
   @GetMapping("/portal/clientes/mis-pedidos")
   public String mostrarMisPedidos(Authentication authentication, Model model) {
     Cliente cliente = obtenerClienteSesion(authentication);
     if (cliente != null) {
-      boolean faltanDatos =
-        (cliente.getDocumento() == null || cliente.getDocumento().trim().isEmpty()) ||
-        (cliente.getTelefono() == null || cliente.getTelefono().trim().isEmpty());
-      model.addAttribute("faltanDatos", faltanDatos);
+      if (faltanDatosObligatorios(cliente)) {
+        return REDIRECT_COMPLETAR_DATOS;
+      }
+      model.addAttribute("faltanDatos", false);
       model.addAttribute(ATTR_CLIENTE, cliente);
     }
     return "portalCliente/home";
@@ -110,7 +169,7 @@ public class ControladorPortalCliente {
   public String mostrarPerfilCliente(Authentication authentication, Model model) {
     Cliente cliente = obtenerClienteSesion(authentication);
     if (cliente == null) {
-      return "redirect:/portal/clientes";
+      return REDIRECT_PORTAL_CLIENTES;
     }
     model.addAttribute(ATTR_CLIENTE, cliente);
     return "portalCliente/perfil";
@@ -127,7 +186,7 @@ public class ControladorPortalCliente {
   ) {
     Cliente cliente = obtenerClienteSesion(authentication);
     if (cliente == null) {
-      return "redirect:/portal/clientes";
+      return REDIRECT_PORTAL_CLIENTES;
     }
     try {
       servicioCliente.actualizarDatosCliente(cliente, documento, telefono, nombre);
@@ -172,13 +231,39 @@ public class ControladorPortalCliente {
     return null;
   }
 
+  private boolean faltanDatosObligatorios(Cliente cliente) {
+    if (cliente == null) return false;
+    return (
+      cliente.getDocumento() == null ||
+      cliente.getDocumento().trim().isEmpty() ||
+      cliente.getTelefono() == null ||
+      cliente.getTelefono().trim().isEmpty()
+    );
+  }
+
   @GetMapping("/portal/clientes/historial")
-  public String mostrarHistorialPedidos() {
+  public String mostrarHistorialPedidos(Authentication authentication, Model model) {
+    Cliente cliente = obtenerClienteSesion(authentication);
+    if (cliente == null) {
+      return REDIRECT_PORTAL_CLIENTES;
+    }
+    if (faltanDatosObligatorios(cliente)) {
+      return REDIRECT_COMPLETAR_DATOS;
+    }
+    model.addAttribute(ATTR_CLIENTE, cliente);
     return "portalCliente/historial";
   }
 
   @GetMapping("/portal/clientes/reportar")
-  public String mostrarReportarPedido() {
+  public String mostrarReportarPedido(Authentication authentication, Model model) {
+    Cliente cliente = obtenerClienteSesion(authentication);
+    if (cliente == null) {
+      return REDIRECT_PORTAL_CLIENTES;
+    }
+    if (faltanDatosObligatorios(cliente)) {
+      return REDIRECT_COMPLETAR_DATOS;
+    }
+    model.addAttribute(ATTR_CLIENTE, cliente);
     return "portalCliente/reportar";
   }
 }
