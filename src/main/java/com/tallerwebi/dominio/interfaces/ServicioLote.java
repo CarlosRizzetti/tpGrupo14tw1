@@ -23,6 +23,9 @@ public interface ServicioLote {
 
   Integer stockDisponibleDe(Producto producto);
 
+  List<Lote> obtenerLotesActivos();
+
+  void descartarLote(Long idLote);
   Lote buscarPorId(Long id);
 
   //Lote -> ConsumoLote -> Timer -> ConsumoTimer -> Pedido.

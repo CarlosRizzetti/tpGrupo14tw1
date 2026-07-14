@@ -6,6 +6,8 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import javax.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 
 @Getter
 @Setter
@@ -28,6 +30,7 @@ public class Timer {
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "idUsuario")
+  @NotFound(action = NotFoundAction.IGNORE)
   private Usuario usuario;
 
   @Enumerated(EnumType.STRING)
@@ -75,14 +78,17 @@ public class Timer {
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "idProducto")
+  @NotFound(action = NotFoundAction.IGNORE)
   private Producto producto;
 
   @ManyToOne
   @JoinColumn(name = "idCategoria")
+  @NotFound(action = NotFoundAction.IGNORE)
   private Categoria categoria;
 
   @ManyToOne
   @JoinColumn(name = "idReglaVencimiento")
+  @NotFound(action = NotFoundAction.IGNORE)
   private ReglaVencimiento reglaVencimiento;
 
   @PrePersist

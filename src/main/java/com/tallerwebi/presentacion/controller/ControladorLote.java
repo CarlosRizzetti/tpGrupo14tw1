@@ -107,4 +107,18 @@ public class ControladorLote {
     modelo.put("error", "Error al registrar el lote: " + exception.getMessage());
     return new ModelAndView(VISTA_NUEVO_LOTE, modelo);
   }
+
+  @RequestMapping(path = "/admin/articulos/descontar", method = RequestMethod.GET)
+  public ModelAndView mostrarParaDescontar() {
+    ModelMap modelo = new ModelMap();
+    List<Lote> lotesActivos = servicioLote.obtenerLotesActivos();
+    modelo.put(ARTICULOS, lotesActivos);
+    return new ModelAndView("funcionalidadesAdmin/articulos-descontar", modelo);
+  }
+
+  @RequestMapping(path = "/admin/articulos/descartar", method = RequestMethod.POST)
+  public ModelAndView descartarLote(@RequestParam("idLote") Long idLote) {
+    servicioLote.descartarLote(idLote);
+    return new ModelAndView("redirect:/admin/articulos/descontar");
+  }
 }

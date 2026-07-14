@@ -293,4 +293,28 @@ public class ServicioLoteImpl implements ServicioLote {
       this.restante = restante;
     }
   }
+
+  @Override
+  public List<Lote> obtenerLotesActivos() {
+    return repositorioLote
+      .listarTodos()
+      .stream()
+      .filter(l -> l.getCantidadDisponible() != null && l.getCantidadDisponible() > 0)
+      .filter(l ->
+        l.getEstado() != EstadoLote.DESCARTADO &&
+        l.getEstado() != EstadoLote.CONSUMIDO &&
+        l.getEstado() != EstadoLote.VENCIDO
+      )
+      .collect(Collectors.toList());
+  }
+
+  @Override
+  public void descartarLote(Long idLote) {
+    Lote lote = repositorioLote.buscarPorId(idLote);
+    if (lote != null) {
+      lote.setEstado(EstadoLote.DESCARTADO);
+      repositorioLote.actualizar(lote);
+      reevaluarFifo(lote.getProducto());
+    }
+  }
 }

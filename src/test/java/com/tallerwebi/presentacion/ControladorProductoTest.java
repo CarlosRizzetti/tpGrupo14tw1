@@ -218,7 +218,7 @@ public class ControladorProductoTest {
   }
 
   @Test
-  public void mostrarProductosPorCategoriaSiUsuarioAutenticadoDeberiaRetornarVista() {
+  public void mostrarProductosPorCategoriaSinPermisoDeberiaRedirigirAlDashboard() {
     // preparacion
     org.springframework.security.core.Authentication auth = mock(
       org.springframework.security.core.Authentication.class
@@ -232,17 +232,15 @@ public class ControladorProductoTest {
     doReturn(Collections.singleton(authority)).when(auth).getAuthorities();
 
     Long categoriaId = 1L;
+    when(servicioCategoriaMock.obtenerCategoriasPorUsuario("user@test.com"))
+      .thenReturn(Collections.emptyList());
     when(servicioCategoriaMock.obtenerCategoriaPorId(categoriaId)).thenReturn(new CategoriaDto());
-    when(servicioProductoMock.obtenerProductosPorCategoria(categoriaId))
-      .thenReturn(Collections.emptyList());
-    when(servicioCategoriaMock.obtenerUsuariosPorCategoria(categoriaId))
-      .thenReturn(Collections.emptyList());
 
     // ejecucion
     ModelAndView mav = controladorProducto.mostrarProductosPorCategoria(1L, sessionMock, auth);
 
     // validacion
-    assertThat(mav.getViewName(), equalToIgnoringCase("listadoDeProductosYReglas/productos"));
+    assertThat(mav.getViewName(), equalToIgnoringCase("redirect:/dashboard"));
   }
 
   @Test

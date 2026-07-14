@@ -66,6 +66,7 @@ const sacarComanda = async (idComanda, btn) => {
     await refrescarComandas();
 
   } catch (err) {
+    console.error(err);
     btn.disabled = false;
     btn.textContent = "Servido";
     alert("Error de red al sacar la comanda.");
