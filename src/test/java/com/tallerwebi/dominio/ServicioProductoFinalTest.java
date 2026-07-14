@@ -21,12 +21,21 @@ import org.junit.jupiter.api.Test;
 public class ServicioProductoFinalTest {
 
   private RepositorioProductoFinal repositorioProductoFinal;
+  private com.tallerwebi.dominio.interfaces.RepositorioCategoria repositorioCategoria;
+  private com.tallerwebi.dominio.interfaces.RepositorioProducto repositorioProducto;
   private ServicioProductoFinalImpl servicio;
 
   @BeforeEach
   public void init() {
     repositorioProductoFinal = mock(RepositorioProductoFinal.class);
-    servicio = new ServicioProductoFinalImpl(repositorioProductoFinal);
+    repositorioCategoria = mock(com.tallerwebi.dominio.interfaces.RepositorioCategoria.class);
+    repositorioProducto = mock(com.tallerwebi.dominio.interfaces.RepositorioProducto.class);
+    servicio =
+      new ServicioProductoFinalImpl(
+        repositorioProductoFinal,
+        repositorioCategoria,
+        repositorioProducto
+      );
   }
 
   @Test
@@ -100,5 +109,35 @@ public class ServicioProductoFinalTest {
     List<ProductoFinal> resultado = servicio.listarPorCategoria(5L);
 
     assertTrue(resultado.isEmpty());
+  }
+
+  @Test
+  @DisplayName(
+    "HP-04 | guardarProductoFinal | Delega en el repositorio con categoría e ingredientes"
+  )
+  public void guardarProductoFinalDeberiaAsignarCategoriaEIngredientesYGuardar() {
+    ProductoFinal productoFinal = new ProductoFinal();
+    Long categoriaId = 1L;
+    List<Long> ingredientesIds = Arrays.asList(10L, 20L);
+    List<Integer> cantidades = Arrays.asList(2, 5);
+
+    com.tallerwebi.dominio.entity.Categoria cat = new com.tallerwebi.dominio.entity.Categoria();
+    cat.setId(categoriaId);
+    when(repositorioCategoria.buscarPorId(categoriaId)).thenReturn(cat);
+
+    com.tallerwebi.dominio.entity.Producto p1 = new com.tallerwebi.dominio.entity.Producto();
+    com.tallerwebi.dominio.entity.Producto p2 = new com.tallerwebi.dominio.entity.Producto();
+    when(repositorioProducto.obtenerProductoPorId(10L)).thenReturn(p1);
+    when(repositorioProducto.obtenerProductoPorId(20L)).thenReturn(p2);
+
+    servicio.guardarProductoFinal(productoFinal, categoriaId, ingredientesIds, cantidades);
+
+    verify(repositorioCategoria, times(1)).buscarPorId(categoriaId);
+    verify(repositorioProducto, times(1)).obtenerProductoPorId(10L);
+    verify(repositorioProducto, times(1)).obtenerProductoPorId(20L);
+    verify(repositorioProductoFinal, times(1)).guardar(productoFinal);
+
+    assertTrue(productoFinal.getCategorias().contains(cat));
+    assertEquals(2, productoFinal.getIngredientes().size());
   }
 }

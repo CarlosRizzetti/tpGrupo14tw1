@@ -301,6 +301,51 @@ public class ServicioTimerTest {
   }
 
   @Test
+  void deberiaManejarTimerSinCategoria() {
+    Timer timer = buildTimer(1L, "Producto A", "g-1", null, null, "Zona Norte");
+    timer.setCategoria(null);
+
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
+
+    List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(1L);
+
+    assertNull(resultado.get(0).getCategoria());
+  }
+
+  @Test
+  void deberiaManejarUsuarioEliminadoEntityNotFound() {
+    Timer timer = buildTimer(1L, "Producto A", "g-1", null, null, "Zona Norte");
+    Usuario usuarioFantasma = mock(Usuario.class);
+    when(usuarioFantasma.getNombre())
+      .thenThrow(new javax.persistence.EntityNotFoundException("Not found"));
+    timer.setUsuario(usuarioFantasma);
+
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
+
+    List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(1L);
+
+    assertEquals("Usuario eliminado", resultado.get(0).getUsuario());
+  }
+
+  @Test
+  void deberiaManejarProductoEliminadoEntityNotFound() {
+    Timer timer = buildTimer(1L, null, "g-1", null, null, "Zona Norte");
+    Producto productoFantasma = mock(Producto.class);
+    when(productoFantasma.getNombre())
+      .thenThrow(new javax.persistence.EntityNotFoundException("Not found"));
+    timer.setProducto(productoFantasma);
+
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
+
+    List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(1L);
+
+    assertEquals("Producto eliminado", resultado.get(0).getNombre());
+  }
+
+  @Test
   void deberiaLanzarExcepcionCuandoIdEsNulo() {
     IdInvalido excepcion = assertThrows(
       IdInvalido.class,

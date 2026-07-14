@@ -9,4 +9,11 @@ public interface ServicioProductoFinal {
   ProductoFinal buscarPorId(Long id);
 
   List<ProductoFinal> listarPorCategoria(Long idCategoria);
+
+  void guardarProductoFinal(
+    ProductoFinal productoFinal,
+    Long idCategoria,
+    List<Long> idIngredientes,
+    List<Integer> cantidades
+  );
 }

@@ -113,6 +113,22 @@ public class ControladorProducto {
       return new ModelAndView("redirect:/login");
     }
 
+    String email = authentication.getName();
+    boolean isAdmin = authentication
+      .getAuthorities()
+      .stream()
+      .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+    boolean tienePermiso = servicioCategoria
+      .obtenerCategoriasPorUsuario(email)
+      .stream()
+      .anyMatch(c -> c.getId().equals(id));
+
+    if (!isAdmin && !tienePermiso) {
+      CategoriaDto categoria = servicioCategoria.obtenerCategoriaPorId(id);
+      session.setAttribute(CATEGORIA, categoria);
+      return new ModelAndView("redirect:/dashboard");
+    }
+
     ModelMap modelo = new ModelMap();
     CategoriaDto categoria = servicioCategoria.obtenerCategoriaPorId(id);
     session.setAttribute(CATEGORIA, categoria);

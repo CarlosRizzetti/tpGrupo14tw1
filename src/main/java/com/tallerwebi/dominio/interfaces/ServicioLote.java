@@ -20,4 +20,8 @@ public interface ServicioLote {
   List<ConsumoLote> consumirCantidad(Producto producto, Integer cantidadNecesaria, Timer timer);
 
   Integer stockDisponibleDe(Producto producto);
+
+  List<Lote> obtenerLotesActivos();
+
+  void descartarLote(Long idLote);
 }

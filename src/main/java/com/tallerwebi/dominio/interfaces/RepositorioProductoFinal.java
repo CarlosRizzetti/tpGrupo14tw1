@@ -9,4 +9,6 @@ public interface RepositorioProductoFinal {
   List<ProductoFinal> listarTodos();
 
   List<ProductoFinal> listarPorCategoria(Long idCategoria);
+
+  void guardar(ProductoFinal productoFinal);
 }
