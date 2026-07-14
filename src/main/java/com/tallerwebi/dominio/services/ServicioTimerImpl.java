@@ -296,6 +296,16 @@ public class ServicioTimerImpl implements ServicioTimer {
 
   private TimerDTO mapearATimerDTO(Timer timer) {
     ValidacionHelper.queNoSeaNull(timer, TIMER);
+
+    List<LoteConsumidoDTO> lotesUtilizados = servicioLote != null
+      ? servicioLote.obtenerLotesConsumidosPorTimer(timer.getId())
+      : null;
+
+    CicloVidaDTO ciclo = new CicloVidaDTO(
+      formatearFecha(timer.getCicloVida().getFechaCreacion()),
+      formatearFecha(timer.getCicloVida().getFechaVencimiento())
+    );
+
     try {
       CategoriaDto categoria = timer.getCategoria() != null
         ? new CategoriaDto(timer.getCategoria())
@@ -305,12 +315,12 @@ public class ServicioTimerImpl implements ServicioTimer {
         timer.getEstado(),
         obtenerNombreProducto(timer),
         timer.getGroupId(),
-        formatearFecha(timer.getCicloVida().getFechaCreacion()),
-        formatearFecha(timer.getCicloVida().getFechaVencimiento()),
+        ciclo,
         obtenerUbicacion(timer),
         timer.getCantidadProducto(),
         obtenerNombreUsuario(timer.getUsuario()),
-        categoria
+        categoria,
+        lotesUtilizados
       );
     } catch (javax.persistence.EntityNotFoundException e) {
       return new TimerDTO(
@@ -318,12 +328,12 @@ public class ServicioTimerImpl implements ServicioTimer {
         timer.getEstado(),
         obtenerNombreProducto(timer),
         timer.getGroupId(),
-        formatearFecha(timer.getCicloVida().getFechaCreacion()),
-        formatearFecha(timer.getCicloVida().getFechaVencimiento()),
+        ciclo,
         obtenerUbicacion(timer),
         timer.getCantidadProducto(),
         obtenerNombreUsuario(timer.getUsuario()),
-        null
+        null,
+        lotesUtilizados
       );
     }
   }
