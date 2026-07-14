@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{}, _, _)}">
+<head>
+    <title>Detalle de Lote</title>
+</head>
+<body>
+
+<!-- HEADER LEFT -->
+<div th:fragment="header_left">
+    <a th:href="@{/admin/articulos}"
+       class="hidden md:flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg border border-white/20 transition text-xs font-bold uppercase tracking-wider">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Volver
+    </a>
+</div>
+
+<!-- HEADER CENTER -->
+<div th:fragment="header_center">
+    <h1 class="text-puesto-header-text font-bold uppercase tracking-widest">
+        Detalle de Lote
+    </h1>
+</div>
+
+<!-- CONTENT -->
+<div th:fragment="content" class="max-w-4xl mx-auto p-6 md:p-8">
+
+    <!-- ==================== Datos del lote ==================== -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold text-gray-800" th:text="${lote.producto.nombre}">Producto</h2>
+            <span class="px-3 py-1 rounded-full text-sm font-semibold"
+                  th:text="${lote.estado}"
+                  th:classappend="${lote.estado.name() == 'EN_USO'} ? 'bg-green-100 text-green-800' :
+                             (${lote.estado.name() == 'DISPONIBLE'} ? 'bg-blue-100 text-blue-800' :
+                             (${lote.estado.name() == 'CONSUMIDO'} ? 'bg-gray-200 text-gray-600' :
+                             (${lote.estado.name() == 'VENCIDO'} ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800')))">
+        ESTADO
+      </span>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+            <div>
+                <p class="text-gray-500">N° de lote</p>
+                <p class="font-semibold" th:text="${lote.numeroDeLote}">-</p>
+            </div>
+            <div>
+                <p class="text-gray-500">Proveedor</p>
+                <p class="font-semibold" th:text="${lote.proveedor}">-</p>
+            </div>
+            <div>
+                <p class="text-gray-500">Marca</p>
+                <p class="font-semibold" th:text="${lote.marca}">-</p>
+            </div>
+            <div>
+                <p class="text-gray-500">Fecha de ingreso</p>
+                <p class="font-semibold" th:text="${#temporals.format(lote.fechaDeIngreso, 'dd/MM/yyyy HH:mm')}">-</p>
+            </div>
+            <div>
+                <p class="text-gray-500">Fecha de vencimiento</p>
+                <p class="font-semibold" th:text="${#temporals.format(lote.fechaDeVencimiento, 'dd/MM/yyyy HH:mm')}">-</p>
+            </div>
+            <div>
+                <p class="text-gray-500">Cantidad inicial</p>
+                <p class="font-semibold" th:text="${lote.cantidadInicial}">-</p>
+            </div>
+            <div>
+                <p class="text-gray-500">Cantidad disponible</p>
+                <p class="font-semibold" th:text="${lote.cantidadDisponible}">-</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== Pedidos donde se usó ==================== -->
+    <div class="bg-white rounded-lg shadow p-6 mt-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">Pedidos en los que se utilizó este lote</h2>
+
+        <table class="w-full text-sm text-left" th:if="${not #lists.isEmpty(pedidos)}">
+            <thead>
+            <tr class="border-b text-gray-500">
+                <th class="py-2">N° Pedido</th>
+                <th class="py-2">Estado</th>
+                <th class="py-2">Hora de salida</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="pedido : ${pedidos}" class="border-b hover:bg-gray-50">
+                <td class="py-2 font-semibold" th:text="${pedido.id}">1</td>
+                <td class="py-2" th:text="${pedido.estado}">ESTADO</td>
+                <td class="py-2"
+                    th:text="${pedido.horaSalida != null} ? ${#temporals.format(pedido.horaSalida, 'dd/MM/yyyy HH:mm')} : '-'">
+                    -
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <p th:if="${#lists.isEmpty(pedidos)}" class="text-gray-500 text-sm">
+            Este lote todavía no fue utilizado en ningún pedido.
+        </p>
+    </div>
+
+</div>
+
+</body>
+</html>

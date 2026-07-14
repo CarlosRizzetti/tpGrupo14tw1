@@ -17,4 +17,5 @@ public interface ServicioTimer {
   List<TimerDTO> obtenerTimersConFiltro(EstadoTimer estado, Long categoriaId);
   void descontarStock(Long timerId, Integer cantidad);
   List<Timer> obtenerTimersActivosConStockPorProducto(Long idProducto);
+  TimerDTO buscarPorIdDTO(Long id);
 }

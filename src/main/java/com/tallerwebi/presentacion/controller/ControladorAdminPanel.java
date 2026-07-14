@@ -35,17 +35,6 @@ public class ControladorAdminPanel {
     if (authentication == null) {
       return new ModelAndView("redirect:/login");
     }
-    if (authentication == null || !authentication.isAuthenticated()) {
-      return new ModelAndView(REDIRECT_ACCESO_DENEGADO);
-    }
-
-    boolean isAdmin = authentication
-      .getAuthorities()
-      .stream()
-      .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
-    if (!isAdmin) {
-      return new ModelAndView(REDIRECT_ACCESO_DENEGADO);
-    }
 
     ModelMap model = new ModelMap();
     model.put("email", authentication.getName());

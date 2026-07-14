@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
+import com.tallerwebi.dominio.interfaces.ServicioLote;
 import com.tallerwebi.dominio.interfaces.ServicioTimer;
 import com.tallerwebi.presentacion.controller.ControladorTimer;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
@@ -26,12 +27,15 @@ class ControladorTimerTest {
   private ServicioCategoria servicioCategoriaMock;
 
   private ControladorTimer controladorTimer;
+  private ServicioLote servicioLoteMock;
 
   @BeforeEach
   public void setUp() {
     this.servicioTimerMock = mock(ServicioTimer.class);
     this.servicioCategoriaMock = mock(ServicioCategoria.class);
-    this.controladorTimer = new ControladorTimer(servicioTimerMock, servicioCategoriaMock);
+    this.servicioLoteMock = mock(ServicioLote.class);
+    this.controladorTimer =
+      new ControladorTimer(servicioTimerMock, servicioCategoriaMock, servicioLoteMock);
   }
 
   @Test

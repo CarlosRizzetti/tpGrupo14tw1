@@ -47,6 +47,18 @@ public class RepositorioLoteImpl implements RepositorioLote {
   }
 
   @Override
+  public List<Lote> obtenerLotesPorTimer(Long idTimer) {
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery(
+        "select distinct cl.lote from ConsumoLote cl where cl.timer.id = :idTimer",
+        Lote.class
+      )
+      .setParameter("idTimer", idTimer)
+      .list();
+  }
+
+  @Override
   public List<Lote> listarConsumiblesDeProducto(Long idProducto) {
     return sessionFactory
       .getCurrentSession()
