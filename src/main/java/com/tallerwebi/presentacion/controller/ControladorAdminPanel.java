@@ -18,12 +18,6 @@ public class ControladorAdminPanel {
 
   private final ServicioTelegram servicioTelegram;
 
-  /**
-   * Constructor del controlador.
-   *
-   * @param servicioArticulo servicio para la gestión de artículos
-   * @param servicioTelegram servicio para el envío de mensajes a Telegram
-   */
   @Autowired
   public ControladorAdminPanel(ServicioLote servicioLote, ServicioTelegram servicioTelegram) {
     this.servicioLote = servicioLote;
@@ -34,17 +28,6 @@ public class ControladorAdminPanel {
   public ModelAndView panelDeControl(Authentication authentication) {
     if (authentication == null) {
       return new ModelAndView("redirect:/login");
-    }
-    if (authentication == null || !authentication.isAuthenticated()) {
-      return new ModelAndView(REDIRECT_ACCESO_DENEGADO);
-    }
-
-    boolean isAdmin = authentication
-      .getAuthorities()
-      .stream()
-      .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
-    if (!isAdmin) {
-      return new ModelAndView(REDIRECT_ACCESO_DENEGADO);
     }
 
     ModelMap model = new ModelMap();

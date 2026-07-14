@@ -15,10 +15,9 @@ import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
 import com.tallerwebi.presentacion.controller.ControladorDashboard;
-import com.tallerwebi.presentacion.dto.CategoriaDto;
-import com.tallerwebi.presentacion.dto.ResponseDTO;
-import com.tallerwebi.presentacion.dto.TimerDTO;
+import com.tallerwebi.presentacion.dto.*;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -99,9 +98,10 @@ public class ControladorDashboardTest {
 
   private TimerDTO buildTimerDTO(Long id) {
     TimerDTO dto = new TimerDTO();
+    dto.setCicloVida(
+      new CicloVidaDTO(OffsetDateTime.now().toString(), OffsetDateTime.now().plusDays(3).toString())
+    );
     dto.setId(id);
-    dto.setFechaCreacion(OffsetDateTime.now().toString());
-    dto.setFechaVencimiento(OffsetDateTime.now().plusDays(3).toString());
     return dto;
   }
 
@@ -225,8 +225,9 @@ public class ControladorDashboardTest {
     Timer timer = buildTimerConRegla(1L);
     TimerDTO nuevoTimer = new TimerDTO();
     nuevoTimer.setId(2L);
-    nuevoTimer.setFechaCreacion(OffsetDateTime.MIN.toString());
-    nuevoTimer.setFechaVencimiento(OffsetDateTime.MAX.toString());
+    nuevoTimer.setCicloVida(
+      new CicloVidaDTO(OffsetDateTime.MIN.toString(), OffsetDateTime.MAX.toString())
+    );
 
     when(servicioTimerMock.buscarPorId(1L)).thenReturn(timer);
     when(servicioTimerMock.renovarTimer(timer, 1, usuarioTest)).thenReturn(nuevoTimer);
@@ -430,6 +431,8 @@ public class ControladorDashboardTest {
     Categoria categoria = new Categoria("mccafe.png", true, "mccafe");
     categoria.setId(1L);
     CategoriaDto categoriaDTO = new CategoriaDto(categoria);
+    CicloVidaDTO cicloVida = new CicloVidaDTO(fechaCreacionISo, fechaVencimientoISO);
+    List<LoteConsumidoDTO> lotesConsumidos = new ArrayList<>();
     String nombre = "hamburguesa";
     String ubicacion = "horno";
     TimerDTO timer = new TimerDTO(
@@ -437,12 +440,12 @@ public class ControladorDashboardTest {
       EstadoTimer.ACTIVO,
       nombre,
       "1AF34",
-      fechaCreacionISo,
-      fechaVencimientoISO,
+      cicloVida,
       ubicacion,
       1,
       usuarioTest.getNombre(),
-      new CategoriaDto(categoria)
+      new CategoriaDto(categoria),
+      lotesConsumidos
     );
     List<TimerDTO> timersActivos = List.of(timer);
     when(servicioTimerMock.obtenerTimersActivos(anyLong())).thenReturn(timersActivos);

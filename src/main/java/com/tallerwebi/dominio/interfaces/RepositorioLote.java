@@ -17,4 +17,6 @@ public interface RepositorioLote {
 
   Lote buscarEnUsoDeProducto(Long idProducto);
   List<OffsetDateTime> obtenerFechasIngresoDesde(OffsetDateTime desde);
+
+  List<Lote> obtenerLotesPorTimer(Long idTimer);
 }

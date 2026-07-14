@@ -1,5 +1,5 @@
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, ~{}, _)}">
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, ~{}, ~{::scripts})}">
 <head>
     <title>Lotes en Almacen</title>
 </head>
@@ -53,9 +53,36 @@
             <p class="text-lg text-gray-500 dark:text-gray-400 font-medium">No hay lotes registrados en el almacen.</p>
         </div>
         <div th:unless="${#lists.isEmpty(articulos)}" class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-wrap gap-4 items-end">
-            <div class="flex-1 min-w-[200px]">
+            <div class="flex-1 min-w-[180px]">
                 <label for="filterDescripcion" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Filtrar por Producto</label>
                 <input type="text" id="filterDescripcion" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm" placeholder="Ingrese nombre de producto...">
+            </div>
+            <div class="min-w-[160px]">
+                <label for="filterEstado" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
+                <select id="filterEstado" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                    <option value="">Todos</option>
+                    <option value="DISPONIBLE">Disponible</option>
+                    <option value="EN_USO">En uso</option>
+                    <option value="CONSUMIDO">Consumido</option>
+                    <option value="VENCIDO">Vencido</option>
+                    <option value="DESCARTADO">Descartado</option>
+                </select>
+            </div>
+            <div class="min-w-[140px]">
+                <label for="filterNumeroLote" class="block text-sm font-medium text-gray-700 dark:text-gray-300">N° de lote</label>
+                <input type="text" id="filterNumeroLote" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm" placeholder="Ej: 12">
+            </div>
+            <div class="min-w-[160px]">
+                <label for="filterFechaExacta" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de ingreso exacta</label>
+                <input type="date" id="filterFechaExacta" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+            </div>
+            <div class="min-w-[180px]">
+                <label for="sortFecha" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ordenar por fecha de ingreso</label>
+                <select id="sortFecha" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                    <option value="">Sin ordenar</option>
+                    <option value="desc">Más nuevo primero</option>
+                    <option value="asc">Más viejo primero</option>
+                </select>
             </div>
             <div class="bg-indigo-100 dark:bg-indigo-900 px-4 py-2 rounded-lg shadow-sm border border-indigo-200 dark:border-indigo-800 flex items-center justify-center">
                 <span class="text-sm font-semibold text-indigo-800 dark:text-indigo-200 mr-2">Cantidad Total Filtrada:</span>
@@ -78,7 +105,13 @@
                 </tr>
                 </thead>
                 <tbody id="articulosTableBody">
-                <tr th:each="articulo : ${articulos}" class="articulo-row bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                <tr th:each="articulo : ${articulos}"
+                    class="articulo-row cursor-pointer bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"
+                    th:attr="data-id=${articulo.id},
+                                 data-estado=${articulo.estado.name()},
+                                 data-numero-lote=${articulo.numeroDeLote},
+                                 data-fecha-ingreso=${#temporals.format(articulo.fechaDeIngreso, 'yyyy-MM-dd')},
+                                 data-fecha-ingreso-ts=${articulo.fechaDeIngreso.toEpochSecond()}">
                     <td class="px-6 py-4 font-medium text-gray-900 dark:text-white articulo-nombre" th:text="${articulo.producto.nombre}"></td>
                     <td class="px-6 py-4" th:text="${articulo.marca}"></td>
                     <td class="px-6 py-4" th:text="${articulo.proveedor}"></td>
@@ -104,36 +137,9 @@
                 </tbody>
             </table>
         </div>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const filterDescripcion = document.getElementById('filterDescripcion');
-                const cantidadTotalSpan = document.getElementById('cantidadTotal');
-                const rows = document.querySelectorAll('.articulo-row');
-                function filterTable() {
-                    if (!filterDescripcion) return;
-                    const textDesc = filterDescripcion.value.toLowerCase().trim();
-                    let sum = 0;
-                    rows.forEach(row => {
-                        const nombreCell = row.querySelector('.articulo-nombre');
-                        const nombre = nombreCell ? nombreCell.textContent.toLowerCase() : '';
-                        const matchesDesc = nombre.includes(textDesc);
-                        if (matchesDesc) {
-                            row.style.display = '';
-                            const cantCell = row.querySelector('.articulo-cantidad');
-                            if (cantCell && cantCell.dataset.cantidad) {
-                                sum += parseFloat(cantCell.dataset.cantidad) || 0;
-                            }
-                        } else {
-                            row.style.display = 'none';
-                        }
-                    });
-                    cantidadTotalSpan.textContent = Number.isInteger(sum) ? sum : sum.toFixed(2);
-                }
-                if (filterDescripcion) filterDescripcion.addEventListener('input', filterTable);
-                // Initial sum
-                filterTable();
-            });
-        </script>
+        <th:block th:fragment="scripts">
+            <script type="module" th:src="@{/resources/core/js/articulos.js}"></script>
+        </th:block>
     </div>
 </div>
 </body>

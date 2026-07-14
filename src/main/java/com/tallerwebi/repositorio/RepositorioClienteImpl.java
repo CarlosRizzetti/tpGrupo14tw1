@@ -43,6 +43,10 @@ public class RepositorioClienteImpl implements RepositorioCliente {
 
   @Override
   public void guardar(Cliente cliente) {
-    sessionFactory.getCurrentSession().saveOrUpdate(cliente);
+    if (cliente.getId() != null) {
+      sessionFactory.getCurrentSession().merge(cliente);
+    } else {
+      sessionFactory.getCurrentSession().saveOrUpdate(cliente);
+    }
   }
 }

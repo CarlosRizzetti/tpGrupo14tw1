@@ -95,22 +95,28 @@
                 <!-- DOCUMENTO / DNI -->
                 <div>
                     <label for="documento" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                        Número de Documento (DNI) <span class="text-puesto-header text-xs">*Recomendado</span>
+                        Número de Documento (DNI) <span class="text-puesto-header text-xs">*Obligatorio</span>
                     </label>
                     <input name="documento" id="documento" type="text" th:value="${cliente?.documento}"
                            class="w-full px-4 py-3 rounded-xl text-black bg-slate-50 border border-slate-300 focus:ring-4 focus:ring-puesto-btn-border focus:bg-white outline-none transition-all font-bold text-sm"
-                           placeholder="Ej: 38492012 (sin puntos ni espacios)" />
+                           placeholder="Ej: 38492012 (sin puntos ni espacios)" pattern="[0-9]{8}" minlength="8" maxlength="8"
+                           title="Debe ingresar exactamente 8 dígitos numéricos."
+                           oninvalid="this.setCustomValidity('Por favor, ingresa tu DNI sin puntos ni espacios.')"
+                           oninput="this.setCustomValidity('')" required />
                     <p class="text-[11px] text-slate-500 mt-1 font-semibold">Permite a los cajeros y personal de mostrador ubicar tu pedido al instante.</p>
                 </div>
 
                 <!-- TELÉFONO -->
                 <div>
                     <label for="telefono" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                        Teléfono de Contacto <span class="text-puesto-header text-xs">*Recomendado</span>
+                        Teléfono de Contacto <span class="text-puesto-header text-xs">*Obligatorio</span>
                     </label>
                     <input name="telefono" id="telefono" type="text" th:value="${cliente?.telefono}"
                            class="w-full px-4 py-3 rounded-xl text-black bg-slate-50 border border-slate-300 focus:ring-4 focus:ring-puesto-btn-border focus:bg-white outline-none transition-all font-bold text-sm"
-                           placeholder="Ej: 11 4920-1923" />
+                           placeholder="Ej: 1149201923" pattern="[0-9]{10}" minlength="10" maxlength="10"
+                           title="Debe ingresar exactamente 10 dígitos numéricos."
+                           oninvalid="this.setCustomValidity('Por favor, ingresa tu teléfono celular (código de área + número).')"
+                           oninput="this.setCustomValidity('')" required />
                     <p class="text-[11px] text-slate-500 mt-1 font-semibold">Para avisarte ante cualquier consulta o demoras en la cocina.</p>
                 </div>
 

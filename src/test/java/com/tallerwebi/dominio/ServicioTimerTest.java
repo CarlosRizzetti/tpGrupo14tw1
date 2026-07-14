@@ -9,11 +9,7 @@ import com.tallerwebi.dominio.entity.embeddables.CicloVida;
 import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.excepcion.IdInvalido;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
-import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
-import com.tallerwebi.dominio.interfaces.RepositorioTimer;
-import com.tallerwebi.dominio.interfaces.ServicioImpresion;
-import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
-import com.tallerwebi.dominio.interfaces.ServicioTelegram;
+import com.tallerwebi.dominio.interfaces.*;
 import com.tallerwebi.dominio.services.ServicioTimerImpl;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.TimerDTO;
@@ -36,6 +32,7 @@ public class ServicioTimerTest {
   private Usuario usuarioTest;
   private ServicioImpresion servicioImpresionMock;
   private ServicioTelegram servicioTelegramMock;
+  private ServicioLote servicioLoteMock;
 
   @BeforeEach
   public void init() {
@@ -44,13 +41,15 @@ public class ServicioTimerTest {
     this.servicioReglaVencimientoMock = mock(ServicioReglaVencimiento.class);
     this.servicioImpresionMock = mock(ServicioImpresion.class);
     this.servicioTelegramMock = mock(ServicioTelegram.class);
+    this.servicioLoteMock = mock(ServicioLote.class);
     this.servicioTimer =
       new ServicioTimerImpl(
         repositorioTimerMock,
         repositorioCategoriaMock,
         servicioReglaVencimientoMock,
         servicioImpresionMock,
-        servicioTelegramMock
+        servicioTelegramMock,
+        servicioLoteMock
       );
     usuarioTest = new Usuario();
   }
@@ -196,8 +195,8 @@ public class ServicioTimerTest {
     assertEquals("Producto A", dto.getNombre());
     assertEquals("group-1", dto.getGroupId());
     assertEquals("Almacen Central", dto.getUbicacion());
-    assertFalse(dto.getFechaCreacion().isEmpty());
-    assertFalse(dto.getFechaVencimiento().isEmpty());
+    assertFalse(dto.getCicloVida().getFechaCreacion().isEmpty());
+    assertFalse(dto.getCicloVida().getFechaVencimiento().isEmpty());
   }
 
   @Test
@@ -296,8 +295,8 @@ public class ServicioTimerTest {
 
     List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(1L);
 
-    assertTrue(resultado.get(0).getFechaCreacion().isEmpty());
-    assertTrue(resultado.get(0).getFechaVencimiento().isEmpty());
+    assertTrue(resultado.get(0).getCicloVida().getFechaCreacion().isEmpty());
+    assertTrue(resultado.get(0).getCicloVida().getFechaVencimiento().isEmpty());
   }
 
   @Test
@@ -1022,7 +1021,9 @@ public class ServicioTimerTest {
 
     TimerDTO resultado = servicioTimer.renovarTimer(timer, 1, usuarioTest);
 
-    OffsetDateTime fechaCreacionDTO = OffsetDateTime.parse(resultado.getFechaCreacion());
+    OffsetDateTime fechaCreacionDTO = OffsetDateTime.parse(
+      resultado.getCicloVida().getFechaCreacion()
+    );
     assertTrue(fechaCreacionDTO.isAfter(timer.getCicloVida().getFechaCreacion()));
   }
 

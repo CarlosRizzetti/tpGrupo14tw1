@@ -35,10 +35,35 @@ public class ServicioClienteImpl implements ServicioCliente {
 
   @Override
   public void registrarCliente(Cliente cliente) throws Exception {
+    validarFormatoDocumentoYTelefono(cliente.getDocumento(), cliente.getTelefono());
     validarEmailYFormatear(cliente);
     validarDocumento(cliente);
     encriptarPasswordSiExiste(cliente);
     repositorioCliente.guardar(cliente);
+  }
+
+  private void validarFormatoDocumentoYTelefono(String documento, String telefono)
+    throws Exception {
+    validarFormatoDocumento(documento);
+    validarFormatoTelefono(telefono);
+  }
+
+  private void validarFormatoDocumento(String documento) throws Exception {
+    if (documento == null || documento.trim().isEmpty()) {
+      throw new Exception("El número de documento (DNI) y el teléfono son obligatorios.");
+    }
+    if (!documento.trim().matches("^[0-9]{8}$")) {
+      throw new Exception("El DNI debe tener exactamente 8 dígitos numéricos.");
+    }
+  }
+
+  private void validarFormatoTelefono(String telefono) throws Exception {
+    if (telefono == null || telefono.trim().isEmpty()) {
+      throw new Exception("El número de documento (DNI) y el teléfono son obligatorios.");
+    }
+    if (!telefono.trim().matches("^[0-9]{10}$")) {
+      throw new Exception("El teléfono debe tener exactamente 10 dígitos numéricos.");
+    }
   }
 
   private void validarEmailYFormatear(Cliente cliente) throws Exception {
@@ -77,6 +102,7 @@ public class ServicioClienteImpl implements ServicioCliente {
     String telefono,
     String nombre
   ) throws Exception {
+    validarFormatoDocumentoYTelefono(documento, telefono);
     actualizarDocumento(cliente, documento);
     actualizarTelefonoYNombre(cliente, telefono, nombre);
     repositorioCliente.guardar(cliente);

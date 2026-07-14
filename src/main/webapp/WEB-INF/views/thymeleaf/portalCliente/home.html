@@ -41,24 +41,6 @@
     <!-- CONTENIDO PRINCIPAL -->
     <div th:fragment="content" class="p-6 max-w-6xl mx-auto flex flex-col justify-center min-h-[calc(100vh-8rem)]">
 
-        <!-- ALERTA SI FALTAN DATOS EN EL PERFIL (EJ: GOOGLE LOGIN) -->
-        <div th:if="${faltanDatos}" 
-             class="mb-8 p-4 bg-amber-50 border-l-4 border-amber-500 text-amber-900 rounded-2xl shadow-md flex flex-col sm:flex-row items-center justify-between gap-4 border border-amber-200">
-            <div class="flex items-center gap-3">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <div>
-                    <h4 class="font-bold text-sm uppercase tracking-wider">Aviso importante</h4>
-                    <p class="text-xs opacity-90 font-medium mt-0.5">Te recomendamos agregar tu <b>DNI</b> o <b>Teléfono</b> para poder identificarte fácilmente.</p>
-                </div>
-            </div>
-            <a th:href="@{/portal/clientes/perfil}" 
-               class="shrink-0 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-black text-xs uppercase tracking-widest rounded-xl transition shadow">
-                Completar mis datos →
-            </a>
-        </div>
-
         <div class="text-center mb-10">
             <h2 class="text-3xl md:text-4xl font-black uppercase tracking-tighter text-slate-800 mb-2">
                 ¿Qué deseas hacer hoy?

@@ -2,6 +2,7 @@ package com.tallerwebi.dominio.services;
 
 import com.tallerwebi.dominio.entity.ConsumoLote;
 import com.tallerwebi.dominio.entity.Lote;
+import com.tallerwebi.dominio.entity.Pedido;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.dominio.entity.enums.EstadoLote;
@@ -10,6 +11,7 @@ import com.tallerwebi.dominio.interfaces.RepositorioConsumoLote;
 import com.tallerwebi.dominio.interfaces.RepositorioLote;
 import com.tallerwebi.dominio.interfaces.RepositorioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioLote;
+import com.tallerwebi.presentacion.dto.LoteConsumidoDTO;
 import com.tallerwebi.presentacion.dto.NotificacionVencimientoDto;
 import com.tallerwebi.presentacion.dto.StockProductoDTO;
 import java.time.LocalDate;
@@ -138,6 +140,31 @@ public class ServicioLoteImpl implements ServicioLote {
 
     notificaciones.sort(Comparator.comparingLong(NotificacionVencimientoDto::getDiasRestantes));
     return notificaciones;
+  }
+
+  @Override
+  public Lote buscarPorId(Long id) {
+    return repositorioLote.buscarPorId(id);
+  }
+
+  @Override
+  public List<Pedido> obtenerPedidosQueUsaronLote(Long idLote) {
+    return repositorioConsumoLote.obtenerPedidosPorLote(idLote);
+  }
+
+  @Override
+  public List<LoteConsumidoDTO> obtenerLotesConsumidosPorTimer(Long idTimer) {
+    return repositorioConsumoLote
+      .listarPorTimer(idTimer)
+      .stream()
+      .map(cl ->
+        new LoteConsumidoDTO(
+          cl.getLote().getId(),
+          cl.getLote().getNumeroDeLote(),
+          cl.getCantidadConsumida()
+        )
+      )
+      .collect(Collectors.toList());
   }
 
   private void agregarNotificacionSiCorresponde(

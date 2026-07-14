@@ -2,6 +2,7 @@ package com.tallerwebi.repositorio;
 
 import com.tallerwebi.dominio.entity.Pedido;
 import com.tallerwebi.dominio.interfaces.RepositorioPedido;
+import java.util.List;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -26,5 +27,13 @@ public class RepositorioPedidoImpl implements RepositorioPedido {
   @Override
   public Pedido buscarPorId(Long id) {
     return sessionFactory.getCurrentSession().get(Pedido.class, id);
+  }
+
+  @Override
+  public List<Pedido> listarTodos() {
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery("from Pedido p order by p.horaCobro desc", Pedido.class)
+      .list();
   }
 }

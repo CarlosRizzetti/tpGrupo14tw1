@@ -2,8 +2,10 @@ package com.tallerwebi.dominio.interfaces;
 
 import com.tallerwebi.dominio.entity.ConsumoLote;
 import com.tallerwebi.dominio.entity.Lote;
+import com.tallerwebi.dominio.entity.Pedido;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.Timer;
+import com.tallerwebi.presentacion.dto.LoteConsumidoDTO;
 import com.tallerwebi.presentacion.dto.NotificacionVencimientoDto;
 import com.tallerwebi.presentacion.dto.StockProductoDTO;
 import java.util.List;
@@ -24,4 +26,10 @@ public interface ServicioLote {
   List<Lote> obtenerLotesActivos();
 
   void descartarLote(Long idLote);
+  Lote buscarPorId(Long id);
+
+  //Lote -> ConsumoLote -> Timer -> ConsumoTimer -> Pedido.
+  List<Pedido> obtenerPedidosQueUsaronLote(Long idLote);
+
+  List<LoteConsumidoDTO> obtenerLotesConsumidosPorTimer(Long idTimer);
 }

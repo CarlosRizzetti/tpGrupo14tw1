@@ -123,8 +123,8 @@ public class ControladorDashboard {
       Map<String, Object> response = new HashMap<>();
       response.put("status", "ok");
       response.put("nuevoTimerId", nuevoTimer.getId());
-      response.put("fechaElaboracion", nuevoTimer.getFechaCreacion());
-      response.put("fechaVencimiento", nuevoTimer.getFechaVencimiento());
+      response.put("fechaElaboracion", nuevoTimer.getCicloVida().getFechaCreacion());
+      response.put("fechaVencimiento", nuevoTimer.getCicloVida().getFechaVencimiento());
       response.put("cantidad", cantidad);
 
       return ResponseEntity.ok(response);

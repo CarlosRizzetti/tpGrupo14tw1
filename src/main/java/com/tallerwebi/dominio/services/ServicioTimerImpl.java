@@ -10,12 +10,15 @@ import com.tallerwebi.dominio.excepcion.ValidacionException;
 import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioImpresion;
+import com.tallerwebi.dominio.interfaces.ServicioLote;
 import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
 import com.tallerwebi.dominio.interfaces.ServicioTelegram;
 import com.tallerwebi.dominio.interfaces.ServicioTimer;
 import com.tallerwebi.dominio.utils.ImpresionHelper;
 import com.tallerwebi.dominio.utils.ValidacionHelper;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
+import com.tallerwebi.presentacion.dto.CicloVidaDTO;
+import com.tallerwebi.presentacion.dto.LoteConsumidoDTO;
 import com.tallerwebi.presentacion.dto.TimerDTO;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -35,6 +38,7 @@ public class ServicioTimerImpl implements ServicioTimer {
   private RepositorioTimer repositorioTimer;
   private RepositorioCategoria repositorioCategoria;
   private ServicioImpresion servicioImpresion;
+  private ServicioLote servicioLote;
 
   @Autowired
   public ServicioTimerImpl(
@@ -42,13 +46,15 @@ public class ServicioTimerImpl implements ServicioTimer {
     RepositorioCategoria repositorioCategoria,
     ServicioReglaVencimiento servicioReglaVencimiento,
     ServicioImpresion servicioImpresion,
-    ServicioTelegram servicioTelegram
+    ServicioTelegram servicioTelegram,
+    ServicioLote servicioLote
   ) {
     this.repositorioTimer = repositorioTimer;
     this.repositorioCategoria = repositorioCategoria;
     this.servicioReglaVencimiento = servicioReglaVencimiento;
     this.servicioImpresion = servicioImpresion;
     this.servicioTelegram = servicioTelegram;
+    this.servicioLote = servicioLote;
   }
 
   @Override
@@ -137,7 +143,6 @@ public class ServicioTimerImpl implements ServicioTimer {
     int restante = timer.getCantidadProducto() - cantidad;
     timer.setCantidadProducto(restante);
 
-    // Si el timer se agotó, transiciona a ELIMINADO (sale del pool de activos)
     if (restante == 0) {
       timer.setEstado(EstadoTimer.CONSUMIDO);
     }
@@ -219,6 +224,13 @@ public class ServicioTimerImpl implements ServicioTimer {
     Timer timer = repositorioTimer.buscarPorId(id);
     ValidacionHelper.queNoSeaNull(timer, TIMER);
     return timer;
+  }
+
+  @Override
+  public TimerDTO buscarPorIdDTO(Long id) {
+    Timer timer = repositorioTimer.buscarPorId(id);
+    ValidacionHelper.queNoSeaNull(timer, TIMER);
+    return mapearATimerDTO(timer);
   }
 
   @Override
