@@ -18,12 +18,6 @@ public class ControladorAdminPanel {
 
   private final ServicioTelegram servicioTelegram;
 
-  /**
-   * Constructor del controlador.
-   *
-   * @param servicioArticulo servicio para la gestión de artículos
-   * @param servicioTelegram servicio para el envío de mensajes a Telegram
-   */
   @Autowired
   public ControladorAdminPanel(ServicioLote servicioLote, ServicioTelegram servicioTelegram) {
     this.servicioLote = servicioLote;
