@@ -60,6 +60,7 @@ const cargarProductosDeCategoria = async (idCategoria) => {
     const productos = await fetchJson(`${API}/productos?idCategoria=${idCategoria}`);
     renderProductos(productos);
   } catch (err) {
+    console.error(err);
     grilla.innerHTML = "";
     msg.textContent = "No se pudieron cargar los productos.";
     msg.classList.remove("hidden");

@@ -67,6 +67,7 @@ async function monitorearTimersGlobales() {
       }
     });
   } catch (error) {
+    console.error("Error silenciado:", error);
     // Si hay un error de red momentáneo, se ignora silenciosamente para no interrumpir al usuario
   }
 }
@@ -94,6 +95,7 @@ function dispararNotificacionGlobal(timer, notificados) {
     const audio = new Audio("/sounds/alert.mp3");
     audio.play().catch(() => {}); // Si falla (ej. por falta de archivo 404 o política de autoplay), se ignora
   } catch (e) {
+    console.error("Error silenciado al reproducir audio:", e);
     // Ignorado intencionalmente si el audio no puede reproducirse
   }
   
