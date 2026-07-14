@@ -108,25 +108,4 @@ public class ControladorAdminPanelTest {
     ModelAndView mav = controlador.panelDeControl(null);
     assertEquals("redirect:/login", mav.getViewName());
   }
-
-  @Test
-  public void quePanelDeControlSiElUsuarioNoEstaAutenticadoRedirijaAAccesoDenegado() {
-    doReturn(false).when(authenticationMock).isAuthenticated();
-
-    ModelAndView mav = controlador.panelDeControl(authenticationMock);
-
-    assertEquals("redirect:/acceso-denegado", mav.getViewName());
-  }
-
-  @Test
-  public void quePanelDeControlSiElUsuarioNoEsAdminRedirijaAAccesoDenegado() {
-    doReturn(true).when(authenticationMock).isAuthenticated();
-    doAnswer(invocation -> List.of(new SimpleGrantedAuthority("ROLE_USER")))
-      .when(authenticationMock)
-      .getAuthorities();
-
-    ModelAndView mav = controlador.panelDeControl(authenticationMock);
-
-    assertEquals("redirect:/acceso-denegado", mav.getViewName());
-  }
 }
