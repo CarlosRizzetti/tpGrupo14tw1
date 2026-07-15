@@ -1,5 +1,6 @@
 package com.tallerwebi.repositorio;
 
+import com.tallerwebi.dominio.entity.Cliente;
 import com.tallerwebi.dominio.entity.Pedido;
 import com.tallerwebi.dominio.interfaces.RepositorioPedido;
 import java.util.List;
@@ -34,6 +35,18 @@ public class RepositorioPedidoImpl implements RepositorioPedido {
     return sessionFactory
       .getCurrentSession()
       .createQuery("from Pedido p order by p.horaCobro desc", Pedido.class)
+      .list();
+  }
+
+  @Override
+  public List<Pedido> buscarPorCliente(Cliente cliente) {
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery(
+        "select distinct p from Pedido p left join fetch p.detalles where p.cliente = :cliente order by p.horaCobro desc",
+        Pedido.class
+      )
+      .setParameter("cliente", cliente)
       .list();
   }
 }

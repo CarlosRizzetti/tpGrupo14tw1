@@ -40,4 +40,11 @@ public class Pedido {
 
   @Enumerated(EnumType.STRING)
   private EstadoPedido estado;
+
+  @Column(columnDefinition = "boolean default false")
+  private Boolean reportado = false;
+
+  public Boolean getReportado() {
+    return Boolean.TRUE.equals(reportado);
+  }
 }

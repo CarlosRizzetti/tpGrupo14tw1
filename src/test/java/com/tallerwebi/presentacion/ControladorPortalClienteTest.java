@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.tallerwebi.dominio.entity.Cliente;
 import com.tallerwebi.dominio.interfaces.ServicioCliente;
+import com.tallerwebi.dominio.interfaces.ServicioPedido;
 import com.tallerwebi.presentacion.controller.ControladorPortalCliente;
 import java.util.Collections;
 import javax.servlet.http.HttpServletRequest;
@@ -28,13 +29,15 @@ import org.springframework.ui.Model;
 public class ControladorPortalClienteTest {
 
   private ServicioCliente servicioCliente;
+  private ServicioPedido servicioPedido;
   private ControladorPortalCliente controlador;
   private Model model;
 
   @BeforeEach
   public void init() {
     servicioCliente = mock(ServicioCliente.class);
-    controlador = new ControladorPortalCliente(servicioCliente);
+    servicioPedido = mock(ServicioPedido.class);
+    controlador = new ControladorPortalCliente(servicioCliente, servicioPedido);
     model = new ConcurrentModel();
   }
 
@@ -84,7 +87,7 @@ public class ControladorPortalClienteTest {
 
     String vista = controlador.procesarRegistroCliente(cliente, model, request);
 
-    assertEquals("redirect:/portal/clientes/mis-pedidos", vista);
+    assertEquals("redirect:/portal/clientes/home", vista);
   }
 
   @Test
@@ -107,7 +110,7 @@ public class ControladorPortalClienteTest {
     );
     Authentication authCompleto = new UsernamePasswordAuthenticationToken(clienteCompleto, "");
     assertEquals(
-      "redirect:/portal/clientes/mis-pedidos",
+      "redirect:/portal/clientes/home",
       controlador.mostrarCompletarDatosCliente(authCompleto, model)
     );
   }
@@ -147,7 +150,7 @@ public class ControladorPortalClienteTest {
       request
     );
 
-    assertEquals("redirect:/portal/clientes/mis-pedidos", vista);
+    assertEquals("redirect:/portal/clientes/home", vista);
     verify(servicioCliente)
       .actualizarDatosCliente(eq(cliente), eq("30111222"), eq("1144556677"), eq("Juan"));
   }
@@ -177,19 +180,19 @@ public class ControladorPortalClienteTest {
   }
 
   @Test
-  @DisplayName("mostrarMisPedidos | Redirige a completar-datos si faltan datos obligatorios")
-  public void mostrarMisPedidosRedireccion() {
+  @DisplayName("mostrarHome | Redirige a completar-datos si faltan datos obligatorios")
+  public void mostrarHomeRedireccion() {
     Cliente clienteIncompleto = new Cliente(1L, "Juan", null, null, "juan@test.com", null);
     Authentication auth = new UsernamePasswordAuthenticationToken(clienteIncompleto, "");
 
-    String vista = controlador.mostrarMisPedidos(auth, model);
+    String vista = controlador.mostrarHome(auth, model);
 
     assertEquals("redirect:/portal/clientes/completar-datos", vista);
   }
 
   @Test
-  @DisplayName("mostrarMisPedidos | Muestra home si datos estan completos")
-  public void mostrarMisPedidosVista() {
+  @DisplayName("mostrarHome | Muestra home si datos estan completos")
+  public void mostrarHomeVista() {
     Cliente clienteCompleto = new Cliente(
       1L,
       "Juan",
@@ -200,7 +203,7 @@ public class ControladorPortalClienteTest {
     );
     Authentication auth = new UsernamePasswordAuthenticationToken(clienteCompleto, "");
 
-    String vista = controlador.mostrarMisPedidos(auth, model);
+    String vista = controlador.mostrarHome(auth, model);
 
     assertEquals("portalCliente/home", vista);
     assertEquals(false, model.getAttribute("faltanDatos"));

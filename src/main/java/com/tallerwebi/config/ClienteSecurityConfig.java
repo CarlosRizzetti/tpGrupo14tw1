@@ -46,7 +46,7 @@ public class ClienteSecurityConfig extends WebSecurityConfigurerAdapter {
       .loginProcessingUrl("/portal/clientes/procesar")
       .usernameParameter("identificador")
       .passwordParameter("password")
-      .defaultSuccessUrl("/portal/clientes/mis-pedidos", true)
+      .defaultSuccessUrl("/portal/clientes/home", true)
       .failureUrl("/portal/clientes?error=true")
       .permitAll()
       .and()

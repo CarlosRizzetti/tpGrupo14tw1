@@ -1,5 +1,6 @@
 package com.tallerwebi.dominio.interfaces;
 
+import com.tallerwebi.dominio.entity.Cliente;
 import com.tallerwebi.dominio.entity.Pedido;
 import java.util.List;
 
@@ -9,4 +10,6 @@ public interface RepositorioPedido {
   Pedido buscarPorId(Long id);
 
   List<Pedido> listarTodos();
+
+  List<Pedido> buscarPorCliente(Cliente cliente);
 }
