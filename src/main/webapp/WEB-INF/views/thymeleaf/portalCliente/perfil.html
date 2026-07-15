@@ -133,10 +133,57 @@
                 </div>
 
             </form>
-
+            <div id="chat-container" class="border p-4 rounded shadow-md mt-4 bg-white">
+                <div id="chat-historial" class="h-64 overflow-y-auto mb-4 border-b pb-2">
+                </div>
+                <div id="chat-botones" class="flex gap-2 flex-wrap">
+                    <button onclick="enviarAccion('INICIAR')" class="bg-blue-600 text-white px-4 py-2 rounded">
+                        Iniciar Reporte
+                    </button>
+                </div>
+            </div>
         </div>
 
     </div>
 
 </body>
+<script>
+    // Fíjate que el reporteId y clienteId deberían venir inyectados por Thymeleaf (ej. [[${cliente.id}]])
+    const reporteId = 1;
+    const clienteId = 1;
+
+    function enviarAccion(accionSeleccionada) {
+        // 1. Dibujar lo que seleccionó el usuario
+        agregarMensajeAlChat(accionSeleccionada, 'usuario');
+        document.getElementById('chat-botones').innerHTML = '<p class="text-gray-500">Analizando...</p>';
+
+        // 2. Enviar petición al Controlador (Sujeto)
+        fetch(`/spring/portal/clientes/reportar/accion?reporteId=${reporteId}&clienteId=${clienteId}&accion=${accionSeleccionada}`, {
+            method: 'POST'
+        })
+            .then(response => response.json())
+            .then(data => {
+                // 3. Dibujar la respuesta del Observer
+                agregarMensajeAlChat(data.mensaje, 'sistema');
+
+                // 4. Dibujar los nuevos botones
+                let botonesHTML = '';
+                if (data.opciones && data.opciones.length > 0) {
+                    data.opciones.forEach(opcion => {
+                        botonesHTML += `<button onclick="enviarAccion('${opcion}')" class="bg-gray-200 hover:bg-gray-300 text-black px-4 py-2 rounded border">${opcion}</button>`;
+                    });
+                } else {
+                    botonesHTML = '<p class="text-green-600 font-bold">Chat finalizado.</p>';
+                }
+                document.getElementById('chat-botones').innerHTML = botonesHTML;
+            });
+    }
+
+    function agregarMensajeAlChat(texto, emisor) {
+        const div = document.createElement('div');
+        div.className = emisor === 'usuario' ? 'text-right text-blue-600 my-2' : 'text-left text-gray-800 bg-gray-100 p-2 rounded my-2';
+        div.innerText = texto;
+        document.getElementById('chat-historial').appendChild(div);
+    }
+</script>
 </html>
