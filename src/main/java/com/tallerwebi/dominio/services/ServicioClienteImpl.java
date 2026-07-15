@@ -108,6 +108,11 @@ public class ServicioClienteImpl implements ServicioCliente {
     repositorioCliente.guardar(cliente);
   }
 
+  @Override
+  public Cliente buscarPorId(Long id) {
+    return repositorioCliente.buscarPorId(id);
+  }
+
   @SuppressWarnings("PMD.NullAssignment")
   private void actualizarDocumento(Cliente cliente, String documento) throws Exception {
     if (documento != null && !documento.trim().isEmpty()) {

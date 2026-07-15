@@ -96,6 +96,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         new FiltroRecaptcha(servicioRecaptcha),
         UsernamePasswordAuthenticationFilter.class
       )
+      .addFilterAfter(new FiltroRestriccionCajero(), UsernamePasswordAuthenticationFilter.class)
       .csrf()
       .disable()
       .exceptionHandling()
@@ -121,7 +122,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
       .and()
       .formLogin()
       .loginPage("/login")
-      .defaultSuccessUrl("/home", true)
+      .defaultSuccessUrl("/", true)
       .permitAll()
       .and()
       .oauth2Login()

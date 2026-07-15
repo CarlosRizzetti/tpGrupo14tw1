@@ -3,10 +3,7 @@ package com.tallerwebi.config;
 import java.time.Clock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -29,7 +26,15 @@ import org.thymeleaf.templatemode.TemplateMode;
     "com.tallerwebi.config",
   }
 )
-@PropertySource(value = "classpath:application.properties", ignoreResourceNotFound = true)
+@PropertySources(
+  {
+    @PropertySource(value = "classpath:application.properties", ignoreResourceNotFound = true),
+    @PropertySource(
+      value = "classpath:application-${spring.profiles.active:default}.properties",
+      ignoreResourceNotFound = true
+    ),
+  }
+)
 public class SpringWebConfig implements WebMvcConfigurer {
 
   // Spring + Thymeleaf need this

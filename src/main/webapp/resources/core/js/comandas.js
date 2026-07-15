@@ -13,7 +13,7 @@ const vacioEl = $("[data-estado-vacio]");
 const modalEl = $("[data-modal-faltantes]");
 const listaFaltantesEl = $("[data-lista-faltantes]");
 
-let comandasEnPantalla = new Map(); // idComanda -> hash (para detectar cambios)
+let comandasEnPantalla = new Map();
 
 const formatearHora = (isoString) => {
   if (!isoString) return "";

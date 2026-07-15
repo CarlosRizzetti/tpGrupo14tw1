@@ -53,43 +53,8 @@ public class ControladorAdminPanelTest {
   }
 
   @Test
-  public void queProbarTelegramSiAuthenticationEsNullRedirijaAAccesoDenegado() {
-    ModelAndView mav = controlador.probarTelegram(null);
-
-    assertEquals("redirect:/acceso-denegado", mav.getViewName());
-  }
-
-  @Test
-  public void queProbarTelegramSiElUsuarioNoEstaAutenticadoRedirijaAAccesoDenegado() {
-    doReturn(false).when(authenticationMock).isAuthenticated();
-
-    ModelAndView mav = controlador.probarTelegram(authenticationMock);
-
-    assertEquals("redirect:/acceso-denegado", mav.getViewName());
-  }
-
-  @Test
-  public void queProbarTelegramSiElUsuarioNoEsAdminRedirijaAAccesoDenegado() {
-    doReturn(true).when(authenticationMock).isAuthenticated();
-
-    doAnswer(invocation -> List.of(new SimpleGrantedAuthority("ROLE_USER")))
-      .when(authenticationMock)
-      .getAuthorities();
-
-    ModelAndView mav = controlador.probarTelegram(authenticationMock);
-
-    assertEquals("redirect:/acceso-denegado", mav.getViewName());
-  }
-
-  @Test
   public void queProbarTelegramSiElUsuarioEsAdminEnvieMensajesYRedirijaConExito() {
-    doReturn(true).when(authenticationMock).isAuthenticated();
-
-    doAnswer(invocation -> List.of(new SimpleGrantedAuthority("ROLE_ADMIN")))
-      .when(authenticationMock)
-      .getAuthorities();
-
-    ModelAndView mav = controlador.probarTelegram(authenticationMock);
+    ModelAndView mav = controlador.probarTelegram();
 
     verify(servicioTelegramMock, times(1)).enviarMensaje(anyString());
     verify(servicioTelegramMock, times(1)).enviarNotificacionesVencimiento();
@@ -101,11 +66,5 @@ public class ControladorAdminPanelTest {
     ModelAndView mav = controlador.accesoDenegado();
 
     assertEquals("acceso-denegado", mav.getViewName());
-  }
-
-  @Test
-  public void deberiaRedirigirALoginSiLaAutenticacionEsNula() {
-    ModelAndView mav = controlador.panelDeControl(null);
-    assertEquals("redirect:/login", mav.getViewName());
   }
 }

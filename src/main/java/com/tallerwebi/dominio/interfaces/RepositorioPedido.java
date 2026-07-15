@@ -9,4 +9,6 @@ public interface RepositorioPedido {
   Pedido buscarPorId(Long id);
 
   List<Pedido> listarTodos();
+
+  List<Pedido> listarPorCliente(Long idCliente);
 }

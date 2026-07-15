@@ -31,8 +31,9 @@
     <!-- ==================== Datos del lote ==================== -->
     <div class="bg-white rounded-lg shadow p-6">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-2xl font-bold text-gray-800" th:text="${lote.producto.nombre}">Producto</h2>
+            <h2 class="text-2xl font-bold text-gray-800" id="lote-nombre-producto" th:text="${lote.producto.nombre}">Producto</h2>
             <span class="px-3 py-1 rounded-full text-sm font-semibold"
+                  id="lote-estado"
                   th:text="${lote.estado}"
                   th:classappend="${lote.estado.name() == 'EN_USO'} ? 'bg-green-100 text-green-800' :
                              (${lote.estado.name() == 'DISPONIBLE'} ? 'bg-blue-100 text-blue-800' :
@@ -45,15 +46,15 @@
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
             <div>
                 <p class="text-gray-500">N° de lote</p>
-                <p class="font-semibold" th:text="${lote.numeroDeLote}">-</p>
+                <p class="font-semibold" id="lote-numero" th:text="${lote.numeroDeLote}">-</p>
             </div>
             <div>
                 <p class="text-gray-500">Proveedor</p>
-                <p class="font-semibold" th:text="${lote.proveedor}">-</p>
+                <p class="font-semibold" id="lote-proveedor" th:text="${lote.proveedor}">-</p>
             </div>
             <div>
                 <p class="text-gray-500">Marca</p>
-                <p class="font-semibold" th:text="${lote.marca}">-</p>
+                <p class="font-semibold" id="lote-marca" th:text="${lote.marca}">-</p>
             </div>
             <div>
                 <p class="text-gray-500">Fecha de ingreso</p>

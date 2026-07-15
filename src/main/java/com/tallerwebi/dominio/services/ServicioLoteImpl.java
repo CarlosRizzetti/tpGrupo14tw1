@@ -15,11 +15,9 @@ import com.tallerwebi.presentacion.dto.LoteConsumidoDTO;
 import com.tallerwebi.presentacion.dto.NotificacionVencimientoDto;
 import com.tallerwebi.presentacion.dto.StockProductoDTO;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -174,10 +172,8 @@ public class ServicioLoteImpl implements ServicioLote {
     if (!esCandidatoANotificar(lote)) {
       return;
     }
-    long dias = ChronoUnit.DAYS.between(
-      LocalDate.now(),
-      lote.getFechaDeVencimiento().toLocalDate()
-    );
+    LocalDate hoy = OffsetDateTime.now(lote.getFechaDeVencimiento().getOffset()).toLocalDate();
+    long dias = ChronoUnit.DAYS.between(hoy, lote.getFechaDeVencimiento().toLocalDate());
     if (dias > URGENCIA_BAJA_DIAS) {
       return;
     }
@@ -187,7 +183,9 @@ public class ServicioLoteImpl implements ServicioLote {
   private boolean esCandidatoANotificar(Lote lote) {
     boolean tieneStock = lote.getCantidadDisponible() != null && lote.getCantidadDisponible() > 0;
     boolean estadoUsable =
-      lote.getEstado() == EstadoLote.DISPONIBLE || lote.getEstado() == EstadoLote.EN_USO;
+      lote.getEstado() == EstadoLote.DISPONIBLE ||
+      lote.getEstado() == EstadoLote.EN_USO ||
+      lote.getEstado() == EstadoLote.VENCIDO;
     return tieneStock && estadoUsable && lote.getFechaDeVencimiento() != null;
   }
 
@@ -315,6 +313,24 @@ public class ServicioLoteImpl implements ServicioLote {
       lote.setEstado(EstadoLote.DESCARTADO);
       repositorioLote.actualizar(lote);
       reevaluarFifo(lote.getProducto());
+    }
+  }
+
+  @Override
+  @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
+  public void marcarLotesVencidos() {
+    OffsetDateTime ahora = OffsetDateTime.now();
+    List<Lote> vencidos = repositorioLote.listarVencidosNoMarcados(ahora);
+
+    Set<Producto> productosAfectados = new HashSet<>();
+    for (Lote lote : vencidos) {
+      lote.setEstado(EstadoLote.VENCIDO);
+      repositorioLote.actualizar(lote);
+      productosAfectados.add(lote.getProducto());
+    }
+
+    for (Producto producto : productosAfectados) {
+      reevaluarFifo(producto);
     }
   }
 }

@@ -51,6 +51,69 @@ public class ServicioLoteTest {
     servicio = new ServicioLoteImpl(repositorioLote, repositorioConsumoLote, repositorioProducto);
   }
 
+  @Test
+  @DisplayName(
+    "HP-01 | marcarLotesVencidos | Marca VENCIDO los lotes vencidos y reevalúa el FIFO del producto"
+  )
+  public void marcarLotesVencidosDeberiaActualizarEstadoYReevaluarFifo() {
+    Producto producto = crearProducto(1L, "Queso");
+    Lote loteVencido = crearLote(
+      1L,
+      producto,
+      10,
+      EstadoLote.EN_USO,
+      OffsetDateTime.now().minusDays(1)
+    );
+
+    when(repositorioLote.listarVencidosNoMarcados(any()))
+      .thenReturn(Collections.singletonList(loteVencido));
+    when(repositorioLote.listarConsumiblesDeProducto(producto.getId()))
+      .thenReturn(new ArrayList<>());
+
+    servicio.marcarLotesVencidos();
+
+    assertEquals(EstadoLote.VENCIDO, loteVencido.getEstado());
+    verify(repositorioLote, times(1)).actualizar(loteVencido);
+    verify(repositorioLote, times(1)).listarConsumiblesDeProducto(producto.getId());
+  }
+
+  @Test
+  @DisplayName("EDGE-01 | marcarLotesVencidos | Sin lotes vencidos no actualiza ni reevalúa nada")
+  public void marcarLotesVencidosSinLotesNoDeberiaActualizarNada() {
+    when(repositorioLote.listarVencidosNoMarcados(any())).thenReturn(new ArrayList<>());
+
+    servicio.marcarLotesVencidos();
+
+    verify(repositorioLote, never()).actualizar(any());
+    verify(repositorioLote, never()).listarConsumiblesDeProducto(any());
+  }
+
+  @Test
+  @DisplayName(
+    "EDGE-02 | marcarLotesVencidos | Dos lotes vencidos del mismo producto reevalúan el FIFO una sola vez"
+  )
+  public void marcarLotesVencidosConDosLotesDelMismoProductoDeberiaReevaluarUnaSolaVez() {
+    Producto producto = crearProducto(1L, "Queso");
+    Lote loteA = crearLote(1L, producto, 5, EstadoLote.EN_USO, OffsetDateTime.now().minusDays(2));
+    Lote loteB = crearLote(
+      2L,
+      producto,
+      8,
+      EstadoLote.DISPONIBLE,
+      OffsetDateTime.now().minusDays(1)
+    );
+
+    when(repositorioLote.listarVencidosNoMarcados(any())).thenReturn(Arrays.asList(loteA, loteB));
+    when(repositorioLote.listarConsumiblesDeProducto(producto.getId()))
+      .thenReturn(new ArrayList<>());
+
+    servicio.marcarLotesVencidos();
+
+    assertEquals(EstadoLote.VENCIDO, loteA.getEstado());
+    assertEquals(EstadoLote.VENCIDO, loteB.getEstado());
+    verify(repositorioLote, times(1)).listarConsumiblesDeProducto(producto.getId());
+  }
+
   // ---------- helpers ----------
 
   private Producto crearProducto(Long id, String nombre) {

@@ -32,4 +32,6 @@ public interface ServicioLote {
   List<Pedido> obtenerPedidosQueUsaronLote(Long idLote);
 
   List<LoteConsumidoDTO> obtenerLotesConsumidosPorTimer(Long idTimer);
+
+  void marcarLotesVencidos();
 }

@@ -36,4 +36,16 @@ public class RepositorioPedidoImpl implements RepositorioPedido {
       .createQuery("from Pedido p order by p.horaCobro desc", Pedido.class)
       .list();
   }
+
+  @Override
+  public List<Pedido> listarPorCliente(Long idCliente) {
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery(
+        "from Pedido p where p.cliente.id = :idCliente order by p.horaCobro desc",
+        Pedido.class
+      )
+      .setParameter("idCliente", idCliente)
+      .list();
+  }
 }

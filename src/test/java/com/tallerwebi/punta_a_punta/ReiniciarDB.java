@@ -1,6 +1,7 @@
 package com.tallerwebi.punta_a_punta;
 
 import java.io.IOException;
+import java.util.List;
 
 public class ReiniciarDB {
 
@@ -14,28 +15,50 @@ public class ReiniciarDB {
         ? System.getenv("DB_PASSWORD")
         : "user";
 
-      String sqlCommands =
-        "DELETE FROM Usuario;\n" +
-        "ALTER TABLE Usuario AUTO_INCREMENT = 1;\n" +
-        "INSERT INTO Usuario(id, email, password, rol, activo) VALUES(null, 'test@unlam.edu.ar', 'test', 'ADMIN', true);";
+      String passwordHasheada = "$2a$10$R2lKQIKoYOsk5oWiA.GPXOkHgfyTIW9gceu1W3ne3lHyqWaH3NvkK";
 
-      String comando = String.format(
-        "docker exec tallerwebi-mysql mysql -h %s -P %s -u %s -p%s %s -e \"%s\"",
+      String sqlCommands =
+        "SET FOREIGN_KEY_CHECKS = 0;\n" +
+        "DELETE FROM Lote WHERE proveedor = 'Proveedor Test';\n" +
+        "DELETE FROM Usuario WHERE email IN ('test@unlam.edu.ar', 'cajero@unlam.edu.ar');;\n" +
+        "INSERT INTO Usuario(id, email,estado, password, rol) VALUES(1,'test@unlam.edu.ar', 'ACTIVO', '" +
+        passwordHasheada +
+        "', 'ADMIN');\n" +
+        "INSERT INTO Usuario(id, email,estado, password, rol) VALUES(22,'cajero@unlam.edu.ar', 'ACTIVO', '" +
+        passwordHasheada +
+        "', 'CAJERO');\n" +
+        "INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES(22, 1);\n" +
+        "SET FOREIGN_KEY_CHECKS = 1;";
+
+      List<String> comando = List.of(
+        "docker",
+        "exec",
+        "mysql-container",
+        "mysql",
+        "-h",
         dbHost,
+        "-P",
         dbPort,
+        "-u",
         dbUser,
-        dbPassword,
+        "-p" + dbPassword,
         dbName,
+        "-e",
         sqlCommands
       );
 
-      Process process = Runtime.getRuntime().exec(new String[] { "/bin/bash", "-c", comando });
+      ProcessBuilder processBuilder = new ProcessBuilder(comando);
+      processBuilder.redirectErrorStream(true);
+      Process process = processBuilder.start();
+
+      String salida = new String(process.getInputStream().readAllBytes());
       int exitCode = process.waitFor();
 
       if (exitCode == 0) {
         System.out.println("Base de datos limpiada exitosamente");
       } else {
         System.err.println("Error al limpiar la base de datos. Exit code: " + exitCode);
+        System.err.println(salida);
       }
     } catch (IOException | InterruptedException e) {
       System.err.println("Error ejecutando script de limpieza: " + e.getMessage());

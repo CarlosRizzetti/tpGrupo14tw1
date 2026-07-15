@@ -131,7 +131,6 @@ const confirmarCobro = async () => {
       btnCobrar.textContent = "Confirmar cobro";
       return;
     }
-    // Volvemos a la caja para el próximo pedido
     window.location.href = "/cajero";
   } catch (err) {
     console.error(err);

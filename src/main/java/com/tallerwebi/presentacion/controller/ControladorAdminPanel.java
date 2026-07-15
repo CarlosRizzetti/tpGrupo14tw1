@@ -14,7 +14,6 @@ import org.springframework.web.servlet.ModelAndView;
 public class ControladorAdminPanel {
 
   private final ServicioLote servicioLote;
-  private static final String REDIRECT_ACCESO_DENEGADO = "redirect:/acceso-denegado";
 
   private final ServicioTelegram servicioTelegram;
 
@@ -26,10 +25,6 @@ public class ControladorAdminPanel {
 
   @RequestMapping(path = "/admin", method = RequestMethod.GET)
   public ModelAndView panelDeControl(Authentication authentication) {
-    if (authentication == null) {
-      return new ModelAndView("redirect:/login");
-    }
-
     ModelMap model = new ModelMap();
     model.put("email", authentication.getName());
     model.put("notificaciones", servicioLote.obtenerNotificacionesVencimiento());
@@ -37,27 +32,8 @@ public class ControladorAdminPanel {
     return new ModelAndView("funcionalidadesAdmin/panel", model);
   }
 
-  /**
-   * Envía un mensaje y una notificación de prueba a Telegram y redirige al panel.
-   *
-   * @param authentication detalles de autenticación del usuario actual
-   * @return ModelAndView para redireccionar al panel de administración con
-   *         parámetro de éxito
-   */
   @RequestMapping(path = "/admin/probar-telegram", method = RequestMethod.GET)
-  public ModelAndView probarTelegram(Authentication authentication) {
-    if (authentication == null || !authentication.isAuthenticated()) {
-      return new ModelAndView(REDIRECT_ACCESO_DENEGADO);
-    }
-
-    boolean isAdmin = authentication
-      .getAuthorities()
-      .stream()
-      .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
-    if (!isAdmin) {
-      return new ModelAndView(REDIRECT_ACCESO_DENEGADO);
-    }
-
+  public ModelAndView probarTelegram() {
     servicioTelegram.enviarMensaje(
       "🔔 ¡Prueba de conexión de Telegram exitosa desde el Panel de Administración!"
     );
@@ -66,11 +42,6 @@ public class ControladorAdminPanel {
     return new ModelAndView("redirect:/admin?telegramOk=true");
   }
 
-  /**
-   * Muestra la vista de acceso denegado.
-   *
-   * @return ModelAndView que renderiza la vista de acceso denegado
-   */
   @RequestMapping(path = "/acceso-denegado", method = RequestMethod.GET)
   public ModelAndView accesoDenegado() {
     return new ModelAndView("acceso-denegado");

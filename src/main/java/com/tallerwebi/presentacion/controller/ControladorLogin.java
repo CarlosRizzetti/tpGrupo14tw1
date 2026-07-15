@@ -4,6 +4,7 @@ import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.PasswordInvalida;
 import com.tallerwebi.dominio.excepcion.UsuarioExistente;
 import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
+import com.tallerwebi.dominio.excepcion.UsuarioSinCategorias;
 import com.tallerwebi.dominio.interfaces.ServicioLogin;
 import com.tallerwebi.dominio.interfaces.ServicioValidacionIdentidad;
 import com.tallerwebi.presentacion.dto.LoginDto;
@@ -26,6 +27,8 @@ public class ControladorLogin {
   private static final String VISTA_LOGIN = "loginYRegistro/login";
   private static final String VISTA_NUEVO_USUARIO = "loginYRegistro/nuevo-usuario";
   private static final String REDIRECT_VALIDACION = "redirect:/validacion-identidad";
+
+  private static final String ROL_CAJERO = "ROLE_CAJERO";
   private final ServicioLogin servicioLogin;
   private final ServicioValidacionIdentidad servicioValidacionIdentidad;
 
@@ -44,9 +47,19 @@ public class ControladorLogin {
   @RequestMapping("/")
   public ModelAndView irALogin(Authentication authentication) {
     if (authentication != null && authentication.isAuthenticated()) {
+      if (esCajero(authentication)) {
+        return new ModelAndView("redirect:/cajero");
+      }
       return new ModelAndView("redirect:/home");
     }
     return new ModelAndView("redirect:/login");
+  }
+
+  private boolean esCajero(Authentication authentication) {
+    return authentication
+      .getAuthorities()
+      .stream()
+      .anyMatch(authority -> ROL_CAJERO.equals(authority.getAuthority()));
   }
 
   @RequestMapping("/login")
@@ -59,13 +72,25 @@ public class ControladorLogin {
       Exception exception = (Exception) request
         .getSession()
         .getAttribute("SPRING_SECURITY_LAST_EXCEPTION");
-      if (exception != null) {
-        modelo.put(ERROR, "Usuario o clave incorrecta");
-      }
+      modelo.put(ERROR, determinarMensajeDeError(exception));
     }
     modelo.put("loginDto", new LoginDto());
     modelo.put("recaptchaSiteKey", recaptchaSiteKey);
     return new ModelAndView(VISTA_LOGIN, modelo);
+  }
+
+  private String determinarMensajeDeError(Exception exception) {
+    Throwable causaReal = (exception != null && exception.getCause() != null)
+      ? exception.getCause()
+      : exception;
+
+    if (causaReal instanceof UsuarioInactivo) {
+      return "Tu cuenta está pendiente de activación";
+    }
+    if (causaReal instanceof UsuarioSinCategorias) {
+      return "Todavía no te asignaron una categoría";
+    }
+    return "Usuario o clave incorrecta";
   }
 
   @RequestMapping("/login-oauth")

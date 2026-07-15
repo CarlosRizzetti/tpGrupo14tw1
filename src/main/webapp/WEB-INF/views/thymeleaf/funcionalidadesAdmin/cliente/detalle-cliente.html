@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, _, _, ~{::scripts})}">
+<head>
+    <title>Detalle de Cliente</title>
+</head>
+<body>
+<!-- HEADER LEFT -->
+<div th:fragment="header_left">
+    <a th:href="@{/admin/historial-pedidos}"
+       class="hidden md:flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg border border-white/20 transition text-xs font-bold uppercase tracking-wider">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Volver
+    </a>
+</div>
+
+<!-- HEADER CENTER -->
+<div th:fragment="header_center">
+    <h1 class="text-puesto-header-text font-bold uppercase tracking-widest">
+        Detalle de Cliente
+    </h1>
+</div>
+
+<!-- CONTENT -->
+<div th:fragment="content" class="max-w-4xl mx-auto p-6 md:p-8">
+
+    <!-- ==================== Datos del cliente ==================== -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4"
+            th:text="${cliente.nombre != null and !#strings.isEmpty(cliente.nombre) ? cliente.nombre : 'Sin nombre'}">
+            Nombre
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+            <div>
+                <p class="text-gray-500">DNI</p>
+                <p class="font-semibold" th:text="${cliente.documento ?: '-'}">-</p>
+            </div>
+            <div>
+                <p class="text-gray-500">Teléfono</p>
+                <p class="font-semibold" th:text="${cliente.telefono ?: '-'}">-</p>
+            </div>
+            <div>
+                <p class="text-gray-500">Email</p>
+                <p class="font-semibold" th:text="${cliente.email ?: '-'}">-</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== Pedidos del cliente ==================== -->
+    <div class="bg-white rounded-lg shadow p-6 mt-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">Pedidos realizados</h2>
+
+        <table class="w-full text-sm text-left" th:if="${not #lists.isEmpty(pedidos)}">
+            <thead>
+            <tr class="border-b text-gray-500">
+                <th class="py-2">N° Pedido</th>
+                <th class="py-2">Estado</th>
+                <th class="py-2">Hora de cobro</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="pedido : ${pedidos}" class="border-b hover:bg-gray-50">
+                <td class="py-2 font-semibold" th:text="${pedido.id}">1</td>
+                <td class="py-2" th:text="${pedido.estado}">ESTADO</td>
+                <td class="py-2 js-formatear-fecha" th:text="${pedido.horaEntrada}">-</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <p th:if="${#lists.isEmpty(pedidos)}" class="text-gray-500 text-sm">
+            Este cliente todavía no hizo ningún pedido.
+        </p>
+    </div>
+</div>
+
+<!-- SCRIPTS -->
+<th:block th:fragment="scripts">
+    <script type="module">
+        const formatearFecha = (fechaString) => {
+            if (!fechaString || fechaString === 'null' || fechaString === '-') return '-';
+            const fecha = new Date(fechaString);
+            if (Number.isNaN(fecha.getTime())) return fechaString;
+            const dia = String(fecha.getDate()).padStart(2, '0');
+            const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+            const horas = String(fecha.getHours()).padStart(2, '0');
+            const minutos = String(fecha.getMinutes()).padStart(2, '0');
+            return `${dia}/${mes} ${horas}:${minutos}`;
+        };
+        document.querySelectorAll('.js-formatear-fecha').forEach((celda) => {
+            celda.textContent = formatearFecha(celda.textContent.trim());
+        });
+    </script>
+</th:block>
+</body>
+</html>

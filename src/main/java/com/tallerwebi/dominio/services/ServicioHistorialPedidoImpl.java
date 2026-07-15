@@ -50,6 +50,15 @@ public class ServicioHistorialPedidoImpl implements ServicioHistorialPedido {
       .collect(Collectors.toList());
   }
 
+  @Override
+  public List<HistorialPedidoDTO> buscarPorCliente(Long idCliente) {
+    return repositorioPedido
+      .listarPorCliente(idCliente)
+      .stream()
+      .map(this::mapearPedido)
+      .collect(Collectors.toList());
+  }
+
   private boolean coincideConFecha(Pedido pedido, OffsetDateTime desde, OffsetDateTime hasta) {
     if (desde == null && hasta == null) {
       return true;

@@ -11,4 +11,6 @@ public interface ServicioHistorialPedido {
     Long numeroDeLote,
     String clienteNombre
   );
+
+  List<HistorialPedidoDTO> buscarPorCliente(Long idCliente);
 }

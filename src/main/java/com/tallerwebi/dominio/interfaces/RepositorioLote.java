@@ -19,4 +19,6 @@ public interface RepositorioLote {
   List<OffsetDateTime> obtenerFechasIngresoDesde(OffsetDateTime desde);
 
   List<Lote> obtenerLotesPorTimer(Long idTimer);
+
+  List<Lote> listarVencidosNoMarcados(OffsetDateTime ahora);
 }

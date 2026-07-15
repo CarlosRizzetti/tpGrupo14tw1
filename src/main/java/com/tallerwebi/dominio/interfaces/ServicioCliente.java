@@ -9,4 +9,6 @@ public interface ServicioCliente {
   void guardar(Cliente cliente);
   void actualizarDatosCliente(Cliente cliente, String documento, String telefono, String nombre)
     throws Exception;
+
+  Cliente buscarPorId(Long id);
 }

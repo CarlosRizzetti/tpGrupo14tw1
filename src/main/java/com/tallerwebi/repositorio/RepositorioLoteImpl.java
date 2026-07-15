@@ -98,4 +98,17 @@ public class RepositorioLoteImpl implements RepositorioLote {
       .setParameter("desde", desde)
       .list();
   }
+
+  @Override
+  public List<Lote> listarVencidosNoMarcados(OffsetDateTime ahora) {
+    return sessionFactory
+      .getCurrentSession()
+      .createQuery(
+        "from Lote l where l.fechaDeVencimiento < :ahora and l.estado in (:estados)",
+        Lote.class
+      )
+      .setParameter("ahora", ahora)
+      .setParameterList("estados", Arrays.asList(EstadoLote.DISPONIBLE, EstadoLote.EN_USO))
+      .list();
+  }
 }

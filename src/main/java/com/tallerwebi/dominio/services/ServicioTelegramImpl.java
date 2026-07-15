@@ -44,13 +44,6 @@ public class ServicioTelegramImpl implements ServicioTelegram {
   @Value("${telegram.chat.id:}")
   private String chatId;
 
-  /**
-   * Constructor del servicio.
-   *
-   * @param servicioLote el servicio de lotes
-   * @param restTemplate     plantilla para consumo de APIs REST
-   * @param repositorioTimer el repositorio de timers
-   */
   @Autowired
   public ServicioTelegramImpl(
     ServicioLote servicioLote,

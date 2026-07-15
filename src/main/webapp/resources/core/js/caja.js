@@ -1,10 +1,10 @@
 const API = "/api/cajero";
 
-// -------- Estado en cliente (mínimo indispensable) --------
+
 const estado = {
   categoriaSeleccionada: null,
-  productoEnPanel: null,       // ProductoFinalDto que está en el panel superior
-  ingredientesMarcados: new Set(), // productoIds tildados en el panel superior
+  productoEnPanel: null,
+  ingredientesMarcados: new Set(),
   carrito: { items: [], total: 0 }
 };
 
@@ -23,7 +23,7 @@ const fetchJson = async (url, opciones = {}) => {
   return respuesta.json();
 };
 
-// -------- Categorías (botones fijos, se pintan desde el HTML server-rendered) --------
+// -------- Categorías --------
 const initCategorias = async () => {
   const botones = $$("[data-btn-categoria]");
   if (botones.length === 0) return;
@@ -32,7 +32,6 @@ const initCategorias = async () => {
     btn.addEventListener("click", () => seleccionarCategoria(btn));
   });
 
-  // Arranco con la primera categoría (ya viene con la clase de "seleccionada" desde el server)
   await seleccionarCategoria(botones[0]);
 };
 
@@ -42,7 +41,6 @@ const seleccionarCategoria = async (btn) => {
 
   estado.categoriaSeleccionada = idCategoria;
 
-  // Estado visual de las pestañas de categoría
   $$("[data-btn-categoria]").forEach((b) => {
     b.classList.remove("ring-2", "ring-offset-1", "ring-puesto-accent");
   });
@@ -95,14 +93,12 @@ const renderProductos = (productos) => {
 
 // -------- Panel superior: producto seleccionado --------
 const seleccionarProducto = (pf) => {
-  // Si NO tiene ingredientes, agregado directo, sin pasar por el panel
   if (!pf.tieneIngredientes) {
     agregarAlCarrito(pf.id, []);
     return;
   }
 
   estado.productoEnPanel = pf;
-  // Por defecto TODOS los ingredientes están marcados (van al pedido)
   estado.ingredientesMarcados = new Set(pf.ingredientes.map((i) => i.productoId));
 
   renderPanelSeleccion();
@@ -155,14 +151,11 @@ const initBotonConfirmar = () => {
   $("[data-btn-confirmar]").addEventListener("click", async () => {
     if (!estado.productoEnPanel) return;
 
-    // Ingredientes retirados = los que están en el original pero NO en el Set de marcados
     const retirados = estado.productoEnPanel.ingredientes
       .filter((ing) => !estado.ingredientesMarcados.has(ing.productoId))
       .map((ing) => ing.productoId);
 
     await agregarAlCarrito(estado.productoEnPanel.id, retirados);
-
-    // Limpiar el panel superior después de agregar
     estado.productoEnPanel = null;
     estado.ingredientesMarcados.clear();
     renderPanelSeleccion();
@@ -239,7 +232,6 @@ const renderCarrito = () => {
 
 const initBotonCobrar = () => {
   $("[data-btn-cobrar]").addEventListener("click", () => {
-    // Redirect a la pantalla de cobro; el carrito ya está en sesión
     window.location.href = "/cajero/cobro";
   });
 };

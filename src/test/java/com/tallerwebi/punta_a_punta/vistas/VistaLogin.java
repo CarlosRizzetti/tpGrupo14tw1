@@ -6,7 +6,7 @@ public class VistaLogin extends VistaWeb {
 
   public VistaLogin(Page page) {
     super(page);
-    page.navigate("localhost:8080/spring/login");
+    page.navigate("localhost:8080/");
   }
 
   public String obtenerTextoDeLaBarraDeNavegacion() {
@@ -31,5 +31,12 @@ public class VistaLogin extends VistaWeb {
 
   public void darClickEnRegistrarse() {
     this.darClickEnElElemento("#btn-register");
+  }
+
+  public void marcarRecaptcha() {
+    page.frameLocator("iframe[title='reCAPTCHA']").locator("#recaptcha-anchor").click();
+    page.waitForFunction(
+      "() => document.getElementById('g-recaptcha-response')?.value?.length > 0"
+    );
   }
 }

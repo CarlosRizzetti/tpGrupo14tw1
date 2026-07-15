@@ -36,6 +36,7 @@ INSERT INTO Usuario(id, nombre, email, password, rol, estado) VALUES(3, 'Tatiel'
 INSERT INTO Usuario(id, nombre, email, password, rol, estado) VALUES(6, 'Tatiel','santi2@mail.com', '$2a$10$aHZnx5KAVlbHi52kmBYWDO0eD23FBux7ucIUeTR9rUOFaBlDKLz7C', 'ADMIN', 'ACTIVO');
 INSERT INTO Usuario(id, nombre, email, password, rol, estado) VALUES(7, 'Carlos','cr10@mail.com', '$2a$10$RRF0.atOTSi88b01MgHpxeMi9gZ7XpayDlHQKwUfa.oVpuPIB4FE2', 'ADMIN', 'ACTIVO');
 
+INSERT INTO Cliente(id, documento, email, nombre, password, telefono) VALUES (1, '44512056', 'cliente@gmail.com', 'Tatiel', '$2a$10$pKxNbg5qcYqoRCxKvU0t8e8dMAWZ8QBl5clkQD9KHcIsgBFcnz9Ei', '1123885963')
 
 INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES (3, 1);
 INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES (3, 2);
@@ -64,13 +65,13 @@ INSERT INTO ProductosCategoria (idProducto, idCategoria) VALUES (3, 4); -- Helad
 INSERT INTO ProductosCategoria (idProducto, idCategoria) VALUES (4, 3); -- Cafe -> McCafe
 
 
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('VENCIDO', NOW(6), '2026-05-24 20:00:59', 'GRP-100', 2,3, 1, 3, 1);
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('RENOVADO', NOW(6), '2026-05-23 20:00:59', 'GRP-100', 10,3, 1, 3, 1);
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('IMPORTADO', NOW(6), '2026-05-23 19:00:59', 'GRP-100', 5,3, 1, 3, 1);
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento) VALUES ('ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-BURG-1', 10, 1, 1, 3, 2);
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento) VALUES ('ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-QUESO-1', 20, 1, 5, 3, 5);
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento) VALUES ('ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-CEB-1', 20, 1, 6, 3, 6);
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento) VALUES ('ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-TOM-1', 20, 1, 7, 3, 7);
+INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES (1, 'VENCIDO', NOW(6), '2026-05-24 20:00:59', 'GRP-100', 2,3, 1, 3, 1);
+INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES (2, 'RENOVADO', NOW(6), '2026-05-23 20:00:59', 'GRP-100', 10,3, 1, 3, 1);
+INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES (3, 'IMPORTADO', NOW(6), '2026-05-23 19:00:59', 'GRP-100', 5,3, 1, 3, 1);
+INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento) VALUES (4, 'ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-BURG-1', 10, 1, 1, 3, 2);
+INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento) VALUES (5,'ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-QUESO-1', 20, 1, 5, 3, 5);
+INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento) VALUES (6, 'ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-CEB-1', 20, 1, 6, 3, 6);
+INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento) VALUES (7, 'ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-TOM-1', 20, 1, 7, 3, 7);
 
 INSERT INTO ProductoFinal (id, nombre, precio) VALUES (1, 'Hamburguesa Completa', 3500.00);
 
