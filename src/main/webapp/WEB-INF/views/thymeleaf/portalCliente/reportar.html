@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, _, _)}">
+
+<head>
+    <title>Reportar Pedido - Portal de Clientes</title>
+</head>
+
+<body>
+
+    <!-- FRAGMENTO IZQUIERDO: Volver al Historial -->
+    <div th:fragment="header_left" class="relative">
+        <a th:href="@{/portal/clientes/historial}"
+           class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Volver a Mis Pedidos
+        </a>
+    </div>
+
+    <!-- FRAGMENTO CENTRAL DEL HEADER -->
+    <div th:fragment="header_center">
+        <span class="text-puesto-header-text font-bold uppercase tracking-widest text-lg">Centro de Ayuda / Reportar</span>
+    </div>
+
+    <!-- FRAGMENTO DERECHO DEL HEADER -->
+    <div th:fragment="header_right" class="flex items-center gap-3">
+        <span class="text-xs font-bold uppercase tracking-wider bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
+            <span th:text="${#authentication.name}">Cliente</span>
+        </span>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div th:fragment="content" class="p-6 max-w-2xl mx-auto min-h-[calc(100vh-8rem)] flex flex-col py-8 overflow-y-auto">
+
+        <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-lg border border-slate-200 relative overflow-hidden">
+            
+            <!-- ENCABEZADO DE TARJETA -->
+            <div class="flex items-start gap-4 pb-6 border-b border-slate-100">
+                <div class="w-14 h-14 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center border border-red-200 shadow-inner shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Reportar un Problema</h2>
+                    <p class="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
+                        Lamentamos que hayas tenido problemas con tu compra. Cuéntanos qué sucedió para que nuestro equipo lo solucione de inmediato.
+                    </p>
+                </div>
+            </div>
+
+            <!-- FORMULARIO DE REPORTE -->
+            <form th:action="@{/portal/clientes/reportar}" method="post" class="mt-6 space-y-6">
+                
+                <!-- ID DEL PEDIDO -->
+                <div th:if="${idPedido != null}" class="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/80 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white font-black flex items-center justify-center text-sm shadow-sm shrink-0">
+                            #<span th:text="${idPedido}">1</span>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Pedido Seleccionado</span>
+                            <span class="font-extrabold text-sm text-slate-700">
+                                <span th:text="${pedido?.horaCobro != null ? #temporals.format(pedido.horaCobro, 'dd/MM/yyyy HH:mm') : 'Pedido de mostrador'}">Pedido de mostrador</span>
+                            </span>
+                        </div>
+                    </div>
+                    <span th:if="${pedido?.precioFinal != null}" class="text-sm font-black text-blue-800 bg-blue-50 px-3 py-1 rounded-lg border border-blue-200/60" th:text="'$ ' + ${pedido.precioFinal}">
+                        $ 3500.00
+                    </span>
+                    <input type="hidden" name="idPedido" th:value="${idPedido}" />
+                </div>
+
+                <div th:unless="${idPedido != null}" class="space-y-1.5">
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-600">
+                        Número de Ticket o Pedido <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number" name="idPedido" required placeholder="Ej: 15"
+                           class="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white font-bold text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm" />
+                </div>
+
+                <!-- SELECCIÓN DE MOTIVO -->
+                <div class="space-y-3">
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-600">
+                        ¿Qué problema tuviste con el pedido? <span class="text-red-500">*</span>
+                    </label>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        
+                        <!-- OPCIÓN 1 -->
+                        <label class="relative flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 hover:border-red-400 bg-white hover:bg-red-50/30 cursor-pointer transition shadow-sm">
+                            <input type="radio" name="motivo" value="Faltó un producto" required class="text-red-600 focus:ring-red-500 w-4 h-4" />
+                            <span class="text-xs font-bold text-slate-700">Faltó un producto</span>
+                        </label>
+
+                        <!-- OPCIÓN 2 -->
+                        <label class="relative flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 hover:border-red-400 bg-white hover:bg-red-50/30 cursor-pointer transition shadow-sm">
+                            <input type="radio" name="motivo" value="Demora excesiva" class="text-red-600 focus:ring-red-500 w-4 h-4" />
+                            <span class="text-xs font-bold text-slate-700">Demora excesiva / Frío</span>
+                        </label>
+
+                        <!-- OPCIÓN 3 -->
+                        <label class="relative flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 hover:border-red-400 bg-white hover:bg-red-50/30 cursor-pointer transition shadow-sm">
+                            <input type="radio" name="motivo" value="Ingredientes incorrectos" class="text-red-600 focus:ring-red-500 w-4 h-4" />
+                            <span class="text-xs font-bold text-slate-700">Ingredientes incorrectos</span>
+                        </label>
+
+                        <!-- OPCIÓN 4 -->
+                        <label class="relative flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 hover:border-red-400 bg-white hover:bg-red-50/30 cursor-pointer transition shadow-sm">
+                            <input type="radio" name="motivo" value="Problema con el cobro" class="text-red-600 focus:ring-red-500 w-4 h-4" />
+                            <span class="text-xs font-bold text-slate-700">Problema con el cobro</span>
+                        </label>
+
+                        <!-- OPCIÓN 5 -->
+                        <label class="relative flex items-center gap-3 p-3.5 rounded-xl border border-slate-200 hover:border-red-400 bg-white hover:bg-red-50/30 cursor-pointer transition shadow-sm">
+                            <input type="radio" name="motivo" value="Otro" class="text-red-600 focus:ring-red-500 w-4 h-4" />
+                            <span class="text-xs font-bold text-slate-700">Otro</span>
+                        </label>
+
+                    </div>
+                </div>
+
+                <!-- COMENTARIOS ADICIONALES -->
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-600">
+                        Detalles adicionales
+                    </label>
+                    <textarea name="comentario" rows="4" placeholder="Describe brevemente lo ocurrido para que podamos ayudarte..."
+                              class="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white font-medium text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition shadow-sm resize-none"></textarea>
+                </div>
+
+                <!-- BOTONES DE ACCIÓN -->
+                <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-end gap-3">
+                    <a th:href="@{/portal/clientes/historial}"
+                       class="w-full sm:w-auto px-6 py-3 text-center rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-extrabold text-xs uppercase tracking-wider transition shadow-sm">
+                        Cancelar
+                    </a>
+                    <button type="submit"
+                            class="w-full sm:w-auto px-8 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider transition shadow-md flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                        Enviar Reporte
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</body>
+</html>
