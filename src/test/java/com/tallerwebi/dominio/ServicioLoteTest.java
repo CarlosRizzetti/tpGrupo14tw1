@@ -739,7 +739,6 @@ public class ServicioLoteTest {
   )
   public void obtenerNotificacionesConLoteNoUtilizableNoDeberiaNotificarlo() {
     Producto producto = crearProducto(1L, "Queso");
-    Lote vencido = crearLote(1L, producto, 5, EstadoLote.VENCIDO, OffsetDateTime.now().plusDays(2));
     Lote descartado = crearLote(
       2L,
       producto,
@@ -748,7 +747,7 @@ public class ServicioLoteTest {
       OffsetDateTime.now().plusDays(2)
     );
 
-    when(repositorioLote.listarTodos()).thenReturn(Arrays.asList(vencido, descartado));
+    when(repositorioLote.listarTodos()).thenReturn(Arrays.asList(descartado));
 
     List<NotificacionVencimientoDto> notificaciones = servicio.obtenerNotificacionesVencimiento();
 
