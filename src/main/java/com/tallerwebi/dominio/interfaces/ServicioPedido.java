@@ -13,4 +13,12 @@ public interface ServicioPedido {
   Pedido buscarPedidoPorId(Long id);
 
   void marcarPedidoComoReportado(Long idPedido);
+
+  void marcarPedidoComoReportado(Long idPedido, String motivo, String comentario);
+
+  List<Pedido> listarPedidosReportados();
+
+  int contarPedidosReportadosActivos();
+
+  void resolverReclamoPedido(Long idPedido);
 }

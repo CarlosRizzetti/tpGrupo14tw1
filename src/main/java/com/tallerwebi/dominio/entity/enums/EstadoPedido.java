@@ -4,4 +4,5 @@ public enum EstadoPedido {
   EN_COCINA,
   ENTREGADO,
   CANCELADO,
+  RESUELTO,
 }
