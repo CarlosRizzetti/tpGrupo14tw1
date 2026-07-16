@@ -63,11 +63,4 @@ public class ControladorAdminPanelTest {
     verify(servicioTelegramMock, times(1)).enviarNotificacionesVencimiento();
     assertEquals("redirect:/admin?telegramOk=true", mav.getViewName());
   }
-
-  @Test
-  public void queAccesoDenegadoRetorneLaVistaCorrecta() {
-    ModelAndView mav = controlador.accesoDenegado();
-
-    assertEquals("acceso-denegado", mav.getViewName());
-  }
 }

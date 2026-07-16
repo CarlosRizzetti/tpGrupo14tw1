@@ -1,7 +1,7 @@
 package com.tallerwebi.dominio.interfaces;
 
-import com.tallerwebi.dominio.entity.Pedido;
 import com.tallerwebi.dominio.entity.Cliente;
+import com.tallerwebi.dominio.entity.Pedido;
 import java.util.List;
 
 public interface RepositorioPedido {
