@@ -27,7 +27,7 @@
     <!-- FRAGMENTO DERECHO DEL HEADER -->
     <div th:fragment="header_right" class="flex items-center gap-3">
         <span class="text-xs font-bold uppercase tracking-wider bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
-            <span th:text="${#authentication.name}">Cliente</span>
+            <span th:text="${#authentication.name.contains('@') ? #strings.capitalize(#strings.substring(#authentication.name, 0, #authentication.name.indexOf('@'))) : #strings.capitalize(#authentication.name)}">Cliente</span>
         </span>
     </div>
 
@@ -131,9 +131,29 @@
                         Cancelar
                     </a>
                 </div>
+                <div class="mt-10 border-t-2 border-slate-100 pt-8">
+                    <h3 class="text-xl font-black uppercase tracking-tight text-slate-800 mb-4">
+                        Mis Reportes Activos
+                    </h3>
 
+                    <div th:if="${#lists.isEmpty(reportesActivos)}" class="p-6 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                        <p class="text-slate-500 font-bold">No tienes ningún reporte activo en este momento.</p>
+                    </div>
+
+                    <div th:unless="${#lists.isEmpty(reportesActivos)}" class="space-y-4">
+                        <div th:each="pedido : ${reportesActivos}" class="flex items-center justify-between p-5 bg-white border-2 border-blue-100 rounded-xl shadow-sm hover:shadow-md transition">
+                            <div>
+                                <p class="font-bold text-slate-800">Pedido #<span th:text="${pedido.id}"></span></p>
+                                <p class="text-sm text-slate-500 mt-1">Estado actual: <span class="font-semibold text-blue-600">En revisión</span></p>
+                            </div>
+                            <a th:href="@{/portal/clientes/reporte-chat(idPedido=${pedido.id})}"
+                               class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow transition">
+                                Abrir Chat
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </form>
-
         </div>
 
     </div>

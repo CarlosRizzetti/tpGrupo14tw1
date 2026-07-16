@@ -3,19 +3,25 @@ package com.tallerwebi.presentacion.controller;
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Cliente;
 import com.tallerwebi.dominio.entity.Pedido;
+import com.tallerwebi.dominio.evento.InteraccionChatEvent;
 import com.tallerwebi.dominio.interfaces.ServicioCliente;
 import com.tallerwebi.dominio.interfaces.ServicioPedido;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,13 +37,20 @@ public class ControladorPortalCliente {
   private static final String REDIRECT_COMPLETAR_DATOS =
     "redirect:/portal/clientes/completar-datos";
   private static final String REDIRECT_HOME = "redirect:/portal/clientes/home";
-
+  private static final String PARAM_ID_PEDIDO = "idPedido";
   private final ServicioCliente servicioCliente;
   private final ServicioPedido servicioPedido;
 
+  private final ApplicationEventPublisher eventPublisher;
+
   @Autowired
-  public ControladorPortalCliente(ServicioCliente servicioCliente, ServicioPedido servicioPedido) {
+  public ControladorPortalCliente(
+    ServicioCliente servicioCliente,
+    ServicioPedido servicioPedido,
+    ApplicationEventPublisher eventPublisher
+  ) {
     this.servicioCliente = servicioCliente;
+    this.eventPublisher = eventPublisher;
     this.servicioPedido = servicioPedido;
   }
 
@@ -182,6 +195,18 @@ public class ControladorPortalCliente {
     if (cliente == null) {
       return REDIRECT_PORTAL_CLIENTES;
     }
+
+    List<Pedido> misPedidos = servicioPedido.listarPedidosDeCliente(cliente);
+    List<Pedido> reportesActivos = new java.util.ArrayList<>();
+    if (misPedidos != null) {
+      for (Pedido p : misPedidos) {
+        if (p.getReportado() != null && p.getReportado()) {
+          reportesActivos.add(p);
+        }
+      }
+    }
+
+    model.addAttribute("reportesActivos", reportesActivos);
     model.addAttribute(ATTR_CLIENTE, cliente);
     return "portalCliente/perfil";
   }
@@ -269,7 +294,7 @@ public class ControladorPortalCliente {
 
   @GetMapping("/portal/clientes/reportar")
   public String mostrarReportarPedido(
-    @RequestParam(value = "idPedido", required = false) Long idPedido,
+    @RequestParam(value = PARAM_ID_PEDIDO, required = false) Long idPedido,
     Authentication authentication,
     Model model
   ) {
@@ -285,10 +310,26 @@ public class ControladorPortalCliente {
       if (pedido != null) {
         model.addAttribute("pedido", pedido);
       }
-      model.addAttribute("idPedido", idPedido);
+      model.addAttribute(PARAM_ID_PEDIDO, idPedido);
     }
     model.addAttribute(ATTR_CLIENTE, cliente);
     return "portalCliente/reportar";
+  }
+
+  @PostMapping("/portal/clientes/reportar/accion")
+  @ResponseBody
+  public ResponseEntity<Map<String, Object>> procesarAccionChat(
+    @RequestParam(PARAM_ID_PEDIDO) final Long pedidoId,
+    @RequestParam("accion") final String accion
+  ) {
+    final InteraccionChatEvent evento = new InteraccionChatEvent(pedidoId, accion);
+    eventPublisher.publishEvent(evento);
+
+    final Map<String, Object> respuesta = new HashMap<>();
+    respuesta.put("mensaje", evento.getRespuestaSistema());
+    respuesta.put("opciones", evento.getOpcionesDisponibles());
+
+    return ResponseEntity.ok(respuesta);
   }
 
   public String mostrarReportarPedido(Authentication authentication, Model model) {
@@ -297,7 +338,7 @@ public class ControladorPortalCliente {
 
   @PostMapping("/portal/clientes/reportar")
   public String procesarReportarPedido(
-    @RequestParam(value = "idPedido", required = false) Long idPedido,
+    @RequestParam(value = PARAM_ID_PEDIDO, required = false) Long idPedido,
     @RequestParam(value = "motivo", required = false) String motivo,
     @RequestParam(value = "comentario", required = false) String comentario,
     Authentication authentication,
@@ -321,5 +362,27 @@ public class ControladorPortalCliente {
       " ha sido enviado. Nuestro equipo lo revisará a la brevedad."
     );
     return "redirect:/portal/clientes/historial";
+  }
+
+  @GetMapping("/portal/clientes/reporte-chat")
+  public String mostrarChatDelReporte(
+    @RequestParam(PARAM_ID_PEDIDO) Long idPedido,
+    Authentication authentication,
+    Model model
+  ) {
+    Cliente cliente = obtenerClienteSesion(authentication);
+    if (cliente == null) {
+      return REDIRECT_PORTAL_CLIENTES;
+    }
+
+    Pedido pedido = servicioPedido.buscarPedidoPorId(idPedido);
+
+    if (pedido == null || !pedido.getCliente().getId().equals(cliente.getId())) {
+      return "redirect:/portal/clientes/perfil?error=PedidoNoEncontrado";
+    }
+
+    model.addAttribute("pedido", pedido);
+
+    return "portalCliente/reporte-chat";
   }
 }
