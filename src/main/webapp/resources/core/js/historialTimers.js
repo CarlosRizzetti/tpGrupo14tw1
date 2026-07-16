@@ -1,67 +1,67 @@
 
 
-const filtroEstado = document.getElementById('filtro-estado');
-const filtroCategoria = document.getElementById('filtro-categoria');
-const contenedorTimers = document.getElementById('timers-container');
+const filtroEstado = document.getElementById("filtro-estado");
+const filtroCategoria = document.getElementById("filtro-categoria");
+const contenedorTimers = document.getElementById("timers-container");
 
 const formatearFecha = (fechaString) => {
-    if (!fechaString || fechaString === 'null' || fechaString === '--') return '--';
+  if (!fechaString || fechaString === "null" || fechaString === "--") return "--";
 
-    try {
-        const fecha = new Date(fechaString);
-        if (Number.isNaN(fecha.getTime())) return fechaString;
+  try {
+    const fecha = new Date(fechaString);
+    if (Number.isNaN(fecha.getTime())) return fechaString;
 
-        const dia = String(fecha.getDate()).padStart(2, '0');
-        const mes = String(fecha.getMonth() + 1).padStart(2, '0');
-        const horas = String(fecha.getHours()).padStart(2, '0');
-        const minutos = String(fecha.getMinutes()).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, "0");
+    const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+    const horas = String(fecha.getHours()).padStart(2, "0");
+    const minutos = String(fecha.getMinutes()).padStart(2, "0");
 
-        return `${dia}/${mes} ${horas}:${minutos}`;
-    } catch {
-        return '--';
-    }
+    return `${dia}/${mes} ${horas}:${minutos}`;
+  } catch {
+    return "--";
+  }
 };
 
-document.querySelectorAll('.js-formatear-fecha').forEach((span) => {
-    span.textContent = formatearFecha(span.textContent.trim());
-    span.classList.remove('js-formatear-fecha');
+document.querySelectorAll(".js-formatear-fecha").forEach((span) => {
+  span.textContent = formatearFecha(span.textContent.trim());
+  span.classList.remove("js-formatear-fecha");
 });
 
 const renderizarLotes = (lotes = []) =>
-    lotes.length
-        ? lotes
-            .map(
-                ({ id, numeroDeLote, cantidadConsumida }) => `
+  lotes.length
+    ? lotes
+      .map(
+        ({ id, numeroDeLote, cantidadConsumida }) => `
             <a href="/admin/lotes/${id}" class="lote-link text-[10px] font-bold text-blue-600 hover:underline bg-blue-50 px-2 py-0.5 rounded">
               Lote #${numeroDeLote} (x${cantidadConsumida})
             </a>
           `
-            )
-            .join('')
-        : '<span class="text-[10px] text-gray-400">Sin lotes</span>';
+      )
+      .join("")
+    : "<span class=\"text-[10px] text-gray-400\">Sin lotes</span>";
 
 const renderizarTimer = (timer) => {
-    const {
-        id,
-        nombre,
-        cantidad,
-        estado,
-        ubicacion,
-        usuario,
-        categoria,
-        lotesUtilizados,
-    } = timer;
-    const { fechaCreacion, fechaVencimiento } = timer.cicloVida ?? {}
+  const {
+    id,
+    nombre,
+    cantidad,
+    estado,
+    ubicacion,
+    usuario,
+    categoria,
+    lotesUtilizados,
+  } = timer;
+  const { fechaCreacion, fechaVencimiento } = timer.cicloVida ?? {}
 
-    const temaClase = categoria?.tema ?? 'tema-servicio';
-    const nombreUsuario = usuario ?? 'Sistema';
-    const ubicacionTexto = ubicacion ?? 'General';
-    const estadoTexto = estado ?? '--';
-    const elaboracionFormateada = formatearFecha(fechaCreacion);
-    const vencimientoFormateado = formatearFecha(fechaVencimiento);
-    const lotesHtml = renderizarLotes(lotesUtilizados);
+  const temaClase = categoria?.tema ?? "tema-servicio";
+  const nombreUsuario = usuario ?? "Sistema";
+  const ubicacionTexto = ubicacion ?? "General";
+  const estadoTexto = estado ?? "--";
+  const elaboracionFormateada = formatearFecha(fechaCreacion);
+  const vencimientoFormateado = formatearFecha(fechaVencimiento);
+  const lotesHtml = renderizarLotes(lotesUtilizados);
 
-    return `
+  return `
     <div class="timer-card cursor-pointer hover:shadow-md ${temaClase} bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row overflow-hidden transform transition-all" data-timer-id="${id}">
 
       <div class="bg-puesto-header p-5 md:w-1/3 flex flex-col justify-center border-b-[6px] md:border-b-0 md:border-l-[6px] border-puesto-btn">
@@ -107,44 +107,44 @@ const renderizarTimer = (timer) => {
 };
 
 const renderizarTimers = (timers = []) => {
-    if (!timers.length) {
-        contenedorTimers.innerHTML = `
+  if (!timers.length) {
+    contenedorTimers.innerHTML = `
       <div class="text-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
         <p class="text-gray-400 font-bold uppercase tracking-widest">No se encontraron resultados</p>
       </div>
     `;
-        return;
-    }
-    contenedorTimers.innerHTML = timers.map(renderizarTimer).join('');
+    return;
+  }
+  contenedorTimers.innerHTML = timers.map(renderizarTimer).join("");
 };
 
 const aplicarFiltros = async () => {
-    const params = new URLSearchParams();
-    if (filtroEstado.value) params.append('estado', filtroEstado.value);
-    if (filtroCategoria.value) params.append('categoriaId', filtroCategoria.value);
+  const params = new URLSearchParams();
+  if (filtroEstado.value) params.append("estado", filtroEstado.value);
+  if (filtroCategoria.value) params.append("categoriaId", filtroCategoria.value);
 
-    try {
-        const respuesta = await fetch(`/timers/obtener/?${params.toString()}`);
-        if (!respuesta.ok) {
-            throw new Error('Error de red');
-        }
-        const { timers } = await respuesta.json();
-        renderizarTimers(timers);
-    } catch (error) {
-        console.error('Error cargando los timers:', error);
+  try {
+    const respuesta = await fetch(`/timers/obtener/?${params.toString()}`);
+    if (!respuesta.ok) {
+      throw new Error("Error de red");
     }
+    const { timers } = await respuesta.json();
+    renderizarTimers(timers);
+  } catch (error) {
+    console.error("Error cargando los timers:", error);
+  }
 };
 
 
-contenedorTimers.addEventListener('click', (evento) => {
-    if (evento.target.closest('.lote-link')) {
-        return;
-    }
-    const card = evento.target.closest('.timer-card');
-    if (card?.dataset.timerId) {
-        window.location.href = `/admin/timers/${card.dataset.timerId}`;
-    }
+contenedorTimers.addEventListener("click", (evento) => {
+  if (evento.target.closest(".lote-link")) {
+    return;
+  }
+  const card = evento.target.closest(".timer-card");
+  if (card?.dataset.timerId) {
+    window.location.href = `/admin/timers/${card.dataset.timerId}`;
+  }
 });
 
-filtroEstado.addEventListener('change', aplicarFiltros);
-filtroCategoria.addEventListener('change', aplicarFiltros);
+filtroEstado.addEventListener("change", aplicarFiltros);
+filtroCategoria.addEventListener("change", aplicarFiltros);

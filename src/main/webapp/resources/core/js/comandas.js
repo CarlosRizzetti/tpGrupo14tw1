@@ -107,7 +107,7 @@ const renderComanda = (comanda) => {
     bloque.innerHTML = `
             <p class="font-black uppercase tracking-wide text-slate-900">${linea.nombre}</p>
             ${linea.tieneIngredientes
-        ? `<ul class="mt-1 pl-4 space-y-0.5">
+    ? `<ul class="mt-1 pl-4 space-y-0.5">
                      ${linea.ingredientes.map((ing) => `
                          <li class="text-sm text-slate-700 flex items-center gap-2">
                              <span class="w-1 h-1 rounded-full bg-slate-400"></span>
@@ -115,8 +115,8 @@ const renderComanda = (comanda) => {
                          </li>
                      `).join("")}
                    </ul>`
-        : "<p class=\"text-xs text-slate-400 italic mt-1\">Sin ingredientes personalizables</p>"
-    }
+    : "<p class=\"text-xs text-slate-400 italic mt-1\">Sin ingredientes personalizables</p>"
+}
         `;
     body.appendChild(bloque);
   });
