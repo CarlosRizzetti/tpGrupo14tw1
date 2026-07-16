@@ -51,7 +51,7 @@ const renderizarTimer = (timer) => {
     categoria,
     lotesUtilizados,
   } = timer;
-  const { fechaCreacion, fechaVencimiento } = timer.cicloVida ?? {}
+  const { fechaCreacion, fechaVencimiento } = timer.cicloVida ?? {};
 
   const temaClase = categoria?.tema ?? "tema-servicio";
   const nombreUsuario = usuario ?? "Sistema";
