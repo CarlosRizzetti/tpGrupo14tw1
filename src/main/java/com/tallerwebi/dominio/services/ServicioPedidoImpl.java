@@ -13,6 +13,8 @@ import com.tallerwebi.dominio.utils.CarritoPedido;
 import com.tallerwebi.dominio.utils.ItemCarrito;
 import com.tallerwebi.dominio.utils.ItemCarritoIngrediente;
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +40,104 @@ public class ServicioPedidoImpl implements ServicioPedido {
     generarComanda(pedido);
     persistirYLimpiar(pedido, carrito);
     return pedido;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<Pedido> listarPedidosDeCliente(Cliente cliente) {
+    if (cliente == null) {
+      return Collections.emptyList();
+    }
+    List<Pedido> pedidos = repositorioPedido.buscarPorCliente(cliente);
+    for (Pedido pedido : pedidos) {
+      if (pedido.getDetalles() != null) {
+        pedido.getDetalles().size();
+        for (DetallePedido detalle : pedido.getDetalles()) {
+          if (detalle.getProductoFinal() != null) {
+            detalle.getProductoFinal().getNombre();
+          }
+          if (detalle.getIngredientes() != null) {
+            detalle.getIngredientes().size();
+            for (DetallePedidoIngrediente ingrediente : detalle.getIngredientes()) {
+              if (ingrediente.getProducto() != null) {
+                ingrediente.getProducto().getNombre();
+              }
+            }
+          }
+        }
+      }
+    }
+    return pedidos;
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public Pedido buscarPedidoPorId(Long id) {
+    if (id == null) {
+      return null;
+    }
+    Pedido pedidoEncontrado = repositorioPedido.buscarPorId(id);
+    if (pedidoEncontrado != null && pedidoEncontrado.getDetalles() != null) {
+      pedidoEncontrado.getDetalles().size();
+      for (DetallePedido dp : pedidoEncontrado.getDetalles()) {
+        if (dp.getIngredientes() != null) {
+          dp.getIngredientes().size();
+        }
+      }
+    }
+    return pedidoEncontrado;
+  }
+
+  @Override
+  @Transactional
+  public void marcarPedidoComoReportado(Long idPedido) {
+    marcarPedidoComoReportado(idPedido, null, null);
+  }
+
+  @Override
+  @Transactional
+  public void marcarPedidoComoReportado(Long idPedido, String motivo, String comentario) {
+    if (idPedido == null) {
+      return;
+    }
+    Pedido pedidoEncontrado = repositorioPedido.buscarPorId(idPedido);
+    if (pedidoEncontrado != null) {
+      pedidoEncontrado.setReportado(true);
+      if (motivo != null && !motivo.isEmpty()) {
+        pedidoEncontrado.setMotivoReclamo(motivo);
+      }
+      if (comentario != null && !comentario.isEmpty()) {
+        pedidoEncontrado.setComentarioReclamo(comentario);
+      }
+      repositorioPedido.guardar(pedidoEncontrado);
+    }
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<Pedido> listarPedidosReportados() {
+    return repositorioPedido.buscarPedidosReportados();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public int contarPedidosReportadosActivos() {
+    List<Pedido> list = repositorioPedido.buscarPedidosReportados();
+    return list != null ? list.size() : 0;
+  }
+
+  @Override
+  @Transactional
+  public void resolverReclamoPedido(Long idPedido) {
+    if (idPedido == null) {
+      return;
+    }
+    Pedido pedidoEncontrado = repositorioPedido.buscarPorId(idPedido);
+    if (pedidoEncontrado != null) {
+      pedidoEncontrado.setReportado(false);
+      pedidoEncontrado.setEstado(EstadoPedido.RESUELTO);
+      repositorioPedido.guardar(pedidoEncontrado);
+    }
   }
 
   private Pedido crearCabeceraPedido(Cliente cliente, CarritoPedido carrito) {

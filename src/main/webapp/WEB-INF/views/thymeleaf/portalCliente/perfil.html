@@ -10,7 +10,7 @@
 
     <!-- FRAGMENTO IZQUIERDO: Volver al Inicio -->
     <div th:fragment="header_left" class="relative">
-        <a th:href="@{/portal/clientes/mis-pedidos}"
+        <a th:href="@{/portal/clientes/home}"
            class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition text-white">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -126,7 +126,7 @@
                             class="flex-1 py-4 bg-puesto-header text-puesto-header-text font-black uppercase tracking-widest text-base rounded-xl hover:opacity-90 transition-all border-b-4 border-black/20 hover:-translate-y-1 hover:shadow-xl">
                         Guardar Cambios
                     </button>
-                    <a th:href="@{/portal/clientes/mis-pedidos}"
+                    <a th:href="@{/portal/clientes/home}"
                        class="py-4 px-6 bg-slate-200 text-slate-700 hover:bg-slate-300 font-bold uppercase tracking-wider text-sm rounded-xl transition text-center flex items-center justify-center">
                         Cancelar
                     </a>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, _, _)}">
+
+<head>
+    <title>Historial de Pedidos - Portal de Clientes</title>
+</head>
+
+<body>
+
+    <!-- FRAGMENTO IZQUIERDO: Volver al Inicio -->
+    <div th:fragment="header_left" class="relative">
+        <a th:href="@{/portal/clientes/home}"
+           class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Volver al Inicio
+        </a>
+    </div>
+
+    <!-- FRAGMENTO CENTRAL DEL HEADER -->
+    <div th:fragment="header_center">
+        <span class="text-puesto-header-text font-bold uppercase tracking-widest text-lg">Historial de Pedidos</span>
+    </div>
+
+    <!-- FRAGMENTO DERECHO DEL HEADER -->
+    <div th:fragment="header_right" class="flex items-center gap-3">
+        <span class="text-xs font-bold uppercase tracking-wider bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
+            <span th:text="${#authentication.name}">Cliente</span>
+        </span>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div th:fragment="content" class="p-6 max-w-4xl mx-auto min-h-[calc(100vh-8rem)] flex flex-col py-8 overflow-y-auto">
+
+        <!-- ENCABEZADO Y ACCIÓN DE RECARGA -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div>
+                <h2 class="text-3xl font-black uppercase tracking-tighter text-slate-800">
+                    Mis Pedidos
+                </h2>
+                <p class="text-xs font-medium text-slate-500 mt-1">
+                    Consulta el estado de tus pedidos en cocina.
+                </p>
+            </div>
+            <a th:href="@{/portal/clientes/historial}" 
+               class="self-start sm:self-center px-4 py-2 bg-white text-slate-700 hover:bg-slate-50 font-bold text-xs uppercase tracking-wider rounded-xl border border-slate-300 shadow-sm transition flex items-center gap-2 shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Actualizar
+            </a>
+        </div>
+
+        <!-- ALERTA DE REPORTE ENVIADO -->
+        <div th:if="${mensajeExito != null}" class="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 mb-6 flex items-center gap-3 text-emerald-800 shadow-sm">
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 border border-emerald-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <div>
+                <h4 class="text-xs font-black uppercase tracking-wider text-emerald-900">¡Reporte Enviado con Éxito!</h4>
+                <p class="text-xs font-medium text-emerald-700 mt-0.5" th:text="${mensajeExito}">Tu reporte ha sido enviado.</p>
+            </div>
+        </div>
+
+        <!-- ESTADO VACÍO (Si aún no tiene pedidos) -->
+        <div th:if="${#lists.isEmpty(pedidos)}" 
+             class="bg-white rounded-3xl py-16 px-8 sm:px-12 shadow-md border border-slate-200 text-center flex flex-col items-center justify-center my-8 max-w-xl mx-auto">
+            <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center text-amber-500 mb-6 border border-blue-200 shadow-inner shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+            </div>
+            <h3 class="text-2xl font-black uppercase tracking-tight text-slate-800 mb-3">Aún no tienes pedidos</h3>
+            <p class="text-sm text-slate-500 max-w-sm mb-8 leading-relaxed font-medium">
+                Tus compras aparecerán aquí para que puedas ver su estado en tiempo real.
+            </p>
+            <a th:href="@{/portal/clientes/home}" 
+               class="px-8 py-3.5 bg-puesto-btn text-puesto-btn-text font-black text-xs uppercase tracking-widest rounded-xl border-b-4 border-puesto-btn-border shadow-md hover:opacity-95 transition transform hover:-translate-y-0.5 shrink-0">
+                Volver al Inicio
+            </a>
+        </div>
+
+        <!-- LISTA DE PEDIDOS -->
+        <div th:unless="${#lists.isEmpty(pedidos)}" class="space-y-6">
+            <div th:each="pedido : ${pedidos}" 
+                 class="bg-white rounded-3xl p-6 md:p-8 shadow-md border border-slate-200 hover:shadow-lg transition-shadow relative overflow-hidden">
+
+                <!-- CABECERA DEL PEDIDO -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5 pt-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center font-black text-slate-700 text-lg border border-slate-200 shrink-0">
+                            #<span th:text="${pedido?.id}">1</span>
+                        </div>
+                        <div>
+                            <span class="text-[11px] font-extrabold uppercase tracking-widest text-slate-400 block">Número de Ticket</span>
+                            <h3 class="text-lg font-black text-slate-800 tracking-tight">
+                                Pedido de Mostrador
+                            </h3>
+                        </div>
+                    </div>
+
+                    <!-- INSIGNIA DE ESTADO -->
+                    <div>
+                        <span th:if="${pedido?.estado?.name() == 'EN_COCINA' || pedido?.estado?.name() == 'EN_PREPARACION'}"
+                              class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300 shadow-sm animate-pulse">
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                            🧑‍🍳 En Cocina / Preparando
+                        </span>
+                        <span th:if="${pedido?.estado?.name() == 'ENTREGADO'}"
+                              class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-sm">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            ✅ Listo / Entregado
+                        </span>
+                        <span th:if="${pedido?.estado?.name() == 'RESUELTO'}"
+                              class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-300 shadow-sm">
+                            <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                            🎉 Reclamo Resuelto
+                        </span>
+                        <span th:if="${pedido?.estado != null && pedido?.estado?.name() != 'EN_COCINA' && pedido?.estado?.name() != 'EN_PREPARACION' && pedido?.estado?.name() != 'ENTREGADO' && pedido?.estado?.name() != 'RESUELTO'}"
+                              class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider bg-slate-100 text-slate-800 border border-slate-300 shadow-sm"
+                              th:text="${pedido?.estado}">
+                            ESTADO
+                        </span>
+                    </div>
+                </div>
+
+                <!-- INFORMACIÓN DE FECHA Y PRECIO -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 py-6 bg-slate-50/70 rounded-2xl px-6 mt-3 mb-3 border border-slate-100/80">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Fecha y Hora</span>
+                        <span class="text-xs font-extrabold text-slate-700"
+                              th:text="${pedido?.horaCobro != null ? #temporals.format(pedido.horaCobro, 'dd/MM/yyyy HH:mm') : 'En curso'}">
+                            14/07/2026 20:45
+                        </span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Hora de Salida</span>
+                        <span class="text-xs font-extrabold text-slate-700"
+                              th:text="${pedido?.horaSalida != null ? #temporals.format(pedido.horaSalida, 'dd/MM/yyyy HH:mm') : '-'}">
+                            -
+                        </span>
+                    </div>
+                    <div class="col-span-2 sm:col-span-1 border-t sm:border-t-0 pt-2 sm:pt-0">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Total Pagado</span>
+                        <span class="text-sm font-black text-blue-800"
+                              th:text="${pedido?.precioFinal != null ? ('$ ' + pedido.precioFinal) : '$ 0.00'}">
+                            $ 0.00
+                        </span>
+                    </div>
+                </div>
+
+                <!-- DETALLE DEL PEDIDO (PRODUCTOS Y OPCIONALES) -->
+                <div>
+                    <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        Detalle de Productos
+                    </h4>
+                    <div class="space-y-2">
+                        <div th:each="detalle : ${pedido.detalles}" 
+                             class="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 bg-white rounded-xl border border-slate-200/80 gap-2">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-2 h-2 rounded-full bg-blue-600 shrink-0"></span>
+                                <span class="font-bold text-sm text-slate-800"
+                                      th:text="${detalle?.productoFinal != null ? detalle.productoFinal.nombre : 'Producto de mostrador'}">
+                                    Hamburguesa de Queso
+                                </span>
+                            </div>
+                            <div th:if="${!#lists.isEmpty(detalle?.ingredientes)}" class="flex flex-wrap gap-1.5 sm:justify-end">
+                                <span th:each="ing : ${detalle.ingredientes}"
+                                      class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                    <span th:text="${ing?.cantidad}">1</span>x <span th:text="${ing?.producto?.nombre}">Pan</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ACCIÓN DE REPORTAR O CONSULTA -->
+                <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-500">
+                    <span th:if="${pedido?.reportado == true}" class="text-red-600 font-extrabold flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+                        Reclamo registrado en este pedido
+                    </span>
+                    <span th:if="${pedido?.estado?.name() == 'RESUELTO'}" class="text-blue-700 font-extrabold flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                        Tu reclamo sobre este pedido fue resuelto exitosamente
+                    </span>
+                    <span th:if="${pedido?.reportado != true && pedido?.estado?.name() != 'RESUELTO'}">¿Inconvenientes con este pedido?</span>
+
+                    <span th:if="${pedido?.reportado == true}" class="text-xs font-black text-slate-400 uppercase tracking-wider">
+                        En revisión
+                    </span>
+                    <span th:if="${pedido?.estado?.name() == 'RESUELTO'}" class="text-xs font-black text-blue-600 uppercase tracking-wider">
+                        Resuelto
+                    </span>
+                    <a th:if="${pedido?.reportado != true && pedido?.estado?.name() != 'RESUELTO'}" th:href="@{/portal/clientes/reportar(idPedido=${pedido?.id})}"
+                       class="text-red-600 hover:text-red-700 font-extrabold hover:underline flex items-center gap-1">
+                        Reportar
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

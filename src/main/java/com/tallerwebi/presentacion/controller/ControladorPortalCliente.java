@@ -2,9 +2,12 @@ package com.tallerwebi.presentacion.controller;
 
 import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Cliente;
+import com.tallerwebi.dominio.entity.Pedido;
 import com.tallerwebi.dominio.interfaces.ServicioCliente;
+import com.tallerwebi.dominio.interfaces.ServicioPedido;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import java.util.Collections;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class ControladorPortalCliente {
@@ -26,13 +30,15 @@ public class ControladorPortalCliente {
   private static final String REDIRECT_PORTAL_CLIENTES = "redirect:/portal/clientes";
   private static final String REDIRECT_COMPLETAR_DATOS =
     "redirect:/portal/clientes/completar-datos";
-  private static final String REDIRECT_MIS_PEDIDOS = "redirect:/portal/clientes/mis-pedidos";
+  private static final String REDIRECT_HOME = "redirect:/portal/clientes/home";
 
   private final ServicioCliente servicioCliente;
+  private final ServicioPedido servicioPedido;
 
   @Autowired
-  public ControladorPortalCliente(ServicioCliente servicioCliente) {
+  public ControladorPortalCliente(ServicioCliente servicioCliente, ServicioPedido servicioPedido) {
     this.servicioCliente = servicioCliente;
+    this.servicioPedido = servicioPedido;
   }
 
   @ModelAttribute("categoria")
@@ -83,7 +89,7 @@ public class ControladorPortalCliente {
         .getSession()
         .setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
-      return REDIRECT_MIS_PEDIDOS;
+      return REDIRECT_HOME;
     } catch (Exception e) {
       model.addAttribute(ATTR_ERROR, e.getMessage());
       model.addAttribute(ATTR_CLIENTE, cliente);
@@ -104,7 +110,7 @@ public class ControladorPortalCliente {
       return REDIRECT_PORTAL_CLIENTES;
     }
     if (!faltanDatosObligatorios(cliente)) {
-      return REDIRECT_MIS_PEDIDOS;
+      return REDIRECT_HOME;
     }
     model.addAttribute(ATTR_CLIENTE, cliente);
     return "portalCliente/completar-datos";
@@ -144,7 +150,7 @@ public class ControladorPortalCliente {
         .getSession()
         .setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
-      return REDIRECT_MIS_PEDIDOS;
+      return REDIRECT_HOME;
     } catch (Exception e) {
       model.addAttribute(ATTR_ERROR, e.getMessage());
       model.addAttribute(ATTR_CLIENTE, cliente);
@@ -152,8 +158,8 @@ public class ControladorPortalCliente {
     }
   }
 
-  @GetMapping("/portal/clientes/mis-pedidos")
-  public String mostrarMisPedidos(Authentication authentication, Model model) {
+  @GetMapping("/portal/clientes/home")
+  public String mostrarHome(Authentication authentication, Model model) {
     Cliente cliente = obtenerClienteSesion(authentication);
     if (cliente != null) {
       if (faltanDatosObligatorios(cliente)) {
@@ -163,6 +169,11 @@ public class ControladorPortalCliente {
       model.addAttribute(ATTR_CLIENTE, cliente);
     }
     return "portalCliente/home";
+  }
+
+  @GetMapping("/portal/clientes/mis-pedidos")
+  public String redirigirMisPedidosAHome() {
+    return REDIRECT_HOME;
   }
 
   @GetMapping("/portal/clientes/perfil")
@@ -250,12 +261,18 @@ public class ControladorPortalCliente {
     if (faltanDatosObligatorios(cliente)) {
       return REDIRECT_COMPLETAR_DATOS;
     }
+    List<Pedido> pedidos = servicioPedido.listarPedidosDeCliente(cliente);
+    model.addAttribute("pedidos", pedidos);
     model.addAttribute(ATTR_CLIENTE, cliente);
     return "portalCliente/historial";
   }
 
   @GetMapping("/portal/clientes/reportar")
-  public String mostrarReportarPedido(Authentication authentication, Model model) {
+  public String mostrarReportarPedido(
+    @RequestParam(value = "idPedido", required = false) Long idPedido,
+    Authentication authentication,
+    Model model
+  ) {
     Cliente cliente = obtenerClienteSesion(authentication);
     if (cliente == null) {
       return REDIRECT_PORTAL_CLIENTES;
@@ -263,7 +280,46 @@ public class ControladorPortalCliente {
     if (faltanDatosObligatorios(cliente)) {
       return REDIRECT_COMPLETAR_DATOS;
     }
+    if (idPedido != null) {
+      Pedido pedido = servicioPedido.buscarPedidoPorId(idPedido);
+      if (pedido != null) {
+        model.addAttribute("pedido", pedido);
+      }
+      model.addAttribute("idPedido", idPedido);
+    }
     model.addAttribute(ATTR_CLIENTE, cliente);
     return "portalCliente/reportar";
+  }
+
+  public String mostrarReportarPedido(Authentication authentication, Model model) {
+    return mostrarReportarPedido(null, authentication, model);
+  }
+
+  @PostMapping("/portal/clientes/reportar")
+  public String procesarReportarPedido(
+    @RequestParam(value = "idPedido", required = false) Long idPedido,
+    @RequestParam(value = "motivo", required = false) String motivo,
+    @RequestParam(value = "comentario", required = false) String comentario,
+    Authentication authentication,
+    RedirectAttributes redirectAttributes
+  ) {
+    Cliente cliente = obtenerClienteSesion(authentication);
+    if (cliente == null) {
+      return REDIRECT_PORTAL_CLIENTES;
+    }
+    if (faltanDatosObligatorios(cliente)) {
+      return REDIRECT_COMPLETAR_DATOS;
+    }
+    if (idPedido != null) {
+      servicioPedido.marcarPedidoComoReportado(idPedido, motivo, comentario);
+    }
+    String numPedido = idPedido != null ? ("#" + idPedido) : "seleccionado";
+    redirectAttributes.addFlashAttribute(
+      "mensajeExito",
+      "Tu reporte del pedido " +
+      numPedido +
+      " ha sido enviado. Nuestro equipo lo revisará a la brevedad."
+    );
+    return "redirect:/portal/clientes/historial";
   }
 }

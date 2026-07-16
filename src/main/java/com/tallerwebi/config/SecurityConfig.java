@@ -172,7 +172,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         if (faltanDatos) {
           response.sendRedirect(request.getContextPath() + "/portal/clientes/completar-datos");
         } else {
-          response.sendRedirect(request.getContextPath() + "/portal/clientes/mis-pedidos");
+          response.sendRedirect(request.getContextPath() + "/portal/clientes/home");
         }
       } else {
         servicioOAuth2.procesarUsuarioGoogle(email, nombre, response);

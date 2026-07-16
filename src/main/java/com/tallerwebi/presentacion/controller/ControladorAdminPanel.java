@@ -1,6 +1,7 @@
 package com.tallerwebi.presentacion.controller;
 
 import com.tallerwebi.dominio.interfaces.ServicioLote;
+import com.tallerwebi.dominio.interfaces.ServicioPedido;
 import com.tallerwebi.dominio.interfaces.ServicioTelegram;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -14,13 +15,20 @@ import org.springframework.web.servlet.ModelAndView;
 public class ControladorAdminPanel {
 
   private final ServicioLote servicioLote;
+  private final ServicioPedido servicioPedido;
+
 
   private final ServicioTelegram servicioTelegram;
 
   @Autowired
-  public ControladorAdminPanel(ServicioLote servicioLote, ServicioTelegram servicioTelegram) {
+  public ControladorAdminPanel(
+    ServicioLote servicioLote,
+    ServicioTelegram servicioTelegram,
+    ServicioPedido servicioPedido
+  ) {
     this.servicioLote = servicioLote;
     this.servicioTelegram = servicioTelegram;
+    this.servicioPedido = servicioPedido;
   }
 
   @RequestMapping(path = "/admin", method = RequestMethod.GET)
@@ -28,8 +36,31 @@ public class ControladorAdminPanel {
     ModelMap model = new ModelMap();
     model.put("email", authentication.getName());
     model.put("notificaciones", servicioLote.obtenerNotificacionesVencimiento());
+    model.put("reclamosActivos", servicioPedido.contarPedidosReportadosActivos());
 
     return new ModelAndView("funcionalidadesAdmin/panel", model);
+  }
+
+  @RequestMapping(path = "/admin/gestionar-reclamos", method = RequestMethod.GET)
+  public ModelAndView gestionarReclamos(Authentication authentication) {
+
+    ModelMap model = new ModelMap();
+    List<Pedido> reclamos = servicioPedido.listarPedidosReportados();
+    model.put("reclamos", reclamos);
+    model.put("reclamosActivos", servicioPedido.contarPedidosReportadosActivos());
+    return new ModelAndView("funcionalidadesAdmin/gestionar-reclamos", model);
+  }
+
+  @RequestMapping(path = "/admin/gestionar-reclamos/resolver", method = RequestMethod.POST)
+  public ModelAndView resolverReclamo(
+    @RequestParam("idPedido") Long idPedido,
+    Authentication authentication
+  ) {
+
+    if (idPedido != null) {
+      servicioPedido.resolverReclamoPedido(idPedido);
+    }
+    return new ModelAndView("redirect:/admin/gestionar-reclamos?resuelto=true");
   }
 
   @RequestMapping(path = "/admin/probar-telegram", method = RequestMethod.GET)
@@ -42,8 +73,4 @@ public class ControladorAdminPanel {
     return new ModelAndView("redirect:/admin?telegramOk=true");
   }
 
-  @RequestMapping(path = "/acceso-denegado", method = RequestMethod.GET)
-  public ModelAndView accesoDenegado() {
-    return new ModelAndView("acceso-denegado");
-  }
 }

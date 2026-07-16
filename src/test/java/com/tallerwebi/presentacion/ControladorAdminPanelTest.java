@@ -21,12 +21,15 @@ public class ControladorAdminPanelTest {
   private Authentication authenticationMock;
   private ServicioLote servicioLoteMock;
   private ServicioTelegram servicioTelegramMock;
+  private com.tallerwebi.dominio.interfaces.ServicioPedido servicioPedidoMock;
 
   @BeforeEach
   public void init() {
     servicioLoteMock = mock(ServicioLote.class);
     servicioTelegramMock = mock(ServicioTelegram.class);
-    controlador = new ControladorAdminPanel(servicioLoteMock, servicioTelegramMock);
+    servicioPedidoMock = mock(com.tallerwebi.dominio.interfaces.ServicioPedido.class);
+    controlador =
+      new ControladorAdminPanel(servicioLoteMock, servicioTelegramMock, servicioPedidoMock);
     authenticationMock = mock(Authentication.class);
   }
 

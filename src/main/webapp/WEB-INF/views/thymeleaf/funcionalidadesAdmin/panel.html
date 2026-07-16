@@ -205,6 +205,27 @@
             <p class="text-sm opacity-85 flex-grow">Reduce de forma manual la cantidad disponible de un artículo en el almacén.</p>
         </a>
 
+        <a th:href="@{/admin/gestionar-reclamos}"
+           class="group relative flex flex-col justify-between p-6 bg-puesto-btn text-puesto-btn-text border-b-[8px] border-puesto-btn-border rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-200 hover:-translate-y-2 min-h-[200px]">
+            <div class="flex items-start justify-between w-full mb-4">
+                <div class="bg-black/10 p-3 rounded-full w-max">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div th:if="${reclamosActivos != null && reclamosActivos > 0}" class="flex flex-col items-end gap-1">
+                    <span class="flex items-center justify-center min-w-8 h-8 px-3 rounded-full bg-red-600 text-white text-sm font-black shadow-lg"
+                          th:text="${reclamosActivos}">
+                        1
+                    </span>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-2xl font-black mb-2 uppercase tracking-tighter">Gestionar Reclamos</h3>
+                <p class="text-sm opacity-85 flex-grow">Visualiza y administra los pedidos que fueron reportados con inconvenientes por los clientes.</p>
+            </div>
+        </a>
+
 
 
     </div>
