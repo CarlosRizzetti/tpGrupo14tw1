@@ -20,13 +20,9 @@ import org.junit.jupiter.api.Test;
 
 public class LoteE2E {
 
-  // Producto sembrado en import.sql: id 5 = "Queso".
   private static final String ID_PRODUCTO_QUESO = "5";
   private static final String NOMBRE_PRODUCTO_QUESO = "Queso";
 
-  // Único por corrida: ReiniciarDB solo resetea Usuario, no Lote, así que un
-  // valor fijo terminaría duplicado (y rompería el locator en modo estricto)
-  // si el test corre más de una vez contra la misma base.
   private static final String NUMERO_DE_LOTE_NUEVO = String.valueOf(System.currentTimeMillis());
 
   static Playwright playwright;

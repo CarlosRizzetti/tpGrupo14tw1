@@ -13,4 +13,6 @@ public interface ServicioHistorialPedido {
   );
 
   List<HistorialPedidoDTO> buscarPorCliente(Long idCliente);
+
+  HistorialPedidoDTO buscarPorId(Long idPedido);
 }

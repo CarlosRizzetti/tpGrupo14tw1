@@ -28,10 +28,10 @@ public class ControladorComandaCocinaApi {
     return servicioComanda.listarPendientesPorCategoria(idCategoria);
   }
 
-  @PostMapping("/{id}/sacar")
-  public ResponseEntity<Map<String, Object>> sacar(@PathVariable Long id) {
+  @PostMapping("/sector/{idSector}/servir")
+  public ResponseEntity<Map<String, Object>> servir(@PathVariable Long idSector) {
     try {
-      servicioComanda.sacarComanda(id);
+      servicioComanda.servirSector(idSector);
       Map<String, Object> respuesta = new HashMap<>();
       respuesta.put("ok", true);
       return ResponseEntity.ok(respuesta);

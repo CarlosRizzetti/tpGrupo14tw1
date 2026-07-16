@@ -1,7 +1,7 @@
 <html xmlns:th="http://www.thymeleaf.org"
       th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, ~{}, ~{::scripts})}">
 <head>
-    <title>Composiciones</title>
+    <title>Creación de producto final</title>
 </head>
 <body>
 <div th:fragment="header_center">
@@ -37,7 +37,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                Crear Nueva Composición
+                Crear Nuevo Producto Final
             </h2>
         </div>
         
@@ -93,7 +93,7 @@
                 <div class="flex justify-end">
                     <button type="submit"
                             class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
-                        Guardar Composición
+                        Guardar Producto Final
                     </button>
                 </div>
             </div>
@@ -103,7 +103,7 @@
     <!-- START: Tabla de Composiciones Creadas -->
     <div class="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-white">Composiciones Actuales</h2>
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white">Productos Finales Actuales</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">Revisa los productos que has ido creando.</p>
         </div>
         <div class="overflow-x-auto">

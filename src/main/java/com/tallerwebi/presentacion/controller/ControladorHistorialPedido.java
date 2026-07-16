@@ -9,10 +9,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
@@ -43,6 +40,17 @@ public class ControladorHistorialPedido {
     OffsetDateTime desde = parsearInicioDeDia(desdeStr);
     OffsetDateTime hasta = parsearFinDeDia(hastaStr);
     return servicioHistorialPedido.buscarHistorial(desde, hasta, numeroDeLote, clienteNombre);
+  }
+
+  @RequestMapping(path = "/admin/pedidos/{id}", method = RequestMethod.GET)
+  public ModelAndView mostrarDetallePedido(@PathVariable Long id) {
+    HistorialPedidoDTO pedido = servicioHistorialPedido.buscarPorId(id);
+    if (pedido == null) {
+      return new ModelAndView("redirect:/admin/historial-pedidos");
+    }
+    ModelAndView mav = new ModelAndView("funcionalidadesAdmin/pedido/detalle-pedido.html");
+    mav.addObject("pedido", pedido);
+    return mav;
   }
 
   private OffsetDateTime parsearInicioDeDia(String fechaStr) {

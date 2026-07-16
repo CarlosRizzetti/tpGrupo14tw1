@@ -11,6 +11,7 @@ import com.tallerwebi.dominio.entity.ProductoFinal;
 import com.tallerwebi.dominio.entity.enums.EstadoComanda;
 import com.tallerwebi.dominio.entity.enums.EstadoPedido;
 import com.tallerwebi.dominio.interfaces.RepositorioPedido;
+import com.tallerwebi.dominio.interfaces.ServicioComanda;
 import com.tallerwebi.dominio.services.ServicioPedidoImpl;
 import com.tallerwebi.dominio.utils.CarritoPedido;
 import com.tallerwebi.dominio.utils.ItemCarrito;
@@ -22,11 +23,13 @@ public class ServicioPedidoImplTest {
 
   private RepositorioPedido repositorioPedido;
   private ServicioPedidoImpl servicioPedido;
+  private ServicioComanda servicioComanda;
 
   @BeforeEach
   public void setUp() {
     repositorioPedido = mock(RepositorioPedido.class);
-    servicioPedido = new ServicioPedidoImpl(repositorioPedido);
+    servicioComanda = mock(ServicioComanda.class);
+    servicioPedido = new ServicioPedidoImpl(repositorioPedido, servicioComanda);
   }
 
   @Test

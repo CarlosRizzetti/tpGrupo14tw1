@@ -51,6 +51,15 @@ public class ServicioHistorialPedidoImpl implements ServicioHistorialPedido {
   }
 
   @Override
+  public HistorialPedidoDTO buscarPorId(Long idPedido) {
+    if (idPedido == null) {
+      return null;
+    }
+    Pedido pedido = repositorioPedido.buscarPorId(idPedido);
+    return pedido != null ? mapearPedido(pedido) : null;
+  }
+
+  @Override
   public List<HistorialPedidoDTO> buscarPorCliente(Long idCliente) {
     return repositorioPedido
       .listarPorCliente(idCliente)
