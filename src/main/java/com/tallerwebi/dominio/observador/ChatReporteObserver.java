@@ -18,34 +18,60 @@ import org.springframework.stereotype.Component;
 public class ChatReporteObserver {
 
   private static final Logger logger = LoggerFactory.getLogger(ChatReporteObserver.class);
+
+  // Constantes para evitar errores de PMD (AvoidDuplicateLiterals)
+  private static final String OPCION_ACTUALIZAR = "Actualizar reporte";
+  private static final String OPCION_REALIZADO = "Dar por realizado";
+  private static final String OPCION_DESESTIMAR = "Desestimar";
+  private static final String OPCION_VOLVER = "Volver";
+
   private final ServicioPedido servicioPedido;
 
-  public ChatReporteObserver(ServicioPedido servicioPedido) {
+  public ChatReporteObserver(final ServicioPedido servicioPedido) {
     this.servicioPedido = servicioPedido;
   }
 
   // Escucha lo que hace el CLIENTE
   @EventListener
-  public void onAccionCliente(InteraccionChatEvent event) {
-    Pedido pedido = servicioPedido.buscarPedidoPorId(event.getPedidoId());
+  public void onAccionCliente(final InteraccionChatEvent event) {
+    final Pedido pedido = servicioPedido.buscarPedidoPorId(event.getPedidoId());
     if (pedido == null) {
       event.setRespuestaSistema("Error: No se encontró el pedido.");
       return;
     }
 
-    switch (event.getAccionUsuario()) {
+    final String accion = event.getAccionUsuario();
+
+    if (accion.startsWith("TEXTO:")) {
+      final String nuevoComentario = accion.substring(6).trim();
+      pedido.setComentarioReclamo(nuevoComentario);
+
+      event.setRespuestaSistema(
+        "Hemos actualizado el detalle de tu reclamo a: '" +
+        nuevoComentario +
+        "'. ¿Cómo deseas continuar?"
+      );
+      event.setOpcionesDisponibles(
+        Arrays.asList(OPCION_ACTUALIZAR, OPCION_REALIZADO, OPCION_DESESTIMAR)
+      );
+
+      servicioPedido.actualizarPedido(pedido);
+      return;
+    }
+
+    switch (accion) {
       case "INICIAR":
         pedido.setReportado(true);
         event.setRespuestaSistema(
           "Tu reporte ha sido abierto y está siendo analizado. ¿Cómo quieres continuar?"
         );
         event.setOpcionesDisponibles(
-          Arrays.asList("Actualizar reporte", "Dar por realizado", "Desestimar reporte")
+          Arrays.asList(OPCION_ACTUALIZAR, OPCION_REALIZADO, "Desestimar reporte")
         );
         break;
       case "ACTUALIZAR":
         event.setRespuestaSistema("Por favor, escribe el detalle adicional de tu reclamo abajo.");
-        event.setOpcionesDisponibles(Arrays.asList("Volver", "Cancelar"));
+        event.setOpcionesDisponibles(Arrays.asList(OPCION_VOLVER, "Cancelar"));
         break;
       case "REALIZADO":
         pedido.setReportado(false);
@@ -59,19 +85,26 @@ public class ChatReporteObserver {
         pedido.setComentarioReclamo("Desestimado por el cliente.");
         event.setRespuestaSistema("Has desestimado este reporte. Quedará archivado sin impacto.");
         break;
+      case "VOLVER":
+      case "CANCELAR":
+        event.setRespuestaSistema("Has cancelado la operación. ¿Qué deseas hacer ahora?");
+        event.setOpcionesDisponibles(
+          Arrays.asList(OPCION_ACTUALIZAR, OPCION_REALIZADO, OPCION_DESESTIMAR)
+        );
+        break;
       default:
         event.setRespuestaSistema("Acción no reconocida.");
-        event.setOpcionesDisponibles(Arrays.asList("Volver"));
+        event.setOpcionesDisponibles(Arrays.asList(OPCION_VOLVER));
         break;
     }
 
     servicioPedido.actualizarPedido(pedido);
   }
 
-  // Escucha lo que hace el ADMIN
+  // Escucha lo que hace el ADMIN (Se mantiene igual, solo le agregué final)
   @EventListener
-  public void onAccionAdmin(AdminActualizaReporteEvent event) {
-    Pedido pedido = servicioPedido.buscarPedidoPorId(event.getReporteId());
+  public void onAccionAdmin(final AdminActualizaReporteEvent event) {
+    final Pedido pedido = servicioPedido.buscarPedidoPorId(event.getReporteId());
 
     if (pedido != null) {
       pedido.setComentarioReclamo(

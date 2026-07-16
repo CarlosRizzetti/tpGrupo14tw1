@@ -27,7 +27,7 @@
     <!-- FRAGMENTO DERECHO DEL HEADER -->
     <div th:fragment="header_right" class="flex items-center gap-3">
         <span class="text-xs font-bold uppercase tracking-wider bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
-            <span th:text="${#authentication.name}">Cliente</span>
+            <span th:text="${#authentication.name.contains('@') ? #strings.capitalize(#strings.substring(#authentication.name, 0, #authentication.name.indexOf('@'))) : #strings.capitalize(#authentication.name)}">Cliente</span>
         </span>
     </div>
 

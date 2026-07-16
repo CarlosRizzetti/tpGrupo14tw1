@@ -9,8 +9,16 @@
 <body class="tema-servicio min-h-screen bg-puesto-app font-sans text-slate-800">
 
 <header class="bg-puesto-header text-puesto-header-text shadow-md">
-
     <div class="max-w-full mx-auto px-6 py-3 flex items-center justify-between">
+        <div th:fragment="header_left">
+            <a th:href="@{/home}"
+               class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Volver
+            </a>
+        </div>
         <h1 class="text-xl font-bold tracking-tight">Puesto de Caja</h1>
 
         <a th:href="@{/logout}"
