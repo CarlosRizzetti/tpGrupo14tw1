@@ -49,4 +49,28 @@ public class RepositorioPedidoImpl implements RepositorioPedido {
       .setParameter("cliente", cliente)
       .list();
   }
+
+  @Override
+  public List<Pedido> buscarPedidosReportados() {
+    List<Pedido> pedidos = sessionFactory
+      .getCurrentSession()
+      .createQuery(
+        "select distinct p from Pedido p left join fetch p.detalles d left join fetch d.productoFinal left join fetch p.cliente where p.detalleReclamo.reportado = true order by p.horaCobro desc",
+        Pedido.class
+      )
+      .list();
+
+    if (pedidos != null && !pedidos.isEmpty()) {
+      sessionFactory
+        .getCurrentSession()
+        .createQuery(
+          "select distinct d from DetallePedido d left join fetch d.ingredientes di left join fetch di.producto where d.pedido in (:pedidos)",
+          com.tallerwebi.dominio.entity.DetallePedido.class
+        )
+        .setParameter("pedidos", pedidos)
+        .list();
+    }
+
+    return pedidos;
+  }
 }

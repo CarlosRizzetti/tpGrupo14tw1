@@ -79,17 +79,9 @@ public class ServicioPedidoImpl implements ServicioPedido {
     Pedido pedidoEncontrado = repositorioPedido.buscarPorId(id);
     if (pedidoEncontrado != null && pedidoEncontrado.getDetalles() != null) {
       pedidoEncontrado.getDetalles().size();
-      for (DetallePedido detalle : pedidoEncontrado.getDetalles()) {
-        if (detalle.getProductoFinal() != null) {
-          detalle.getProductoFinal().getNombre();
-        }
-        if (detalle.getIngredientes() != null) {
-          detalle.getIngredientes().size();
-          for (DetallePedidoIngrediente ingrediente : detalle.getIngredientes()) {
-            if (ingrediente.getProducto() != null) {
-              ingrediente.getProducto().getNombre();
-            }
-          }
+      for (DetallePedido dp : pedidoEncontrado.getDetalles()) {
+        if (dp.getIngredientes() != null) {
+          dp.getIngredientes().size();
         }
       }
     }
@@ -99,12 +91,51 @@ public class ServicioPedidoImpl implements ServicioPedido {
   @Override
   @Transactional
   public void marcarPedidoComoReportado(Long idPedido) {
+    marcarPedidoComoReportado(idPedido, null, null);
+  }
+
+  @Override
+  @Transactional
+  public void marcarPedidoComoReportado(Long idPedido, String motivo, String comentario) {
     if (idPedido == null) {
       return;
     }
     Pedido pedidoEncontrado = repositorioPedido.buscarPorId(idPedido);
     if (pedidoEncontrado != null) {
       pedidoEncontrado.setReportado(true);
+      if (motivo != null && !motivo.isEmpty()) {
+        pedidoEncontrado.setMotivoReclamo(motivo);
+      }
+      if (comentario != null && !comentario.isEmpty()) {
+        pedidoEncontrado.setComentarioReclamo(comentario);
+      }
+      repositorioPedido.guardar(pedidoEncontrado);
+    }
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<Pedido> listarPedidosReportados() {
+    return repositorioPedido.buscarPedidosReportados();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public int contarPedidosReportadosActivos() {
+    List<Pedido> list = repositorioPedido.buscarPedidosReportados();
+    return list != null ? list.size() : 0;
+  }
+
+  @Override
+  @Transactional
+  public void resolverReclamoPedido(Long idPedido) {
+    if (idPedido == null) {
+      return;
+    }
+    Pedido pedidoEncontrado = repositorioPedido.buscarPorId(idPedido);
+    if (pedidoEncontrado != null) {
+      pedidoEncontrado.setReportado(false);
+      pedidoEncontrado.setEstado(EstadoPedido.RESUELTO);
       repositorioPedido.guardar(pedidoEncontrado);
     }
   }

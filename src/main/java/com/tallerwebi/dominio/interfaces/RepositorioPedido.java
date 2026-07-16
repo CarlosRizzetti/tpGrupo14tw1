@@ -12,4 +12,6 @@ public interface RepositorioPedido {
   List<Pedido> listarTodos();
 
   List<Pedido> buscarPorCliente(Cliente cliente);
+
+  List<Pedido> buscarPedidosReportados();
 }

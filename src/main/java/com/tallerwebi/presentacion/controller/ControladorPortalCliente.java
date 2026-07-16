@@ -311,7 +311,7 @@ public class ControladorPortalCliente {
       return REDIRECT_COMPLETAR_DATOS;
     }
     if (idPedido != null) {
-      servicioPedido.marcarPedidoComoReportado(idPedido);
+      servicioPedido.marcarPedidoComoReportado(idPedido, motivo, comentario);
     }
     String numPedido = idPedido != null ? ("#" + idPedido) : "seleccionado";
     redirectAttributes.addFlashAttribute(
