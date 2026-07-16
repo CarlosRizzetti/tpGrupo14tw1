@@ -168,4 +168,9 @@ public class ControladorLogin {
     model.put("usuario", new Usuario());
     return new ModelAndView(VISTA_NUEVO_USUARIO, model);
   }
+
+  @RequestMapping("/home")
+  public ModelAndView verHome() {
+    return new ModelAndView("home");
+  }
 }

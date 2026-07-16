@@ -1,9 +1,10 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, _, _, ~{::scripts})}">
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, _, ~{::scripts})}">
 <head>
-    <title>Menú</title>
+    <title>Categorías</title>
 </head>
 <body>
+
 
 <div th:fragment="header_left" class="relative">
     <button id="profileBtn" class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition text-white">
@@ -22,6 +23,7 @@
             <p class="text-sm font-bold text-gray-800 truncate"
                th:if="${userEmail != null}"
                th:text="${userEmail.contains('@') ? #strings.capitalize(#strings.substring(userEmail, 0, userEmail.indexOf('@'))) : userEmail}">
+
                 Usuario
             </p>
         </div>
@@ -41,41 +43,50 @@
             Cerrar Sesión
         </a>
     </div>
+
+
 </div>
 
+<!-- FRAGMENTO 1 -->
 <div th:fragment="header_center">
-    <span class="text-puesto-header-text font-bold uppercase tracking-widest">Seleccioná una sección</span>
+    <span class="text-puesto-header-text font-bold uppercase tracking-widest">Seleccione Categoría</span>
 </div>
+
+
+<!-- FRAGMENTO 2 -->
+<div th:fragment="header_right">
+    <a th:href="@{/dashboard/global}"
+       class="md:flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg border border-white/20 transition text-xs font-bold uppercase tracking-wider">
+        Dashboard Global
+    </a>
+</div>
+
+
 
 <div th:fragment="content" class="p-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[calc(100vh-7rem)]">
 
-        <a th:href="@{/cocina/comandas}"
-           class="group relative flex flex-col items-center justify-center p-10 bg-amber-500 text-white border-b-[8px] border-amber-700 rounded-3xl shadow-xl hover:shadow-2xl hover:bg-amber-600 transition-all duration-200 hover:-translate-y-2">
-            <div class="mb-6 text-white/90">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 md:h-32 md:w-32" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z" />
-                </svg>
+    <div th:if="${mensajeVacio != null}" class="p-6 bg-red-100 border-l-4 border-red-500 text-red-700 rounded-lg shadow-inner text-center font-bold text-xl mb-8">
+        <p th:text="${mensajeVacio}"></p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-10">
+        <a th:each="categoria : ${categorias}"
+           th:href="@{/category/{id}/products(id=${categoria.id})}"
+           th:classappend="' ' + ${categoria.tema}"
+           class="group relative flex flex-col items-center justify-center p-6 bg-puesto-btn text-puesto-btn-text border-b-[8px] border-puesto-btn-border rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-200 hover:-translate-y-2 min-h-[180px]">
+
+            <div class="mb-4 text-puesto-accent">
+                <img th:src="@{${categoria.icono}}"
+                     class="h-16 w-16 md:h-24 md:w-24 object-contain"
+                     alt="icono">
             </div>
-            <span class="text-3xl md:text-5xl font-black uppercase tracking-tighter text-center">
-                Comandas
-            </span>
-            <div class="w-12 h-1.5 md:w-20 md:h-2 mt-4 rounded-full opacity-50 bg-white"></div>
-        </a>
 
-        <a th:href="@{/vencimientos-categoria}"
-           class="group relative flex flex-col items-center justify-center p-10 bg-rose-600 text-white border-b-[8px] border-rose-800 rounded-3xl shadow-xl hover:shadow-2xl hover:bg-rose-700 transition-all duration-200 hover:-translate-y-2">
-            <div class="mb-6 text-white/90">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 md:h-32 md:w-32" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                </svg>
-            </div>
-            <span class="text-3xl md:text-5xl font-black uppercase tracking-tighter text-center">
-                Gestión de vencimientos
-            </span>
-            <div class="w-12 h-1.5 md:w-20 md:h-2 mt-4 rounded-full opacity-50 bg-white"></div>
-        </a>
+            <span class="text-3xl md:text-5xl font-black uppercase tracking-tighter text-center"
+                  th:text="${categoria.nombre}">
+             </span>
 
+            <div class="w-12 h-1.5 md:w-20 md:h-2 mt-4 rounded-full opacity-50 bg-puesto-accent"></div>
+        </a>
     </div>
 </div>
 </body>
@@ -90,6 +101,7 @@
                 menu.classList.toggle('hidden');
             });
 
+            // Cerrar el menú si hacemos click en otro lugar de la ventana
             window.addEventListener('click', function(event) {
                 if (!btn.contains(event.target) && !menu.contains(event.target)) {
                     menu.classList.add('hidden');

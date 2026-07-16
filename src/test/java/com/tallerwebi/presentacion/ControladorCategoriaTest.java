@@ -45,7 +45,7 @@ public class ControladorCategoriaTest {
     ModelAndView mav = controladorCategoria.index(auth);
 
     verify(servicioCategoria, times(1)).obtenerLasCategoriasParaElMenu();
-    assertThat(mav.getViewName(), equalTo("home"));
+    assertThat(mav.getViewName(), equalTo("vencimientos-categorias"));
     assertThat(mav.getModel().get("categorias"), equalTo(categorias));
   }
 
@@ -62,7 +62,7 @@ public class ControladorCategoriaTest {
     ModelAndView mav = controladorCategoria.index(auth);
 
     verify(servicioCategoria, times(1)).obtenerLasCategoriasParaElMenu();
-    assertThat(mav.getViewName(), equalTo("home"));
+    assertThat(mav.getViewName(), equalTo("vencimientos-categorias"));
     assertThat(mav.getModel().get("categorias"), equalTo(categorias));
   }
 
