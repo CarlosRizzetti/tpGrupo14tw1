@@ -21,4 +21,6 @@ public interface ServicioPedido {
   int contarPedidosReportadosActivos();
 
   void resolverReclamoPedido(Long idPedido);
+
+  void actualizarPedido(Pedido pedido);
 }

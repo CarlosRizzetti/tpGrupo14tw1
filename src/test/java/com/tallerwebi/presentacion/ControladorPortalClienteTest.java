@@ -19,6 +19,7 @@ import javax.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,12 +33,14 @@ public class ControladorPortalClienteTest {
   private ServicioPedido servicioPedido;
   private ControladorPortalCliente controlador;
   private Model model;
+  private ApplicationEventPublisher eventPublisher;
 
   @BeforeEach
   public void init() {
     servicioCliente = mock(ServicioCliente.class);
     servicioPedido = mock(ServicioPedido.class);
-    controlador = new ControladorPortalCliente(servicioCliente, servicioPedido);
+    eventPublisher = mock(ApplicationEventPublisher.class);
+    controlador = new ControladorPortalCliente(servicioCliente, servicioPedido, eventPublisher);
     model = new ConcurrentModel();
   }
 

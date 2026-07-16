@@ -1,54 +1,96 @@
 package com.tallerwebi.dominio.observador;
 
+import com.tallerwebi.dominio.entity.Pedido;
 import com.tallerwebi.dominio.evento.AdminActualizaReporteEvent;
 import com.tallerwebi.dominio.evento.InteraccionChatEvent;
+import com.tallerwebi.dominio.interfaces.ServicioPedido;
+import java.util.Arrays;
+import lombok.Getter;
+import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-// Importa tus servicios y repositorios aquí...
 
+@Getter
+@Setter
 @Component
 public class ChatReporteObserver {
 
-    // Aquí inyectarías el ServicioReporte para interactuar con la BD
-    // private final ServicioReporte servicioReporte;
+  private static final Logger logger = LoggerFactory.getLogger(ChatReporteObserver.class);
+  private final ServicioPedido servicioPedido;
 
-    // 1. Escucha lo que hace el CLIENTE
-    @EventListener
-    public void onAccionCliente(InteraccionChatEvent event) {
-        String mensajeSistema = "";
-        String opcionesDisponibles = ""; // Separadas por coma o en formato JSON
+  public ChatReporteObserver(ServicioPedido servicioPedido) {
+    this.servicioPedido = servicioPedido;
+  }
 
-        switch (event.getAccionUsuario()) {
-            case "INICIAR":
-                mensajeSistema = "Tu reporte está siendo analizado. ¿Cómo quieres continuar?";
-                opcionesDisponibles = "Actualizar reporte,Dar por realizado,Desestimar reporte";
-                break;
-            case "ACTUALIZAR":
-                mensajeSistema = "Por favor, escribe el detalle adicional abajo.";
-                opcionesDisponibles = "Volver,Cancelar";
-                break;
-            case "REALIZADO":
-                mensajeSistema = "¡Perfecto! Hemos marcado este reporte como solucionado. Gracias por avisarnos.";
-                opcionesDisponibles = "NINGUNA"; // Fin del chat
-                break;
-            case "DESESTIMAR":
-                mensajeSistema = "Has desestimado este reporte. Quedará archivado sin impacto.";
-                opcionesDisponibles = "NINGUNA"; // Fin del chat
-                break;
-        }
-
-        // TODO: Guardar este "mensajeSistema" y las "opcionesDisponibles" en la Base de Datos
-        // asociadas al event.getReporteId() para que el Controlador pueda leerlas.
-        System.out.println("OBSERVER: Guardando respuesta automática para el reporte " + event.getReporteId());
+  // Escucha lo que hace el CLIENTE
+  @EventListener
+  public void onAccionCliente(InteraccionChatEvent event) {
+    Pedido pedido = servicioPedido.buscarPedidoPorId(event.getPedidoId());
+    if (pedido == null) {
+      event.setRespuestaSistema("Error: No se encontró el pedido.");
+      return;
     }
 
-    // 2. Escucha lo que hace el ADMIN
-    @EventListener
-    public void onAccionAdmin(AdminActualizaReporteEvent event) {
-        String mensajeSistema = "🔔 Un administrador ha cambiado el estado de tu reporte a: " + event.getNuevoEstado();
-        String opcionesDisponibles = "Dar por realizado,Apelar decisión";
-
-        // TODO: Guardar en BD para que cuando el cliente entre al chat lo vea.
-        System.out.println("OBSERVER: Notificando al cliente del reporte " + event.getReporteId());
+    switch (event.getAccionUsuario()) {
+      case "INICIAR":
+        pedido.setReportado(true);
+        event.setRespuestaSistema(
+          "Tu reporte ha sido abierto y está siendo analizado. ¿Cómo quieres continuar?"
+        );
+        event.setOpcionesDisponibles(
+          Arrays.asList("Actualizar reporte", "Dar por realizado", "Desestimar reporte")
+        );
+        break;
+      case "ACTUALIZAR":
+        event.setRespuestaSistema("Por favor, escribe el detalle adicional de tu reclamo abajo.");
+        event.setOpcionesDisponibles(Arrays.asList("Volver", "Cancelar"));
+        break;
+      case "REALIZADO":
+        pedido.setReportado(false);
+        pedido.setComentarioReclamo("Resuelto por el cliente desde el chat.");
+        event.setRespuestaSistema(
+          "¡Perfecto! Hemos marcado este reporte como solucionado. Gracias por avisarnos."
+        );
+        break;
+      case "DESESTIMAR":
+        pedido.setReportado(false);
+        pedido.setComentarioReclamo("Desestimado por el cliente.");
+        event.setRespuestaSistema("Has desestimado este reporte. Quedará archivado sin impacto.");
+        break;
+      default:
+        event.setRespuestaSistema("Acción no reconocida.");
+        event.setOpcionesDisponibles(Arrays.asList("Volver"));
+        break;
     }
+
+    servicioPedido.actualizarPedido(pedido);
+  }
+
+  // Escucha lo que hace el ADMIN
+  @EventListener
+  public void onAccionAdmin(AdminActualizaReporteEvent event) {
+    Pedido pedido = servicioPedido.buscarPedidoPorId(event.getReporteId());
+
+    if (pedido != null) {
+      pedido.setComentarioReclamo(
+        "Un administrador ha cambiado el estado de tu reporte a: " + event.getNuevoEstado()
+      );
+
+      if ("RESUELTO".equalsIgnoreCase(event.getNuevoEstado())) {
+        pedido.setReportado(false);
+      }
+
+      servicioPedido.actualizarPedido(pedido);
+    }
+
+    if (logger.isInfoEnabled()) {
+      logger.info(
+        "OBSERVER: Notificando al cliente del reporte ID {}. Mensaje: 'Un administrador ha cambiado el estado de tu reporte a: {}' | Opciones: Dar por realizado,Apelar decisión",
+        event.getReporteId(),
+        event.getNuevoEstado()
+      );
+    }
+  }
 }

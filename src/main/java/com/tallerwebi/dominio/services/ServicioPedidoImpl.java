@@ -204,4 +204,12 @@ public class ServicioPedidoImpl implements ServicioPedido {
     repositorioPedido.guardar(pedido);
     carrito.vaciar();
   }
+
+  @Override
+  @Transactional
+  public void actualizarPedido(Pedido pedido) {
+    if (pedido != null) {
+      repositorioPedido.guardar(pedido);
+    }
+  }
 }

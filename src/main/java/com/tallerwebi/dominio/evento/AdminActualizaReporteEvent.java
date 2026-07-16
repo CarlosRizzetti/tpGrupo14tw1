@@ -1,11 +1,17 @@
 package com.tallerwebi.dominio.evento;
 
-public class AdminActualizaReporteEvent {
-    private final Long reporteId;
-    private final String nuevoEstado; // Ej: "RESUELTO"
+import lombok.Getter;
+import lombok.Setter;
 
-    public AdminActualizaReporteEvent(Long reporteId, String nuevoEstado) {
-        this.reporteId = reporteId;
-        this.nuevoEstado = nuevoEstado;
-    }
+@Getter
+@Setter
+public class AdminActualizaReporteEvent {
+
+  private final Long reporteId;
+  private final String nuevoEstado;
+
+  public AdminActualizaReporteEvent(Long reporteId, String nuevoEstado) {
+    this.reporteId = reporteId;
+    this.nuevoEstado = nuevoEstado;
+  }
 }

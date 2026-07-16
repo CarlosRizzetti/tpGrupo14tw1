@@ -9,8 +9,8 @@ import com.tallerwebi.dominio.interfaces.ServicioPedido;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -21,12 +21,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class ControladorPortalCliente {
@@ -44,7 +44,11 @@ public class ControladorPortalCliente {
   private final ApplicationEventPublisher eventPublisher;
 
   @Autowired
-  public ControladorPortalCliente(ServicioCliente servicioCliente, ServicioPedido servicioPedido, ApplicationEventPublisher eventPublisher) {
+  public ControladorPortalCliente(
+    ServicioCliente servicioCliente,
+    ServicioPedido servicioPedido,
+    ApplicationEventPublisher eventPublisher
+  ) {
     this.servicioCliente = servicioCliente;
     this.eventPublisher = eventPublisher;
     this.servicioPedido = servicioPedido;
@@ -300,30 +304,22 @@ public class ControladorPortalCliente {
     return "portalCliente/reportar";
   }
 
-    @PostMapping("/reportar/accion")
-    @ResponseBody // Para devolver JSON en lugar de una vista Thymeleaf
-    public ResponseEntity<Map<String, Object>> procesarAccionChat(
-            @RequestParam("reporteId") Long reporteId,
-            @RequestParam("clienteId") Long clienteId,
-            @RequestParam("accion") String accion) {
+  @PostMapping("/reportar/accion")
+  @ResponseBody
+  public ResponseEntity<Map<String, Object>> procesarAccionChat(
+    @RequestParam("pedidoId") Long pedidoId,
+    @RequestParam("accion") String accion
+  ) {
+    InteraccionChatEvent evento = new InteraccionChatEvent(pedidoId, accion);
 
-        // 1. PUBLICAR EL EVENTO (Patrón Observer)
-        // Esto dispara sincrónicamente el ChatReporteObserver
-        eventPublisher.publishEvent(new InteraccionChatEvent(reporteId, clienteId, accion));
+    eventPublisher.publishEvent(evento);
 
-        // 2. LEER EL RESULTADO
-        // Como el observer es síncrono, para cuando esta línea se ejecuta,
-        // el observer ya guardó la respuesta en la base de datos.
+    Map<String, Object> respuesta = new HashMap<>();
+    respuesta.put("mensaje", evento.getRespuestaSistema());
+    respuesta.put("opciones", evento.getOpcionesDisponibles());
 
-        // Simulación de búsqueda en BD del último mensaje generado por el sistema:
-        // MensajeChat ultimoMensaje = servicioReporte.obtenerUltimoMensaje(reporteId);
-
-        Map<String, Object> respuesta = new HashMap<>();
-        respuesta.put("mensaje", "Respuesta obtenida de la BD generada por el Observer");
-        respuesta.put("opciones", new String[]{"Actualizar reporte", "Dar por realizado", "Desestimar reporte"});
-
-        return ResponseEntity.ok(respuesta);
-    }
+    return ResponseEntity.ok(respuesta);
+  }
 
   public String mostrarReportarPedido(Authentication authentication, Model model) {
     return mostrarReportarPedido(null, authentication, model);
