@@ -1,5 +1,4 @@
 
-
 const API = "/api/cocina/comandas";
 const INTERVALO_POLLING_MS = 6000;
 
@@ -39,13 +38,13 @@ modalEl.addEventListener("click", (e) => {
   if (e.target === modalEl) cerrarModal();
 });
 
-// -------- Sacar comanda --------
-const sacarComanda = async (idComanda, btn) => {
+// -------- Servir sector --------
+const servirSector = async (idSector, btn) => {
   btn.disabled = true;
   btn.textContent = "Enviando…";
 
   try {
-    const respuesta = await fetch(`${API}/${idComanda}/sacar`, { method: "POST" });
+    const respuesta = await fetch(`${API}/sector/${idSector}/servir`, { method: "POST" });
 
     if (respuesta.status === 409) {
       const data = await respuesta.json();
@@ -58,7 +57,7 @@ const sacarComanda = async (idComanda, btn) => {
     if (!respuesta.ok) {
       btn.disabled = false;
       btn.textContent = "Servido";
-      alert("No se pudo sacar la comanda. Reintentá.");
+      alert("No se pudo servir la comanda. Reintentá.");
       return;
     }
 
@@ -69,20 +68,20 @@ const sacarComanda = async (idComanda, btn) => {
     console.error(err);
     btn.disabled = false;
     btn.textContent = "Servido";
-    alert("Error de red al sacar la comanda.");
+    alert("Error de red al servir la comanda.");
   }
 };
 
 // -------- Render --------
 const construirHashComanda = (comanda) => {
   const totalIngredientes = comanda.lineas.reduce((acc, l) => acc + l.ingredientes.length, 0);
-  return `${comanda.id}-${comanda.lineas.length}-${totalIngredientes}`;
+  return `${comanda.idSector}-${comanda.lineas.length}-${totalIngredientes}`;
 };
 
 const renderComanda = (comanda) => {
   const card = document.createElement("article");
   card.className = "bg-white rounded-2xl shadow-lg border-t-8 border-puesto-btn-border flex flex-col overflow-hidden";
-  card.dataset.idComanda = comanda.id;
+  card.dataset.idSector = comanda.idSector;
 
   // Header
   const header = document.createElement("div");
@@ -108,7 +107,7 @@ const renderComanda = (comanda) => {
     bloque.innerHTML = `
             <p class="font-black uppercase tracking-wide text-slate-900">${linea.nombre}</p>
             ${linea.tieneIngredientes
-    ? `<ul class="mt-1 pl-4 space-y-0.5">
+        ? `<ul class="mt-1 pl-4 space-y-0.5">
                      ${linea.ingredientes.map((ing) => `
                          <li class="text-sm text-slate-700 flex items-center gap-2">
                              <span class="w-1 h-1 rounded-full bg-slate-400"></span>
@@ -116,8 +115,8 @@ const renderComanda = (comanda) => {
                          </li>
                      `).join("")}
                    </ul>`
-    : "<p class=\"text-xs text-slate-400 italic mt-1\">Sin ingredientes personalizables</p>"
-}
+        : "<p class=\"text-xs text-slate-400 italic mt-1\">Sin ingredientes personalizables</p>"
+    }
         `;
     body.appendChild(bloque);
   });
@@ -130,7 +129,7 @@ const renderComanda = (comanda) => {
   btn.type = "button";
   btn.textContent = "Servido";
   btn.className = "w-full bg-puesto-btn text-puesto-btn-text border-2 border-puesto-btn-border rounded-md py-3 font-black uppercase tracking-widest hover:bg-puesto-btn-hover-bg transition";
-  btn.addEventListener("click", () => sacarComanda(comanda.id, btn));
+  btn.addEventListener("click", () => servirSector(comanda.idSector, btn));
   footer.appendChild(btn);
   card.appendChild(footer);
 
@@ -149,11 +148,11 @@ const renderTodas = (comandas) => {
   vacioEl.classList.add("hidden");
   grillaEl.classList.remove("hidden");
 
-  const nuevasHashes = new Map(comandas.map((c) => [c.id, construirHashComanda(c)]));
+  const nuevasHashes = new Map(comandas.map((c) => [c.idSector, construirHashComanda(c)]));
 
   const cambio =
-        nuevasHashes.size !== comandasEnPantalla.size ||
-        [...nuevasHashes.entries()].some(([id, hash]) => comandasEnPantalla.get(id) !== hash);
+      nuevasHashes.size !== comandasEnPantalla.size ||
+      [...nuevasHashes.entries()].some(([idSector, hash]) => comandasEnPantalla.get(idSector) !== hash);
 
   if (!cambio) return;
 
@@ -183,3 +182,4 @@ document.addEventListener("DOMContentLoaded", () => {
     if (document.visibilityState === "visible") refrescarComandas();
   });
 });
+

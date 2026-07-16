@@ -1,6 +1,8 @@
 package com.tallerwebi.dominio.entity;
 
 import com.tallerwebi.dominio.entity.enums.EstadoComanda;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -24,4 +26,7 @@ public class Comanda {
 
   @Enumerated(EnumType.STRING)
   private EstadoComanda estado;
+
+  @OneToMany(mappedBy = "comanda", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<ComandaSector> sectores = new ArrayList<>();
 }

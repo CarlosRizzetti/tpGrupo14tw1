@@ -1,6 +1,8 @@
 package com.tallerwebi.dominio.services;
 
+import com.tallerwebi.dominio.entity.Categoria;
 import com.tallerwebi.dominio.entity.Comanda;
+import com.tallerwebi.dominio.entity.ComandaSector;
 import com.tallerwebi.dominio.entity.ConsumoTimer;
 import com.tallerwebi.dominio.entity.DetallePedido;
 import com.tallerwebi.dominio.entity.DetallePedidoIngrediente;
@@ -8,17 +10,16 @@ import com.tallerwebi.dominio.entity.Pedido;
 import com.tallerwebi.dominio.entity.Producto;
 import com.tallerwebi.dominio.entity.Timer;
 import com.tallerwebi.dominio.entity.enums.EstadoComanda;
+import com.tallerwebi.dominio.entity.enums.EstadoComandaSector;
 import com.tallerwebi.dominio.entity.enums.EstadoPedido;
 import com.tallerwebi.dominio.excepcion.IngredientesNoDisponiblesException;
 import com.tallerwebi.dominio.interfaces.RepositorioComanda;
+import com.tallerwebi.dominio.interfaces.RepositorioComandaSector;
 import com.tallerwebi.dominio.interfaces.ServicioComanda;
 import com.tallerwebi.dominio.interfaces.ServicioTimer;
 import com.tallerwebi.presentacion.dto.ComandaCocinaDTO;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,12 +29,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ServicioComandaImpl implements ServicioComanda {
 
+  private static final String NOMBRE_CATEGORIA_COCINA = "Cocina";
+
   private final RepositorioComanda repositorioComanda;
+  private final RepositorioComandaSector repositorioComandaSector;
   private final ServicioTimer servicioTimer;
 
   @Autowired
-  public ServicioComandaImpl(RepositorioComanda repositorioComanda, ServicioTimer servicioTimer) {
+  public ServicioComandaImpl(
+    RepositorioComanda repositorioComanda,
+    RepositorioComandaSector repositorioComandaSector,
+    ServicioTimer servicioTimer
+  ) {
     this.repositorioComanda = repositorioComanda;
+    this.repositorioComandaSector = repositorioComandaSector;
     this.servicioTimer = servicioTimer;
   }
 
@@ -48,25 +57,141 @@ public class ServicioComandaImpl implements ServicioComanda {
     }
   }
 
+  // ========================================================
+  // Creación de sectores
+  // ========================================================
+
   @Override
   @Transactional
-  public void sacarComanda(Long comandaId) throws IngredientesNoDisponiblesException {
-    Comanda comanda = repositorioComanda.buscarPorId(comandaId);
-    List<DetallePedidoIngrediente> ingredientes = obtenerIngredientesDelPedido(comanda.getPedido());
+  @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
+  public void crearSectoresDeComanda(Comanda comanda) {
+    Set<Categoria> categoriasDelPedido = obtenerCategoriasDelPedido(comanda.getPedido());
+    boolean tieneCocina = categoriasDelPedido.stream().anyMatch(this::esCategoriaCocina);
 
-    Map<DetallePedidoIngrediente, List<PlanDeConsumo>> plan = planificarConsumos(ingredientes);
-    validarPlanCompleto(plan, ingredientes);
+    for (Categoria categoria : categoriasDelPedido) {
+      boolean esCocina = esCategoriaCocina(categoria);
+      EstadoComandaSector estadoInicial = (!tieneCocina || esCocina)
+        ? EstadoComandaSector.PENDIENTE
+        : EstadoComandaSector.BLOQUEADO;
+
+      ComandaSector sector = new ComandaSector();
+      sector.setComanda(comanda);
+      sector.setCategoria(categoria);
+      sector.setEstado(estadoInicial);
+      repositorioComandaSector.guardar(sector);
+    }
+  }
+
+  private Set<Categoria> obtenerCategoriasDelPedido(Pedido pedido) {
+    Set<Categoria> categorias = new HashSet<>();
+    for (DetallePedido detalle : pedido.getDetalles()) {
+      categorias.addAll(detalle.getProductoFinal().getCategorias());
+    }
+    return categorias;
+  }
+
+  private boolean esCategoriaCocina(Categoria categoria) {
+    return NOMBRE_CATEGORIA_COCINA.equalsIgnoreCase(categoria.getNombre());
+  }
+
+  // ========================================================
+  // Servir un sector
+  // ========================================================
+
+  @Override
+  @Transactional
+  public void servirSector(Long idSector) throws IngredientesNoDisponiblesException {
+    ComandaSector sector = repositorioComandaSector.buscarPorId(idSector);
+    Comanda comanda = sector.getComanda();
+    Pedido pedido = comanda.getPedido();
+
+    List<DetallePedidoIngrediente> ingredientesDelSector = obtenerIngredientesDelSector(
+      pedido,
+      sector.getCategoria()
+    );
+
+    Map<DetallePedidoIngrediente, List<PlanDeConsumo>> plan = planificarConsumos(
+      ingredientesDelSector
+    );
+    validarPlanCompleto(plan, ingredientesDelSector);
 
     ejecutarPlan(plan);
-    finalizarPedido(comanda.getPedido());
-    marcarComandaComoSacada(comanda);
+    marcarSectorComoServido(sector);
+    desbloquearSectoresSiCorresponde(comanda, sector);
+    finalizarPedidoSiTodosLosSectoresSirvieron(comanda);
   }
+
+  private List<DetallePedidoIngrediente> obtenerIngredientesDelSector(
+    Pedido pedido,
+    Categoria categoria
+  ) {
+    List<DetallePedidoIngrediente> ingredientes = new ArrayList<>();
+    for (DetallePedido detalle : pedido.getDetalles()) {
+      boolean perteneceAlSector = detalle
+        .getProductoFinal()
+        .getCategorias()
+        .stream()
+        .anyMatch(c -> c.getId().equals(categoria.getId()));
+      if (perteneceAlSector) {
+        for (DetallePedidoIngrediente ingrediente : detalle.getIngredientes()) {
+          if (ingrediente.getConsumos().isEmpty()) {
+            ingredientes.add(ingrediente);
+          }
+        }
+      }
+    }
+    return ingredientes;
+  }
+
+  private void marcarSectorComoServido(ComandaSector sector) {
+    sector.setEstado(EstadoComandaSector.SERVIDO);
+    sector.setHoraServido(OffsetDateTime.now());
+    repositorioComandaSector.actualizar(sector);
+  }
+
+  private void desbloquearSectoresSiCorresponde(
+    Comanda comanda,
+    ComandaSector sectorRecienServido
+  ) {
+    if (!esCategoriaCocina(sectorRecienServido.getCategoria())) {
+      return;
+    }
+
+    for (ComandaSector otroSector : comanda.getSectores()) {
+      if (otroSector.getEstado() == EstadoComandaSector.BLOQUEADO) {
+        otroSector.setEstado(EstadoComandaSector.PENDIENTE);
+        repositorioComandaSector.actualizar(otroSector);
+      }
+    }
+  }
+
+  private void finalizarPedidoSiTodosLosSectoresSirvieron(Comanda comanda) {
+    boolean todosServidos = comanda
+      .getSectores()
+      .stream()
+      .allMatch(s -> s.getEstado() == EstadoComandaSector.SERVIDO);
+
+    if (!todosServidos) {
+      return;
+    }
+
+    Pedido pedido = comanda.getPedido();
+    pedido.setHoraSalida(OffsetDateTime.now());
+    pedido.setEstado(EstadoPedido.ENTREGADO);
+
+    comanda.setEstado(EstadoComanda.SACADA);
+    repositorioComanda.actualizar(comanda);
+  }
+
+  // ========================================================
+  // Listado / conteo por categoría
+  // ========================================================
 
   @Override
   @Transactional(readOnly = true)
   public List<ComandaCocinaDTO> listarPendientesPorCategoria(Long idCategoria) {
-    return repositorioComanda
-      .listarPendientesPorCategoria(idCategoria)
+    return repositorioComandaSector
+      .listarVisiblesPorCategoria(idCategoria)
       .stream()
       .map(ComandaCocinaDTO::new)
       .collect(Collectors.toList());
@@ -75,16 +200,12 @@ public class ServicioComandaImpl implements ServicioComanda {
   @Override
   @Transactional(readOnly = true)
   public int contarPendientesPorCategoria(Long idCategoria) {
-    return repositorioComanda.listarPendientesPorCategoria(idCategoria).size();
+    return repositorioComandaSector.listarVisiblesPorCategoria(idCategoria).size();
   }
 
-  private List<DetallePedidoIngrediente> obtenerIngredientesDelPedido(Pedido pedido) {
-    List<DetallePedidoIngrediente> ingredientes = new ArrayList<>();
-    for (DetallePedido detalle : pedido.getDetalles()) {
-      ingredientes.addAll(detalle.getIngredientes());
-    }
-    return ingredientes;
-  }
+  // ========================================================
+  // Planificación de consumo de timers (sin cambios respecto a la versión anterior)
+  // ========================================================
 
   @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
   private Map<DetallePedidoIngrediente, List<PlanDeConsumo>> planificarConsumos(
@@ -172,15 +293,5 @@ public class ServicioComandaImpl implements ServicioComanda {
     registro.setTimer(consumo.timer);
     registro.setCantidadConsumida(consumo.cantidad);
     ingrediente.getConsumos().add(registro);
-  }
-
-  private void finalizarPedido(Pedido pedido) {
-    pedido.setHoraSalida(OffsetDateTime.now());
-    pedido.setEstado(EstadoPedido.ENTREGADO);
-  }
-
-  private void marcarComandaComoSacada(Comanda comanda) {
-    comanda.setEstado(EstadoComanda.SACADA);
-    repositorioComanda.actualizar(comanda);
   }
 }

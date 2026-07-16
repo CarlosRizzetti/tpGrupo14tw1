@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{}, _, ~{::scripts})}">
+<head>
+    <title>Detalle de Pedido</title>
+</head>
+<body>
+
+<!-- HEADER LEFT -->
+<div th:fragment="header_left">
+    <a th:href="@{/admin/historial-pedidos}"
+       class="hidden md:flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg border border-white/20 transition text-xs font-bold uppercase tracking-wider">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Volver
+    </a>
+</div>
+
+<!-- HEADER CENTER -->
+<div th:fragment="header_center">
+    <h1 class="text-puesto-header-text font-bold uppercase tracking-widest">
+        Detalle de Pedido
+    </h1>
+</div>
+
+<!-- CONTENT -->
+<div th:fragment="content" class="max-w-4xl mx-auto p-6 md:p-8">
+
+    <!-- ==================== Datos del pedido ==================== -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-2xl font-bold text-gray-800" th:text="'Pedido #' + ${pedido.id}">Pedido #1</h2>
+            <span class="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-700"
+                  th:text="${pedido.estado} ?: '-'">ESTADO</span>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+            <div>
+                <p class="text-gray-500">Cliente</p>
+                <a th:if="${pedido.clienteId != null}"
+                   th:href="@{/admin/clientes/{id}(id=${pedido.clienteId})}"
+                   class="font-semibold text-blue-600 hover:underline"
+                   th:text="${pedido.clienteNombre}">Cliente</a>
+                <p th:if="${pedido.clienteId == null}" class="font-semibold" th:text="${pedido.clienteNombre} ?: 'Sin cliente'">Sin cliente</p>
+            </div>
+            <div>
+                <p class="text-gray-500">Hora de cobro</p>
+                <p class="font-semibold js-formatear-fecha" th:attr="data-fecha=${pedido.horaEntrada}">-</p>
+            </div>
+            <div>
+                <p class="text-gray-500">Hora de salida</p>
+                <p class="font-semibold js-formatear-fecha" th:attr="data-fecha=${pedido.horaSalida}">-</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== Items del pedido ==================== -->
+    <div class="bg-white rounded-lg shadow p-6 mt-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">Items del pedido</h2>
+
+        <div th:if="${not #lists.isEmpty(pedido.items)}">
+            <div th:each="item, iterador : ${pedido.items}"
+                 th:classappend="${iterador.first} ? '' : 'border-t pt-3 mt-3'">
+                <p class="font-semibold text-sm text-gray-800" th:text="${item.nombreProducto}">Producto</p>
+
+                <ul th:if="${not #lists.isEmpty(item.ingredientes)}" class="ml-4 mt-1 space-y-1 text-xs text-gray-600 list-disc">
+                    <li th:each="ingrediente : ${item.ingredientes}">
+                        <span th:text="${ingrediente.cantidad} + 'x ' + ${ingrediente.nombreProducto}">1x Ingrediente</span>
+                        <a th:each="timerId : ${ingrediente.timers}"
+                           th:href="@{/admin/timers/{id}(id=${timerId})}"
+                           class="text-emerald-600 hover:underline text-xs ml-1"
+                           th:text="'(Timer #' + ${timerId} + ')'">
+                            (Timer #1)
+                        </a>
+                    </li>
+                </ul>
+                <p th:if="${#lists.isEmpty(item.ingredientes)}" class="text-xs text-gray-400 italic ml-4 mt-1">
+                    Sin ingredientes personalizables
+                </p>
+            </div>
+        </div>
+
+        <p th:if="${#lists.isEmpty(pedido.items)}" class="text-gray-500 text-sm">
+            Este pedido no tiene items cargados.
+        </p>
+    </div>
+
+</div>
+
+<!-- SCRIPTS -->
+<th:block th:fragment="scripts">
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".js-formatear-fecha").forEach((el) => {
+                const iso = el.dataset.fecha;
+                if (!iso || iso === "null") {
+                    el.textContent = "-";
+                    return;
+                }
+                const fecha = new Date(iso);
+                el.textContent = fecha.toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" });
+            });
+        });
+    </script>
+</th:block>
+
+</body>
+</html>

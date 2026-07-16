@@ -1,21 +1,30 @@
 package com.tallerwebi.presentacion.dto;
 
 import com.tallerwebi.dominio.entity.Comanda;
+import com.tallerwebi.dominio.entity.ComandaSector;
 import com.tallerwebi.dominio.entity.DetallePedido;
 import com.tallerwebi.dominio.entity.DetallePedidoIngrediente;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
 @Getter
+@NoArgsConstructor
 public class ComandaCocinaDTO {
 
+  private Long idSector;
   private Long id;
   private Long idPedido;
   private String horaCobro;
   private List<LineaDto> lineas = new ArrayList<>();
+
+  public ComandaCocinaDTO(ComandaSector sector) {
+    this(sector.getComanda());
+    this.idSector = sector.getId();
+  }
 
   public ComandaCocinaDTO(Comanda comanda) {
     this.id = comanda.getId();

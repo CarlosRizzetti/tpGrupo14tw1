@@ -74,8 +74,10 @@ INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantida
 INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento) VALUES (7, 'ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-TOM-1', 20, 1, 7, 3, 7);
 
 INSERT INTO ProductoFinal (id, nombre, precio) VALUES (1, 'Hamburguesa Completa', 3500.00);
+INSERT INTO ProductoFinal (id, nombre, precio) VALUES (2, 'Papas fritas', 1500.00);
 
 INSERT INTO ProductoFinalCategoria (idProductoFinal, idCategoria) VALUES (1, 1);
+INSERT INTO ProductoFinalCategoria (idProductoFinal, idCategoria) VALUES (2, 2);
 
 INSERT INTO ProductoFinalIngrediente (id, productoFinalId, productoId, cantidad) VALUES (1, 1, 1, 1); -- 1 hamburguesa (carne)
 INSERT INTO ProductoFinalIngrediente (id, productoFinalId, productoId, cantidad) VALUES (2, 1, 5, 1); -- 1 queso

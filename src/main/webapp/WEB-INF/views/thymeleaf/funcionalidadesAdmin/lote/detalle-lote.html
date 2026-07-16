@@ -85,6 +85,7 @@
                 <th class="py-2">N° Pedido</th>
                 <th class="py-2">Estado</th>
                 <th class="py-2">Hora de salida</th>
+                <th class="py-2 text-right">Acciones</th>
             </tr>
             </thead>
             <tbody>
@@ -94,6 +95,12 @@
                 <td class="py-2"
                     th:text="${pedido.horaSalida != null} ? ${#temporals.format(pedido.horaSalida, 'dd/MM/yyyy HH:mm')} : '-'">
                     -
+                </td>
+                <td class="py-2 text-right">
+                    <a th:href="@{/admin/pedidos/{id}(id=${pedido.id})}"
+                       class="text-blue-600 hover:underline text-xs font-semibold">
+                        Ver pedido
+                    </a>
                 </td>
             </tr>
             </tbody>
