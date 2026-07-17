@@ -5,28 +5,25 @@ INSERT INTO Categoria (id, icono, estaActiva, nombre) VALUES (2, '/resources/cor
 INSERT INTO Categoria (id, icono, estaActiva, nombre) VALUES (3, '/resources/core/img/mccafe.png', 1, 'McCafe');
 INSERT INTO Categoria (id, icono, estaActiva, nombre) VALUES (4, '/resources/core/img/isla.png', 1, 'Isla');
 
-INSERT INTO Articulos (id, codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (1, 001, 'Hamburguesa', 'McCain', 'Distribuidora Central', 1001, NOW(6), '2027-12-31 23:59:59', 10, 'UNIDAD', 'CONGELADO');
-INSERT INTO Articulos (id, codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (2, 002, 'Vasos Grandes', 'Papelera SA', 'Distribuidora Sur', 1002, NOW(6), '2027-12-31 23:59:59', 500, 'UNIDAD', 'SECO');
-INSERT INTO Articulos (id, codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (3, 003, 'Hamburguesa', 'Paty', 'Frigorífico del Sur', 2013, '2026-06-10 09:15:00', '2027-05-20 23:59:59', 5, 'UNIDAD', 'CONGELADO');
-INSERT INTO Articulos (id, codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (4, 004, 'Queso Cheddar', 'La Serenísima', 'Lácteos del Centro', 1014, '2026-06-12 10:30:00', '2026-09-15 23:59:59', 80, 'KILOS', 'LACTEOS');
-INSERT INTO Articulos (id, codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (5, 005, 'Mayonesa', 'Hellmann''s', 'Distribuidora Sur', 1015, '2026-06-15 14:20:00', '2027-12-10 23:59:59', 120, 'LITROS', 'SECO');
-INSERT INTO Articulos (id, codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (6, 006, 'Café', 'La Virginia', 'Mayorista Uno', 1016, '2026-06-18 08:45:00', '2028-06-30 23:59:59', 60, 'KILOS', 'SECO');
-INSERT INTO Articulos (id, codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (7, 007, 'Pan de Hamburguesa', 'Bimbo', 'Panificados SRL', 1017, '2026-06-20 07:50:00', '2026-07-25 23:59:59', 500, 'UNIDAD', 'LACTEOS');
-INSERT INTO Articulos (id, codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (9, 009, 'Papas Congeladas', 'McCain', 'Congelados Express', 1019, '2026-06-25 11:25:00', '2027-08-30 23:59:59', 350, 'KILOS', 'CONGELADO');
-INSERT INTO Articulos (id, codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (10, 010, 'Jugo de Naranja', 'Cepita', 'Bebidas Argentinas', 1020, '2026-06-27 16:40:00', '2027-02-28 23:59:59', 180, 'LITROS', 'SECO');
-INSERT INTO Articulos (id, codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (11, 011, 'Azúcar', 'Ledesma', 'Distribuidora Norte', 1021, '2026-06-29 09:00:00', '2029-01-15 23:59:59', 500, 'KILOS', 'SECO');
-INSERT INTO Articulos (id, codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (12, 012, 'Lechuga', 'Huerta Verde', 'Verdulería Central', 1022, '2026-06-30 06:30:00', '2026-07-08 23:59:59', 120, 'UNIDAD', 'SECO');
-INSERT INTO Articulos (id, codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (13, 013, 'Tomate', 'Huerta Verde', 'Verdulería Central', 1023, '2026-06-30 06:45:00', '2026-07-09 23:59:59', 150, 'KILOS', 'SECO');
-INSERT INTO Articulos (id, codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (14, 003, 'Hamburguesa', 'Paty', 'Frigorífico del Sur', 3013, '2026-06-20 09:15:00', '2027-05-20 23:59:59', 10, 'UNIDAD', 'CONGELADO');
+INSERT INTO Lote (id, idProducto, fechaDeIngreso, fechaDeVencimiento, proveedor, marca, numeroDeLote, cantidadInicial, cantidadDisponible, estado) VALUES (1, 5, '2026-06-01 09:00:00', '2026-07-20 00:00:00', 'Lácteos del Sur', 'La Serenísima', 1001, 20, 20, 'EN_USO');
+INSERT INTO Lote (id, idProducto, fechaDeIngreso, fechaDeVencimiento, proveedor, marca, numeroDeLote, cantidadInicial, cantidadDisponible, estado) VALUES (2, 5, '2026-06-15 09:00:00', '2026-08-15 00:00:00', 'Lácteos del Sur', 'La Serenísima', 1002, 25, 25, 'DISPONIBLE');
+INSERT INTO Lote (id, idProducto, fechaDeIngreso, fechaDeVencimiento, proveedor, marca, numeroDeLote, cantidadInicial, cantidadDisponible, estado) VALUES (3, 6, '2026-05-20 09:00:00', '2026-07-10 00:00:00', 'Verduleria Don Pepe', 'Sin marca', 2001, 30, 12, 'EN_USO');
+INSERT INTO Lote (id, idProducto, fechaDeIngreso, fechaDeVencimiento, proveedor, marca, numeroDeLote, cantidadInicial, cantidadDisponible, estado) VALUES (4, 7, '2026-05-25 09:00:00', '2026-06-30 00:00:00', 'Verduleria Don Pepe', 'Sin marca', 3001, 15, 4, 'VENCIDO');
+INSERT INTO Lote (id, idProducto, fechaDeIngreso, fechaDeVencimiento, proveedor, marca, numeroDeLote, cantidadInicial, cantidadDisponible, estado) VALUES (5, 1, '2026-06-01 09:00:00', '2026-12-01 00:00:00', 'Frigorífico Central', 'Paty', 4001, 50, 50, 'DISPONIBLE');
+INSERT INTO Lote (id, idProducto, fechaDeIngreso, fechaDeVencimiento, proveedor, marca, numeroDeLote, cantidadInicial, cantidadDisponible, estado) VALUES (6, 1, '2026-05-01 09:00:00', '2026-08-01 00:00:00', 'Frigorífico Central', 'Paty', 4000, 40, 0, 'CONSUMIDO');
+INSERT INTO Lote (id, idProducto, fechaDeIngreso, fechaDeVencimiento, proveedor, marca, numeroDeLote, cantidadInicial, cantidadDisponible, estado) VALUES (7, 2, '2026-06-10 09:00:00', '2027-01-10 00:00:00', 'McCain Argentina', 'McCain', 5001, 60, 60, 'EN_USO');
+INSERT INTO Lote (id, idProducto, fechaDeIngreso, fechaDeVencimiento, proveedor, marca, numeroDeLote, cantidadInicial, cantidadDisponible, estado) VALUES (8, 3, '2026-06-05 09:00:00', '2026-09-05 00:00:00', 'Distribuidora Fría', 'Freddo', 6001, 10, 3, 'DESCARTADO');
+INSERT INTO Lote (id, idProducto, fechaDeIngreso, fechaDeVencimiento, proveedor, marca, numeroDeLote, cantidadInicial, cantidadDisponible, estado) VALUES (9, 4, '2026-04-01 09:00:00', '2027-04-01 00:00:00', 'Cafetería Mayorista', 'La Virginia', 7001, 100, 100, 'DISPONIBLE');
+INSERT INTO Lote (id, idProducto, fechaDeIngreso, fechaDeVencimiento, proveedor, marca, numeroDeLote, cantidadInicial, cantidadDisponible, estado) VALUES (10, 6, '2026-06-25 09:00:00', '2026-11-25 00:00:00', 'Verduleria Don Pepe', 'Sin marca', 2002, 35, 35, 'DISPONIBLE');
 
 
-INSERT INTO Producto (id, cantidad, estaActivo, nombre) VALUES (5, 100, 1, 'Queso');
-INSERT INTO Producto (id, cantidad, estaActivo, nombre) VALUES (6, 100, 1, 'Cebolla');
-INSERT INTO Producto (id, cantidad, estaActivo, nombre) VALUES (7, 100, 1, 'Tomate');
-INSERT INTO Producto (id, cantidad, estaActivo, nombre) VALUES (1, 100, 1, 'Hamburguesa');
-INSERT INTO Producto (id, cantidad, estaActivo, nombre) VALUES (2, 100, 1, 'Papas Fritas');
-INSERT INTO Producto (id, cantidad, estaActivo, nombre) VALUES (3, 100, 1, 'Helado');
-INSERT INTO Producto (id, cantidad, estaActivo, nombre) VALUES (4, 100, 1, 'Cafe');
+INSERT INTO Producto (id, unidadDeMedida, estaActivo, tipoProducto, nombre) VALUES (5, 'KILOS', 1, 'SECO', 'Queso');
+INSERT INTO Producto (id, unidadDeMedida, estaActivo, tipoProducto, nombre) VALUES (6, 'KILOS', 1, 'SECO', 'Cebolla');
+INSERT INTO Producto (id, unidadDeMedida, estaActivo, tipoProducto, nombre) VALUES (7, 'KILOS', 1, 'SECO', 'Tomate');
+INSERT INTO Producto (id, unidadDeMedida, estaActivo, tipoProducto, nombre) VALUES (1, 'KILOS', 1, 'SECO', 'Hamburguesa');
+INSERT INTO Producto (id, unidadDeMedida, estaActivo, tipoProducto, nombre) VALUES (2, 'KILOS', 1, 'SECO', 'Papas Fritas');
+INSERT INTO Producto (id, unidadDeMedida, estaActivo, tipoProducto, nombre) VALUES (3, 'KILOS', 1, 'SECO', 'Helado');
+INSERT INTO Producto (id, unidadDeMedida, estaActivo, tipoProducto, nombre) VALUES (4, 'KILOS', 1, 'SECO', 'Cafe');
 
 
 INSERT INTO ProductosCategoria (idProducto, idCategoria) VALUES (5, 1);
@@ -39,21 +36,14 @@ INSERT INTO Usuario(id, nombre, email, password, rol, estado) VALUES(3, 'Tatiel'
 INSERT INTO Usuario(id, nombre, email, password, rol, estado) VALUES(6, 'Tatiel','santi2@mail.com', '$2a$10$aHZnx5KAVlbHi52kmBYWDO0eD23FBux7ucIUeTR9rUOFaBlDKLz7C', 'ADMIN', 'ACTIVO');
 INSERT INTO Usuario(id, nombre, email, password, rol, estado) VALUES(7, 'Carlos','cr10@mail.com', '$2a$10$RRF0.atOTSi88b01MgHpxeMi9gZ7XpayDlHQKwUfa.oVpuPIB4FE2', 'ADMIN', 'ACTIVO');
 
+INSERT INTO Cliente(id, documento, email, nombre, password, telefono) VALUES (1, '44512056', 'cliente@gmail.com', 'Tatiel', '$2a$10$pKxNbg5qcYqoRCxKvU0t8e8dMAWZ8QBl5clkQD9KHcIsgBFcnz9Ei', '1123885963')
 
 INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES (3, 1);
 INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES (3, 2);
 INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES (3, 3);
 INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES (3, 4);
-INSERT INTO Usuario(id, email, password, rol, estado) VALUES(7, 'cr10@mail.com', '$2a$10$vpXbkVGioeJq7AxQp/nWFeOwN1pQXL5dbJijT83BVv2LuJTcWy1pG', 'ADMIN', 'ACTIVO');
-INSERT INTO Usuario(id, nombre, email, password, rol, estado) VALUES(3, 'Tatiel','tahielrecchia05@gmail.com', '$2a$10$pKxNbg5qcYqoRCxKvU0t8e8dMAWZ8QBl5clkQD9KHcIsgBFcnz9Ei', 'ADMIN', 'ACTIVO');
-INSERT INTO Usuario(id, nombre, email, password, rol, estado) VALUES(6, 'Tatiel','santi2@mail.com', '$2a$10$aHZnx5KAVlbHi52kmBYWDO0eD23FBux7ucIUeTR9rUOFaBlDKLz7C', 'ADMIN', 'ACTIVO');
-INSERT INTO Usuario(id, nombre, email, password, rol, estado) VALUES(7, 'Carlos','cr10@mail.com', '$2a$10$H5r3PwNXEVZeVqJfDie49en6CcS75xXc58XSUJPjvP3aYTmb9AasS', 'ADMIN', 'ACTIVO');
 
 
-INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES (3, 1);
-INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES (3, 2);
-INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES (3, 3);
-INSERT INTO usuarioCategorias(idUsuario, idCategoria) VALUES (3, 4);
 
 INSERT INTO ReglaVencimiento (descongelamientoMinutos, duracionMinutos, tieneDescongelamiento, ubicacion, idProducto) VALUES (0, 240, 0, 'Mesa de Producción', 5);
 INSERT INTO ReglaVencimiento (descongelamientoMinutos, duracionMinutos, tieneDescongelamiento, ubicacion, idProducto) VALUES (0, 240, 0, 'Mesa de Producción', 6);
@@ -75,28 +65,19 @@ INSERT INTO ProductosCategoria (idProducto, idCategoria) VALUES (3, 4); -- Helad
 INSERT INTO ProductosCategoria (idProducto, idCategoria) VALUES (4, 3); -- Cafe -> McCafe
 
 
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('VENCIDO', NOW(6), '2026-05-24 20:00:59', 'GRP-100', 2,3, 1, 3, 1);
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('RENOVADO', NOW(6), '2026-05-23 20:00:59', 'GRP-100', 10,3, 1, 3, 1);
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES ('IMPORTADO', NOW(6), '2026-05-23 19:00:59', 'GRP-100', 5,3, 1, 3, 1);
-
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento)
-VALUES ('ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-BURG-1', 10, 1, 1, 3, 2);
-
-
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento)
-VALUES ('ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-QUESO-1', 20, 1, 5, 3, 5);
-
-
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento)
-VALUES ('ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-CEB-1', 20, 1, 6, 3, 6);
-
-
-INSERT INTO Timer (estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento)
-VALUES ('ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-TOM-1', 20, 1, 7, 3, 7);
+INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES (1, 'VENCIDO', NOW(6), '2026-05-24 20:00:59', 'GRP-100', 2,3, 1, 3, 1);
+INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES (2, 'RENOVADO', NOW(6), '2026-05-23 20:00:59', 'GRP-100', 10,3, 1, 3, 1);
+INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto ,idCategoria, idProducto, idUsuario , idReglaVencimiento) VALUES (3, 'IMPORTADO', NOW(6), '2026-05-23 19:00:59', 'GRP-100', 5,3, 1, 3, 1);
+INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento) VALUES (4, 'ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-BURG-1', 10, 1, 1, 3, 2);
+INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento) VALUES (5,'ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-QUESO-1', 20, 1, 5, 3, 5);
+INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento) VALUES (6, 'ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-CEB-1', 20, 1, 6, 3, 6);
+INSERT INTO Timer (id, estado, fechaCreacion, fechaVencimiento, groupId, cantidadProducto, idCategoria, idProducto, idUsuario, idReglaVencimiento) VALUES (7, 'ACTIVO', NOW(6), DATE_ADD(NOW(6), INTERVAL 4 HOUR), 'GRP-TOM-1', 20, 1, 7, 3, 7);
 
 INSERT INTO ProductoFinal (id, nombre, precio) VALUES (1, 'Hamburguesa Completa', 3500.00);
+INSERT INTO ProductoFinal (id, nombre, precio) VALUES (2, 'Papas fritas', 1500.00);
 
 INSERT INTO ProductoFinalCategoria (idProductoFinal, idCategoria) VALUES (1, 1);
+INSERT INTO ProductoFinalCategoria (idProductoFinal, idCategoria) VALUES (2, 2);
 
 INSERT INTO ProductoFinalIngrediente (id, productoFinalId, productoId, cantidad) VALUES (1, 1, 1, 1); -- 1 hamburguesa (carne)
 INSERT INTO ProductoFinalIngrediente (id, productoFinalId, productoId, cantidad) VALUES (2, 1, 5, 1); -- 1 queso
@@ -107,30 +88,6 @@ INSERT INTO ProductoFinalIngrediente (id, productoFinalId, productoId, cantidad)
 -- ---------------------------------------------------------
 -- RECETAS / COMPOSICIONES DE PRODUCTOS
 -- ---------------------------------------------------------
-
--- 1. Receta de Hamburguesa (Producto ID 1)
-INSERT INTO Receta (id, idProducto) VALUES (1, 1);
-INSERT INTO RecetaDetalle (id, cantidad, idArticulo, idReceta) VALUES (1, 1.0, 7, 1);  -- Pan de Hamburguesa (1 unidad)
-INSERT INTO RecetaDetalle (id, cantidad, idArticulo, idReceta) VALUES (2, 1.0, 3, 1);  -- Carne (1 unidad)
-INSERT INTO RecetaDetalle (id, cantidad, idArticulo, idReceta) VALUES (3, 1.0, 12, 1); -- Lechuga (1 unidad)
-INSERT INTO RecetaDetalle (id, cantidad, idArticulo, idReceta) VALUES (4, 0.1, 13, 1); -- Tomate (0.1 kg)
-INSERT INTO RecetaDetalle (id, cantidad, idArticulo, idReceta) VALUES (5, 0.05, 4, 1); -- Queso Cheddar (0.05 kg)
-INSERT INTO RecetaDetalle (id, cantidad, idArticulo, idReceta) VALUES (6, 0.02, 5, 1); -- Mayonesa (0.02 litros)
-
--- 2. Receta de Papas Fritas (Producto ID 2)
-INSERT INTO Receta (id, idProducto) VALUES (2, 2);
-INSERT INTO RecetaDetalle (id, cantidad, idArticulo, idReceta) VALUES (7, 0.25, 9, 2); -- Papas Congeladas (0.25 kg = 250g)
-
--- 3. Receta de Café (Producto ID 4)
-INSERT INTO Receta (id, idProducto) VALUES (3, 4);
-INSERT INTO RecetaDetalle (id, cantidad, idArticulo, idReceta) VALUES (8, 0.02, 6, 3); -- Café (0.02 kg = 20g)
-
--- 4. Artículo Helado (El artículo no existía en stock, lo creamos)
-INSERT INTO Articulos (id, codigo, nombre, marca, proveedor, numeroDeLote, fechaDeIngreso, fechaDeVencimiento, cantidad, unidadDeMedida, tipoArticulo) VALUES (14, 014, 'Helado Vainilla', 'La Serenísima', 'Lácteos del Centro', 1024, NOW(6), '2027-07-09 23:59:59', 50, 'KILOS', 'LACTEOS');
-
--- 5. Receta de Helado (Producto ID 3)
-INSERT INTO Receta (id, idProducto) VALUES (4, 3);
-INSERT INTO RecetaDetalle (id, cantidad, idArticulo, idReceta) VALUES (9, 0.15, 14, 4); -- Helado Vainilla (0.15 kg = 150g)
 
 SET FOREIGN_KEY_CHECKS = 1;
 

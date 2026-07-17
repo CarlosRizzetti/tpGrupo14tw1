@@ -101,8 +101,8 @@
                 <div th:each="timer : ${timersPorCategoria[categoria.id]}"
                      th:id="'timer-' + ${timer.id}"
                      class="timer bg-white rounded-3xl shadow-xl border-b-[8px] border-puesto-header flex flex-col transform transition-all active:scale-95 min-h-[400px]"
-                     th:data-vencimiento="${timer.fechaVencimiento}"
-                     th:data-elaboracion="${timer.fechaCreacion}">
+                     th:data-vencimiento="${timer.cicloVida.fechaVencimiento}"
+                     th:data-elaboracion="${timer.cicloVida.fechaCreacion}">
 
                     <div class="px-6 pt-6 pb-2 flex-none">
                         <div class="flex justify-between items-center gap-4">
@@ -147,13 +147,13 @@
                             <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Elaboración</span>
                             <span th:id="'elab-' + ${timer.id}"
                                   class="text-gray-800 font-black text-base sm:text-lg"
-                                  th:text="${timer.fechaCreacion}">12:00</span>
+                                  th:text="${timer.cicloVida.fechaCreacion}">12:00</span>
                         </div>
                         <div class="flex flex-col text-right">
                             <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Vencimiento</span>
                             <span th:id="'vence-' + ${timer.id}"
                                   class="text-puesto-header font-black text-base sm:text-lg"
-                                  th:text="${timer.fechaVencimiento}">14:00</span>
+                                  th:text="${timer.cicloVida.fechaVencimiento}">14:00</span>
                         </div>
                     </div>
 
@@ -203,7 +203,6 @@
 
                 </div>
 
-            </div>
 
         </section>
 

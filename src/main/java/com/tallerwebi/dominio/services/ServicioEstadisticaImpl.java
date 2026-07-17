@@ -1,7 +1,7 @@
 package com.tallerwebi.dominio.services;
 
 import com.tallerwebi.dominio.entity.enums.EstadoTimer;
-import com.tallerwebi.dominio.interfaces.RepositorioControlStock;
+import com.tallerwebi.dominio.interfaces.RepositorioLote;
 import com.tallerwebi.dominio.interfaces.RepositorioTimer;
 import com.tallerwebi.dominio.interfaces.ServicioEstadistica;
 import com.tallerwebi.presentacion.dto.EstadisticasDTO;
@@ -22,10 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Implementación del servicio de estadísticas. Obtiene los datos crudos de los
- * repositorios de Timer y ControlStock y los agrupa para graficarlos.
- */
 @Service("servicioEstadistica")
 @Transactional
 public class ServicioEstadisticaImpl implements ServicioEstadistica {
@@ -51,17 +47,17 @@ public class ServicioEstadisticaImpl implements ServicioEstadistica {
   private static final String[] NOMBRES_ESTADO_METRICA = { "Vencidos", "Importados", "Renovados" };
 
   private final RepositorioTimer repositorioTimer;
-  private final RepositorioControlStock repositorioControlStock;
+  private final RepositorioLote repositorioLote;
   private final Clock clock;
 
   @Autowired
   public ServicioEstadisticaImpl(
     RepositorioTimer repositorioTimer,
-    RepositorioControlStock repositorioControlStock,
+    RepositorioLote repositorioLote,
     Clock clock
   ) {
     this.repositorioTimer = repositorioTimer;
-    this.repositorioControlStock = repositorioControlStock;
+    this.repositorioLote = repositorioLote;
     this.clock = clock;
   }
 
@@ -77,9 +73,11 @@ public class ServicioEstadisticaImpl implements ServicioEstadistica {
     OffsetDateTime desde = desdeDia.atStartOfDay(zona).toOffsetDateTime();
 
     List<OffsetDateTime> fechasVencimientos = repositorioTimer.obtenerFechasCreacionDesde(desde);
-    List<OffsetDateTime> fechasModificaciones =
-      repositorioControlStock.obtenerFechasMovimientosDesde(desde);
-    List<OffsetDateTime> fechasDemanda = repositorioControlStock.obtenerFechasEgresosDesde(desde);
+    List<OffsetDateTime> fechasIngresosLote = repositorioLote.obtenerFechasIngresoDesde(desde);
+    List<OffsetDateTime> fechasModificaciones = Stream
+      .concat(fechasVencimientos.stream(), fechasIngresosLote.stream())
+      .collect(Collectors.toList());
+    List<OffsetDateTime> fechasDemanda = fechasVencimientos;
     List<Object[]> conteoProductos = repositorioTimer.contarVencimientosPorProducto(desde);
     List<Object[]> conteoEstados = repositorioTimer.contarPorEstado(desde);
 

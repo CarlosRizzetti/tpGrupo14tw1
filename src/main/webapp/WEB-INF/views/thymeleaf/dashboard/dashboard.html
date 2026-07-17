@@ -7,7 +7,17 @@
 
 <!-- FRAGMENTO IZQUIERDO: Botón Volver -->
 <div th:fragment="header_left">
-    <a th:href="@{/category/{id}/products(id=${categoria.id})}"
+    <!-- If user is ADMIN or has category assigned, go to products -->
+    <a th:if="${tieneCategoriaAsignada or isAdmin}" th:href="@{/category/{id}/products(id=${categoria.id})}"
+       class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
+        </svg>
+        Volver
+    </a>
+    
+    <!-- If user does NOT have category assigned and is NOT ADMIN, go to home -->
+    <a th:unless="${tieneCategoriaAsignada or isAdmin}" th:href="@{/home}"
        class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7" />
@@ -55,8 +65,8 @@
             <div th:each="timer : ${timers}"
                  th:id="'timer-' + ${timer.id}"
                  class="timer bg-white rounded-3xl shadow-xl border-b-[8px] border-puesto-header flex flex-col transform transition-all active:scale-95 min-h-[400px]"
-                 th:data-vencimiento="${timer.fechaVencimiento}"
-                 th:data-elaboracion="${timer.fechaCreacion}">
+                 th:data-vencimiento="${timer.cicloVida.fechaVencimiento}"
+                 th:data-elaboracion="${timer.cicloVida.fechaCreacion}">
 
                 <div class="px-6 pt-6 pb-2 flex-none">
                     <div class="flex justify-between items-center gap-4">
@@ -101,13 +111,13 @@
                         <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Elaboración</span>
                         <span th:id="'elab-' + ${timer.id}"
                               class="text-gray-800 font-black text-base sm:text-lg"
-                              th:text="${timer.fechaCreacion}">12:00</span>
+                              th:text="${timer.cicloVida.fechaCreacion}">12:00</span>
                     </div>
                     <div class="flex flex-col text-right">
                         <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5">Vencimiento</span>
                         <span th:id="'vence-' + ${timer.id}"
                               class="text-puesto-header font-black text-base sm:text-lg"
-                              th:text="${timer.fechaVencimiento}">14:00</span>
+                              th:text="${timer.cicloVida.fechaVencimiento}">14:00</span>
                     </div>
                 </div>
 

@@ -20,9 +20,9 @@ public class ControladorCategoria {
     this.servicioCategoria = servicioCategoria;
   }
 
-  @RequestMapping("/home")
+  @RequestMapping("/vencimientos-categoria")
   public ModelAndView index(Authentication authentication) {
-    ModelAndView mav = new ModelAndView("home");
+    ModelAndView mav = new ModelAndView("vencimientos-categorias");
     List<CategoriaDto> categorias;
 
     if (authentication != null && authentication.isAuthenticated()) {

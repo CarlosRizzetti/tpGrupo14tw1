@@ -1,16 +1,14 @@
 <html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, ~{}, _)}">
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, ~{}, ~{::scripts})}">
 <head>
-    <title>Articulos en Almacen</title>
+    <title>Lotes en Almacen</title>
 </head>
 <body>
-
 <div th:fragment="header_center">
     <span class="text-puesto-header-text font-bold uppercase tracking-widest">
-        Articulos de Almacen
+        Lotes de Almacen
     </span>
 </div>
-
 <div th:fragment="header_left">
     <a th:href="@{/admin}" class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -19,16 +17,14 @@
         Volver
     </a>
 </div>
-
 <div th:fragment="header_right">
     <a th:href="@{/dashboard}"
        class="hidden md:flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg border border-white/20 transition text-xs font-bold uppercase tracking-wider">
         Dashboard
     </a>
 </div>
-
 <div th:fragment="content" class="p-6 max-w-6xl mx-auto">
-    
+
     <div class="mb-6 md:hidden">
         <a th:href="@{/category/5/products}" class="inline-flex items-center px-4 py-2 bg-puesto-btn text-puesto-btn-text text-sm font-bold uppercase rounded-lg border border-puesto-btn-border shadow">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -37,121 +33,113 @@
             Volver
         </a>
     </div>
-
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 flex justify-between items-center">
             <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
-                Listado de Articulos
+                Listado de Lotes
             </h2>
             <div class="flex items-center space-x-3">
-
                 <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-1 rounded-lg dark:bg-indigo-200 dark:text-indigo-900" th:text="${#lists.size(articulos)} + ' Lotes'"></span>
             </div>
         </div>
-        
+
         <div th:if="${#lists.isEmpty(articulos)}" class="text-center p-10 bg-white dark:bg-gray-800">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
-            <p class="text-lg text-gray-500 dark:text-gray-400 font-medium">No hay articulos registrados en el almacen.</p>
+            <p class="text-lg text-gray-500 dark:text-gray-400 font-medium">No hay lotes registrados en el almacen.</p>
         </div>
-
         <div th:unless="${#lists.isEmpty(articulos)}" class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-wrap gap-4 items-end">
-            <div class="flex-1 min-w-[200px]">
-                <label for="filterCodigo" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Filtrar por Código</label>
-                <input type="text" id="filterCodigo" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm" placeholder="Ingrese código...">
+            <div class="flex-1 min-w-[180px]">
+                <label for="filterDescripcion" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Filtrar por Producto</label>
+                <input type="text" id="filterDescripcion" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm" placeholder="Ingrese nombre de producto...">
             </div>
-            <div class="flex-1 min-w-[200px]">
-                <label for="filterDescripcion" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Filtrar por Descripción</label>
-                <input type="text" id="filterDescripcion" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm" placeholder="Ingrese descripción...">
+            <div class="min-w-[160px]">
+                <label for="filterEstado" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Estado</label>
+                <select id="filterEstado" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                    <option value="">Todos</option>
+                    <option value="DISPONIBLE">Disponible</option>
+                    <option value="EN_USO">En uso</option>
+                    <option value="CONSUMIDO">Consumido</option>
+                    <option value="VENCIDO">Vencido</option>
+                    <option value="DESCARTADO">Descartado</option>
+                </select>
+            </div>
+            <div class="min-w-[140px]">
+                <label for="filterNumeroLote" class="block text-sm font-medium text-gray-700 dark:text-gray-300">N° de lote</label>
+                <input type="text" id="filterNumeroLote" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm" placeholder="Ej: 12">
+            </div>
+            <div class="min-w-[160px]">
+                <label for="filterFechaExacta" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Fecha de ingreso exacta</label>
+                <input type="date" id="filterFechaExacta" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+            </div>
+            <div class="min-w-[180px]">
+                <label for="sortFecha" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ordenar por fecha de ingreso</label>
+                <select id="sortFecha" class="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white sm:text-sm">
+                    <option value="">Sin ordenar</option>
+                    <option value="desc">Más nuevo primero</option>
+                    <option value="asc">Más viejo primero</option>
+                </select>
             </div>
             <div class="bg-indigo-100 dark:bg-indigo-900 px-4 py-2 rounded-lg shadow-sm border border-indigo-200 dark:border-indigo-800 flex items-center justify-center">
                 <span class="text-sm font-semibold text-indigo-800 dark:text-indigo-200 mr-2">Cantidad Total Filtrada:</span>
                 <span id="cantidadTotal" class="text-lg font-bold text-indigo-900 dark:text-indigo-100">0</span>
             </div>
         </div>
-
         <div th:unless="${#lists.isEmpty(articulos)}" class="overflow-x-auto">
             <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-300">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 rounded-tl-lg">Código</th>
-                        <th scope="col" class="px-6 py-3">Nombre</th>
-                        <th scope="col" class="px-6 py-3">Marca</th>
-                        <th scope="col" class="px-6 py-3">Proveedor</th>
-                        <th scope="col" class="px-6 py-3 text-center">Cantidad</th>
-                        <th scope="col" class="px-6 py-3 text-center">Categoría</th>
-                        <th scope="col" class="px-6 py-3 text-center">Nº Lote</th>
-                        <th scope="col" class="px-6 py-3 text-center">Ingreso</th>
-                        <th scope="col" class="px-6 py-3 text-center rounded-tr-lg">Vencimiento</th>
-                    </tr>
+                <tr>
+                    <th scope="col" class="px-6 py-3 rounded-tl-lg">Nombre</th>
+                    <th scope="col" class="px-6 py-3">Marca</th>
+                    <th scope="col" class="px-6 py-3">Proveedor</th>
+                    <th scope="col" class="px-6 py-3 text-center">Cantidad</th>
+                    <th scope="col" class="px-6 py-3 text-center">Categoría</th>
+                    <th scope="col" class="px-6 py-3 text-center">Estado</th>
+                    <th scope="col" class="px-6 py-3 text-center">Nº Lote</th>
+                    <th scope="col" class="px-6 py-3 text-center">Ingreso</th>
+                    <th scope="col" class="px-6 py-3 text-center rounded-tr-lg">Vencimiento</th>
+                </tr>
                 </thead>
                 <tbody id="articulosTableBody">
-                    <tr th:each="articulo : ${articulos}" class="articulo-row bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
-                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white articulo-codigo" th:text="${articulo.codigo != null ? articulo.codigo : '-'}"></td>
-                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white articulo-nombre" th:text="${articulo.nombre}"></td>
-                        <td class="px-6 py-4" th:text="${articulo.marca}"></td>
-                        <td class="px-6 py-4" th:text="${articulo.proveedor}"></td>
-                        <td class="px-6 py-4 text-center font-semibold text-indigo-600 dark:text-indigo-400 articulo-cantidad" th:text="${articulo.cantidad != null ? (articulo.cantidad % 1 == 0 ? #numbers.formatInteger(articulo.cantidad, 1) : articulo.cantidad) + ' ' + (articulo.unidadDeMedida != null ? articulo.unidadDeMedida.name() : '') : '-'}" th:data-cantidad="${articulo.cantidad != null ? articulo.cantidad : 0}"></td>
-                        <td class="px-6 py-4 text-center">
-                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-900" th:text="${articulo.tipoArticulo != null ? articulo.tipoArticulo.name() : '-'}"></span>
-                        </td>
-                        <td class="px-6 py-4 text-center">
-                            <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600" th:text="${articulo.numeroDeLote}"></span>
-                        </td>
-                        <td class="px-6 py-4 text-center" th:text="${#temporals.format(articulo.fechaDeIngreso, 'dd/MM/yyyy')}"></td>
-                        <td class="px-6 py-4 text-center text-red-600 dark:text-red-400 font-semibold" th:text="${#temporals.format(articulo.fechaDeVencimiento, 'dd/MM/yyyy')}"></td>
-                    </tr>
+                <tr th:each="articulo : ${articulos}"
+                    class="articulo-row cursor-pointer bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition"
+                    th:attr="data-id=${articulo.id},
+                                 data-estado=${articulo.estado.name()},
+                                 data-numero-lote=${articulo.numeroDeLote},
+                                 data-fecha-ingreso=${#temporals.format(articulo.fechaDeIngreso, 'yyyy-MM-dd')},
+                                 data-fecha-ingreso-ts=${articulo.fechaDeIngreso.toEpochSecond()}">
+                    <td class="px-6 py-4 font-medium text-gray-900 dark:text-white articulo-nombre" th:text="${articulo.producto.nombre}"></td>
+                    <td class="px-6 py-4" th:text="${articulo.marca}"></td>
+                    <td class="px-6 py-4" th:text="${articulo.proveedor}"></td>
+                    <td class="px-6 py-4 text-center font-semibold text-indigo-600 dark:text-indigo-400 articulo-cantidad"
+                        th:text="${articulo.cantidadDisponible != null ? articulo.cantidadDisponible + ' ' + (articulo.producto.unidadDeMedida != null ? articulo.producto.unidadDeMedida.name() : '') : '-'}"
+                        th:data-cantidad="${articulo.cantidadDisponible != null ? articulo.cantidadDisponible : 0}"></td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-900" th:text="${articulo.producto.tipoProducto != null ? articulo.producto.tipoProducto.name() : '-'}"></span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <span th:if="${articulo.estado.name() == 'DISPONIBLE'}" class="bg-gray-100 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">Disponible</span>
+                        <span th:if="${articulo.estado.name() == 'EN_USO'}" class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-900/40 dark:text-blue-300">En uso</span>
+                        <span th:if="${articulo.estado.name() == 'CONSUMIDO'}" class="bg-gray-200 text-gray-600 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-gray-600 dark:text-gray-300">Consumido</span>
+                        <span th:if="${articulo.estado.name() == 'VENCIDO'}" class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-red-900/40 dark:text-red-300">Vencido</span>
+                        <span th:if="${articulo.estado.name() == 'DESCARTADO'}" class="bg-red-200 text-red-900 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-red-950/50 dark:text-red-400">Descartado</span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600" th:text="${articulo.numeroDeLote}"></span>
+                    </td>
+                    <td class="px-6 py-4 text-center" th:text="${#temporals.format(articulo.fechaDeIngreso, 'dd/MM/yyyy')}"></td>
+                    <td class="px-6 py-4 text-center text-red-600 dark:text-red-400 font-semibold" th:text="${#temporals.format(articulo.fechaDeVencimiento, 'dd/MM/yyyy')}"></td>
+                </tr>
                 </tbody>
             </table>
         </div>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const filterCodigo = document.getElementById('filterCodigo');
-                const filterDescripcion = document.getElementById('filterDescripcion');
-                const cantidadTotalSpan = document.getElementById('cantidadTotal');
-                const rows = document.querySelectorAll('.articulo-row');
-
-                function filterTable() {
-                    if (!filterCodigo || !filterDescripcion) return;
-                    const textCodigo = filterCodigo.value.toLowerCase().trim();
-                    const textDesc = filterDescripcion.value.toLowerCase().trim();
-                    let sum = 0;
-
-                    rows.forEach(row => {
-                        const codigoCell = row.querySelector('.articulo-codigo');
-                        const nombreCell = row.querySelector('.articulo-nombre');
-                        
-                        const codigo = codigoCell ? codigoCell.textContent.toLowerCase() : '';
-                        const nombre = nombreCell ? nombreCell.textContent.toLowerCase() : '';
-
-                        const matchesCodigo = codigo.includes(textCodigo);
-                        const matchesDesc = nombre.includes(textDesc);
-
-                        if (matchesCodigo && matchesDesc) {
-                            row.style.display = '';
-                            const cantCell = row.querySelector('.articulo-cantidad');
-                            if (cantCell && cantCell.dataset.cantidad) {
-                                sum += parseFloat(cantCell.dataset.cantidad) || 0;
-                            }
-                        } else {
-                            row.style.display = 'none';
-                        }
-                    });
-
-                    cantidadTotalSpan.textContent = Number.isInteger(sum) ? sum : sum.toFixed(2);
-                }
-
-                if (filterCodigo) filterCodigo.addEventListener('input', filterTable);
-                if (filterDescripcion) filterDescripcion.addEventListener('input', filterTable);
-
-                // Initial sum
-                filterTable();
-            });
-        </script>
+        <th:block th:fragment="scripts">
+            <script type="module" th:src="@{/resources/core/js/articulos.js}"></script>
+        </th:block>
     </div>
 </div>
 </body>

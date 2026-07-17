@@ -3,6 +3,7 @@ package com.tallerwebi.dominio.services;
 import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.entity.enums.EstadoUsuario;
 import com.tallerwebi.dominio.excepcion.UsuarioInactivo;
+import com.tallerwebi.dominio.excepcion.UsuarioSinCategorias;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
 import java.util.Collections;
 import javax.transaction.Transactional;
@@ -80,9 +81,7 @@ public class UserDetailsServiceImpl
     boolean noEsAdmin = !"ADMIN".equalsIgnoreCase(usuario.getRol());
     boolean sinCategorias = usuario.getCategorias() == null || usuario.getCategorias().isEmpty();
     if (noEsAdmin && sinCategorias) {
-      throw new com.tallerwebi.dominio.excepcion.UsuarioSinCategorias(
-        "Todavía no te asignaron una categoría"
-      );
+      throw new UsuarioSinCategorias("Todavía no te asignaron una categoría");
     }
   }
 }

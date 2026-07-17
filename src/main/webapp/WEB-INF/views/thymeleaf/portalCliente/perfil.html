@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{layouts/app :: layout(~{::content}, ~{::header_left}, ~{::header_center}, ~{::header_right}, _, _)}">
+
+<head>
+    <title>Mi Perfil - Portal de Clientes</title>
+</head>
+
+<body>
+
+    <!-- FRAGMENTO IZQUIERDO: Volver al Inicio -->
+    <div th:fragment="header_left" class="relative">
+        <a th:href="@{/portal/clientes/home}"
+           class="flex items-center px-4 py-2 bg-black/10 hover:bg-black/20 rounded-lg font-bold uppercase text-xs border border-white/20 transition text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Volver al Inicio
+        </a>
+    </div>
+
+    <!-- FRAGMENTO CENTRAL DEL HEADER -->
+    <div th:fragment="header_center">
+        <span class="text-puesto-header-text font-bold uppercase tracking-widest text-lg">Mi Perfil MCD</span>
+    </div>
+
+    <!-- FRAGMENTO DERECHO DEL HEADER -->
+    <div th:fragment="header_right" class="flex items-center gap-3">
+        <span class="text-xs font-bold uppercase tracking-wider bg-white/10 px-3 py-1.5 rounded-full border border-white/20">
+            <span th:text="${#authentication.name.contains('@') ? #strings.capitalize(#strings.substring(#authentication.name, 0, #authentication.name.indexOf('@'))) : #strings.capitalize(#authentication.name)}">Cliente</span>
+        </span>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div th:fragment="content" class="p-6 max-w-2xl mx-auto min-h-[calc(100vh-8rem)] flex flex-col justify-center py-8 overflow-y-auto">
+
+        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-puesto-btn-border p-8 md:p-10 relative">
+            
+            <!-- ENCABEZADO TARJETA -->
+            <div class="flex items-center gap-4 mb-8 pb-6 border-b border-slate-200">
+                <div class="w-16 h-16 rounded-2xl bg-puesto-header text-puesto-header-text flex items-center justify-center shrink-0 shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-black uppercase tracking-tight text-slate-800">
+                        Datos Personales
+                    </h2>
+                    <p class="text-slate-500 font-medium text-sm mt-0.5">
+                        Administra y completa tu información personal.
+                    </p>
+                </div>
+            </div>
+
+            <!-- ALERTAS -->
+            <div th:if="${exito != null}" class="mb-6 p-4 bg-emerald-100/90 border-l-4 border-emerald-500 text-emerald-900 rounded-xl shadow-sm flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-bold text-sm" th:text="${exito}"></span>
+            </div>
+
+            <div th:if="${error != null}" class="mb-6 p-4 bg-red-100/90 border-l-4 border-red-500 text-red-900 rounded-xl shadow-sm flex items-center gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-bold text-sm" th:text="${error}"></span>
+            </div>
+
+            <!-- FORMULARIO DE PERFIL -->
+            <form th:action="@{/portal/clientes/perfil-guardar}" method="POST" class="space-y-6">
+
+                <!-- CORREO ELECTRÓNICO (SOLO LECTURA SI EXISTE) -->
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                        Correo Electrónico vinculado
+                    </label>
+                    <input type="email" th:value="${cliente?.email ?: 'No registrado (Ingreso por DNI)'}"
+                           class="w-full px-4 py-3.5 rounded-xl text-slate-500 bg-slate-100 border border-slate-200 outline-none font-bold text-sm cursor-not-allowed select-none"
+                           disabled />
+                    <p class="text-[11px] text-slate-400 mt-1 font-semibold">El correo es tu identificador principal y no puede modificarse.</p>
+                </div>
+
+                <!-- NOMBRE COMPLETO -->
+                <div>
+                    <label for="nombre" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Nombre Completo
+                    </label>
+                    <input name="nombre" id="nombre" type="text" th:value="${cliente?.nombre}"
+                           class="w-full px-4 py-3 rounded-xl text-black bg-slate-50 border border-slate-300 focus:ring-4 focus:ring-puesto-btn-border focus:bg-white outline-none transition-all font-bold text-sm"
+                           placeholder="Ej: Juan Pérez" required />
+                </div>
+
+                <!-- DOCUMENTO / DNI -->
+                <div>
+                    <label for="documento" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Número de Documento (DNI) <span class="text-puesto-header text-xs">*Obligatorio</span>
+                    </label>
+                    <input name="documento" id="documento" type="text" th:value="${cliente?.documento}"
+                           class="w-full px-4 py-3 rounded-xl text-black bg-slate-50 border border-slate-300 focus:ring-4 focus:ring-puesto-btn-border focus:bg-white outline-none transition-all font-bold text-sm"
+                           placeholder="Ej: 38492012 (sin puntos ni espacios)" pattern="[0-9]{8}" minlength="8" maxlength="8"
+                           title="Debe ingresar exactamente 8 dígitos numéricos."
+                           oninvalid="this.setCustomValidity('Por favor, ingresa tu DNI sin puntos ni espacios.')"
+                           oninput="this.setCustomValidity('')" required />
+                    <p class="text-[11px] text-slate-500 mt-1 font-semibold">Permite a los cajeros y personal de mostrador ubicar tu pedido al instante.</p>
+                </div>
+
+                <!-- TELÉFONO -->
+                <div>
+                    <label for="telefono" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Teléfono de Contacto <span class="text-puesto-header text-xs">*Obligatorio</span>
+                    </label>
+                    <input name="telefono" id="telefono" type="text" th:value="${cliente?.telefono}"
+                           class="w-full px-4 py-3 rounded-xl text-black bg-slate-50 border border-slate-300 focus:ring-4 focus:ring-puesto-btn-border focus:bg-white outline-none transition-all font-bold text-sm"
+                           placeholder="Ej: 1149201923" pattern="[0-9]{10}" minlength="10" maxlength="10"
+                           title="Debe ingresar exactamente 10 dígitos numéricos."
+                           oninvalid="this.setCustomValidity('Por favor, ingresa tu teléfono celular (código de área + número).')"
+                           oninput="this.setCustomValidity('')" required />
+                    <p class="text-[11px] text-slate-500 mt-1 font-semibold">Para avisarte ante cualquier consulta o demoras en la cocina.</p>
+                </div>
+
+                <!-- BOTONES DE ACCIÓN -->
+                <div class="pt-4 flex flex-col sm:flex-row gap-4">
+                    <button type="submit"
+                            class="flex-1 py-4 bg-puesto-header text-puesto-header-text font-black uppercase tracking-widest text-base rounded-xl hover:opacity-90 transition-all border-b-4 border-black/20 hover:-translate-y-1 hover:shadow-xl">
+                        Guardar Cambios
+                    </button>
+                    <a th:href="@{/portal/clientes/home}"
+                       class="py-4 px-6 bg-slate-200 text-slate-700 hover:bg-slate-300 font-bold uppercase tracking-wider text-sm rounded-xl transition text-center flex items-center justify-center">
+                        Cancelar
+                    </a>
+                </div>
+                <div class="mt-10 border-t-2 border-slate-100 pt-8">
+                    <h3 class="text-xl font-black uppercase tracking-tight text-slate-800 mb-4">
+                        Mis Reportes Activos
+                    </h3>
+
+                    <div th:if="${#lists.isEmpty(reportesActivos)}" class="p-6 bg-slate-50 rounded-2xl border border-slate-200 text-center">
+                        <p class="text-slate-500 font-bold">No tienes ningún reporte activo en este momento.</p>
+                    </div>
+
+                    <div th:unless="${#lists.isEmpty(reportesActivos)}" class="space-y-4">
+                        <div th:each="pedido : ${reportesActivos}" class="flex items-center justify-between p-5 bg-white border-2 border-blue-100 rounded-xl shadow-sm hover:shadow-md transition">
+                            <div>
+                                <p class="font-bold text-slate-800">Pedido #<span th:text="${pedido.id}"></span></p>
+                                <p class="text-sm text-slate-500 mt-1">Estado actual: <span class="font-semibold text-blue-600">En revisión</span></p>
+                            </div>
+                            <a th:href="@{/portal/clientes/reporte-chat(idPedido=${pedido.id})}"
+                               class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow transition">
+                                Abrir Chat
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+</body>
+</html>

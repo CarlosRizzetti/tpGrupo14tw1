@@ -9,10 +9,7 @@ import com.tallerwebi.dominio.entity.embeddables.CicloVida;
 import com.tallerwebi.dominio.entity.enums.EstadoTimer;
 import com.tallerwebi.dominio.excepcion.IdInvalido;
 import com.tallerwebi.dominio.excepcion.ValidacionException;
-import com.tallerwebi.dominio.interfaces.RepositorioCategoria;
-import com.tallerwebi.dominio.interfaces.RepositorioTimer;
-import com.tallerwebi.dominio.interfaces.ServicioImpresion;
-import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
+import com.tallerwebi.dominio.interfaces.*;
 import com.tallerwebi.dominio.services.ServicioTimerImpl;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.TimerDTO;
@@ -34,6 +31,8 @@ public class ServicioTimerTest {
   public ServicioReglaVencimiento servicioReglaVencimientoMock;
   private Usuario usuarioTest;
   private ServicioImpresion servicioImpresionMock;
+  private ServicioTelegram servicioTelegramMock;
+  private ServicioLote servicioLoteMock;
 
   @BeforeEach
   public void init() {
@@ -41,12 +40,16 @@ public class ServicioTimerTest {
     this.repositorioCategoriaMock = mock(RepositorioCategoria.class);
     this.servicioReglaVencimientoMock = mock(ServicioReglaVencimiento.class);
     this.servicioImpresionMock = mock(ServicioImpresion.class);
+    this.servicioTelegramMock = mock(ServicioTelegram.class);
+    this.servicioLoteMock = mock(ServicioLote.class);
     this.servicioTimer =
       new ServicioTimerImpl(
         repositorioTimerMock,
         repositorioCategoriaMock,
         servicioReglaVencimientoMock,
-        servicioImpresionMock
+        servicioImpresionMock,
+        servicioTelegramMock,
+        servicioLoteMock
       );
     usuarioTest = new Usuario();
   }
@@ -192,8 +195,8 @@ public class ServicioTimerTest {
     assertEquals("Producto A", dto.getNombre());
     assertEquals("group-1", dto.getGroupId());
     assertEquals("Almacen Central", dto.getUbicacion());
-    assertFalse(dto.getFechaCreacion().isEmpty());
-    assertFalse(dto.getFechaVencimiento().isEmpty());
+    assertFalse(dto.getCicloVida().getFechaCreacion().isEmpty());
+    assertFalse(dto.getCicloVida().getFechaVencimiento().isEmpty());
   }
 
   @Test
@@ -292,8 +295,53 @@ public class ServicioTimerTest {
 
     List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(1L);
 
-    assertTrue(resultado.get(0).getFechaCreacion().isEmpty());
-    assertTrue(resultado.get(0).getFechaVencimiento().isEmpty());
+    assertTrue(resultado.get(0).getCicloVida().getFechaCreacion().isEmpty());
+    assertTrue(resultado.get(0).getCicloVida().getFechaVencimiento().isEmpty());
+  }
+
+  @Test
+  void deberiaManejarTimerSinCategoria() {
+    Timer timer = buildTimer(1L, "Producto A", "g-1", null, null, "Zona Norte");
+    timer.setCategoria(null);
+
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
+
+    List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(1L);
+
+    assertNull(resultado.get(0).getCategoria());
+  }
+
+  @Test
+  void deberiaManejarUsuarioEliminadoEntityNotFound() {
+    Timer timer = buildTimer(1L, "Producto A", "g-1", null, null, "Zona Norte");
+    Usuario usuarioFantasma = mock(Usuario.class);
+    when(usuarioFantasma.getNombre())
+      .thenThrow(new javax.persistence.EntityNotFoundException("Not found"));
+    timer.setUsuario(usuarioFantasma);
+
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
+
+    List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(1L);
+
+    assertEquals("Usuario eliminado", resultado.get(0).getUsuario());
+  }
+
+  @Test
+  void deberiaManejarProductoEliminadoEntityNotFound() {
+    Timer timer = buildTimer(1L, null, "g-1", null, null, "Zona Norte");
+    Producto productoFantasma = mock(Producto.class);
+    when(productoFantasma.getNombre())
+      .thenThrow(new javax.persistence.EntityNotFoundException("Not found"));
+    timer.setProducto(productoFantasma);
+
+    when(repositorioTimerMock.obtenerTimersSegunEstado(1L, EstadoTimer.ACTIVO))
+      .thenReturn(List.of(timer));
+
+    List<TimerDTO> resultado = servicioTimer.obtenerTimersActivos(1L);
+
+    assertEquals("Producto eliminado", resultado.get(0).getNombre());
   }
 
   @Test
@@ -973,7 +1021,9 @@ public class ServicioTimerTest {
 
     TimerDTO resultado = servicioTimer.renovarTimer(timer, 1, usuarioTest);
 
-    OffsetDateTime fechaCreacionDTO = OffsetDateTime.parse(resultado.getFechaCreacion());
+    OffsetDateTime fechaCreacionDTO = OffsetDateTime.parse(
+      resultado.getCicloVida().getFechaCreacion()
+    );
     assertTrue(fechaCreacionDTO.isAfter(timer.getCicloVida().getFechaCreacion()));
   }
 
@@ -1080,5 +1130,87 @@ public class ServicioTimerTest {
     assertNotNull(resultado);
     assertEquals(1, resultado.size());
     verify(repositorioTimerMock, times(1)).obtenerTimersConFiltro(estado, categoriaId);
+  }
+
+  @Test
+  public void deberiaEnviarNotificacionTelegramAlEliminarTimer() {
+    OffsetDateTime fechaVencimientoFutura = OffsetDateTime.now().plusHours(1);
+    CicloVida fechaValida = new CicloVida(OffsetDateTime.now(), fechaVencimientoFutura);
+
+    Producto producto = new Producto();
+    producto.setNombre("Producto Eliminado");
+
+    Categoria categoria = new Categoria();
+    categoria.setNombre("Categoria Eliminacion");
+
+    Timer timer = new Timer();
+    timer.setId(1L);
+    timer.setProducto(producto);
+    timer.setCategoria(categoria);
+    timer.setCicloVida(fechaValida);
+    timer.setEstado(EstadoTimer.ACTIVO);
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+
+    servicioTimer.modificarEstado(1L, EstadoTimer.ELIMINADO);
+
+    verify(servicioTelegramMock, times(1)).enviarMensaje(argThat(s -> s.contains("eliminó")));
+  }
+
+  @Test
+  public void deberiaEnviarNotificacionTelegramAlRenovarTimer() {
+    Timer timer = buildTimerCompleto(1L);
+    Timer nuevoTimer = buildTimerGenerado();
+    usuarioTest.setNombre("Carlos");
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(
+      servicioReglaVencimientoMock.generarVencimiento(
+        timer.getProducto(),
+        timer.getCategoria(),
+        1L,
+        null,
+        5,
+        usuarioTest
+      )
+    )
+      .thenReturn(nuevoTimer);
+
+    servicioTimer.renovarTimer(timer, 5, usuarioTest);
+
+    verify(servicioTelegramMock, times(1)).enviarMensaje(argThat(s -> s.contains("renovó")));
+  }
+
+  @Test
+  public void deberiaEnviarNotificacionTelegramAlImportarTimer() {
+    OffsetDateTime fechaCreacion = OffsetDateTime.now();
+    Categoria categoriaOrigen = new Categoria("cocina.png", true, "Cocina");
+    categoriaOrigen.setId(1L);
+    Categoria categoriaDestino = new Categoria("isla.png", true, "Isla");
+    categoriaDestino.setId(2L);
+
+    Producto producto = new Producto();
+    producto.setNombre("Producto Importado");
+
+    Timer timer = new Timer(
+      fechaCreacion,
+      fechaCreacion.plusHours(2),
+      "GROUP-01",
+      producto,
+      categoriaOrigen,
+      new ReglaVencimiento(),
+      2,
+      usuarioTest
+    );
+    timer.setId(1L);
+    usuarioTest.setNombre("Carlos");
+
+    when(repositorioTimerMock.buscarPorId(1L)).thenReturn(timer);
+    when(repositorioCategoriaMock.buscarPorId(2L)).thenReturn(categoriaDestino);
+    when(repositorioTimerMock.existeTimerActivoEnCategoriaYGrupo(2L, "GROUP-01")).thenReturn(false);
+
+    servicioTimer.importarTimer(1L, 2L, 1, usuarioTest);
+
+    verify(servicioTelegramMock, times(1)).enviarMensaje(argThat(s -> s.contains("importó")));
   }
 }

@@ -1,22 +1,24 @@
 package com.tallerwebi.config;
 
+import com.tallerwebi.dominio.entity.Cliente;
 import com.tallerwebi.dominio.interfaces.RepositorioUsuario;
+import com.tallerwebi.dominio.interfaces.ServicioCliente;
 import com.tallerwebi.dominio.interfaces.ServicioOAuth2;
-import com.tallerwebi.dominio.interfaces.ServicioOAuth2;
-import com.tallerwebi.dominio.interfaces.ServicioOAuth2;
-import com.tallerwebi.dominio.services.ServicioRecaptcha;
 import com.tallerwebi.dominio.services.ServicioRecaptcha;
 import com.tallerwebi.dominio.services.UserDetailsServiceImpl;
+import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -47,7 +49,6 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -57,16 +58,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
   private final RepositorioUsuario repositorioUsuario;
   private final ServicioOAuth2 servicioOAuth2;
   private final ServicioRecaptcha servicioRecaptcha;
+  private final ServicioCliente servicioCliente;
 
   @Autowired
   public SecurityConfig(
     RepositorioUsuario repositorioUsuario,
     ServicioOAuth2 servicioOAuth2,
-    ServicioRecaptcha servicioRecaptcha
+    ServicioRecaptcha servicioRecaptcha,
+    ServicioCliente servicioCliente
   ) {
     this.repositorioUsuario = repositorioUsuario;
     this.servicioOAuth2 = servicioOAuth2;
     this.servicioRecaptcha = servicioRecaptcha;
+    this.servicioCliente = servicioCliente;
   }
 
   @Bean
@@ -92,13 +96,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         new FiltroRecaptcha(servicioRecaptcha),
         UsernamePasswordAuthenticationFilter.class
       )
+      .addFilterAfter(new FiltroRestriccionCajero(), UsernamePasswordAuthenticationFilter.class)
       .csrf()
       .disable()
       .exceptionHandling()
       .accessDeniedPage("/home")
       .and()
       .authorizeRequests()
-      .antMatchers("/admin/**")
+      .antMatchers("/admin", "/admin/**")
       .hasRole("ADMIN")
       .antMatchers(
         "/login",
@@ -107,6 +112,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         "/",
         "/nuevo-usuario",
         "/validacion-identidad",
+        "/portal/**",
+        "/cliente/**",
         "/resources/**"
       )
       .permitAll()
@@ -115,7 +122,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
       .and()
       .formLogin()
       .loginPage("/login")
-      .defaultSuccessUrl("/home", true)
+      .defaultSuccessUrl("/", true)
       .permitAll()
       .and()
       .oauth2Login()
@@ -135,7 +142,41 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
       OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
       String email = oAuth2User.getAttribute("email");
       String nombre = oAuth2User.getAttribute("name");
-      servicioOAuth2.procesarUsuarioGoogle(email, nombre, response);
+
+      String loginType = (String) request.getSession().getAttribute("OAUTH_LOGIN_TYPE");
+      if ("CLIENTE".equals(loginType)) {
+        request.getSession().removeAttribute("OAUTH_LOGIN_TYPE");
+        Cliente cliente = servicioCliente.buscarPorEmail(email);
+        if (cliente == null) {
+          cliente = new Cliente();
+          cliente.setEmail(email);
+          cliente.setNombre(nombre != null ? nombre : "Cliente Google");
+          servicioCliente.guardar(cliente);
+        }
+        UsernamePasswordAuthenticationToken authResult = new UsernamePasswordAuthenticationToken(
+          cliente,
+          "",
+          Collections.singletonList(new SimpleGrantedAuthority("ROLE_CLIENTE"))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authResult);
+        request
+          .getSession()
+          .setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+
+        boolean faltanDatos =
+          cliente.getDocumento() == null ||
+          cliente.getDocumento().trim().isEmpty() ||
+          cliente.getTelefono() == null ||
+          cliente.getTelefono().trim().isEmpty();
+
+        if (faltanDatos) {
+          response.sendRedirect(request.getContextPath() + "/portal/clientes/completar-datos");
+        } else {
+          response.sendRedirect(request.getContextPath() + "/portal/clientes/home");
+        }
+      } else {
+        servicioOAuth2.procesarUsuarioGoogle(email, nombre, response);
+      }
     };
   }
 

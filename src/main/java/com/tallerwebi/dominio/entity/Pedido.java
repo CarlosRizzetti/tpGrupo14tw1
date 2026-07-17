@@ -40,4 +40,40 @@ public class Pedido {
 
   @Enumerated(EnumType.STRING)
   private EstadoPedido estado;
+
+  @Embedded
+  private DetalleReclamo detalleReclamo = new DetalleReclamo();
+
+  public Boolean getReportado() {
+    return detalleReclamo != null && Boolean.TRUE.equals(detalleReclamo.getReportado());
+  }
+
+  public void setReportado(Boolean reportado) {
+    if (this.detalleReclamo == null) {
+      this.detalleReclamo = new DetalleReclamo();
+    }
+    this.detalleReclamo.setReportado(reportado);
+  }
+
+  public String getMotivoReclamo() {
+    return detalleReclamo != null ? detalleReclamo.getMotivoReclamo() : null;
+  }
+
+  public void setMotivoReclamo(String motivoReclamo) {
+    if (this.detalleReclamo == null) {
+      this.detalleReclamo = new DetalleReclamo();
+    }
+    this.detalleReclamo.setMotivoReclamo(motivoReclamo);
+  }
+
+  public String getComentarioReclamo() {
+    return detalleReclamo != null ? detalleReclamo.getComentarioReclamo() : null;
+  }
+
+  public void setComentarioReclamo(String comentarioReclamo) {
+    if (this.detalleReclamo == null) {
+      this.detalleReclamo = new DetalleReclamo();
+    }
+    this.detalleReclamo.setComentarioReclamo(comentarioReclamo);
+  }
 }

@@ -44,4 +44,9 @@ public class RepositorioProductoFinalImpl implements RepositorioProductoFinal {
       .setParameter("idCategoria", idCategoria)
       .list();
   }
+
+  @Override
+  public void guardar(ProductoFinal productoFinal) {
+    sessionFactory.getCurrentSession().saveOrUpdate(productoFinal);
+  }
 }

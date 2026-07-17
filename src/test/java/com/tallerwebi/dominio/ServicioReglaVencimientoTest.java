@@ -21,30 +21,24 @@ public class ServicioReglaVencimientoTest {
   private ServicioReglaVencimientoImpl servicioReglaVencimiento;
   private RepositorioReglaVencimiento repositorioReglaVencimientoMock;
   private RepositorioTimer repositorioTimerMock;
-  private ServicioProducto servicioProductoMock;
-  private ServicioControlStock servicioControlStockMock;
+  private ServicioLote servicioLoteMock;
   private Clock clock;
   private ServicioImpresion servicioImpresionMock;
-  private ServicioProduccion servicioProduccionMock;
 
   @BeforeEach
   public void init() {
     clock = Clock.fixed(Instant.now(), ZoneOffset.ofHours(-3));
     repositorioReglaVencimientoMock = mock(RepositorioReglaVencimiento.class);
     repositorioTimerMock = mock(RepositorioTimer.class);
-    servicioProductoMock = mock(ServicioProducto.class);
-    servicioControlStockMock = mock(ServicioControlStock.class);
+    servicioLoteMock = mock(ServicioLote.class);
     servicioImpresionMock = mock(ServicioImpresion.class);
-    servicioProduccionMock = mock(ServicioProduccion.class);
     servicioReglaVencimiento =
       new ServicioReglaVencimientoImpl(
         repositorioReglaVencimientoMock,
         repositorioTimerMock,
-        servicioProductoMock,
-        servicioControlStockMock,
+        servicioLoteMock,
         clock,
-        servicioImpresionMock,
-        servicioProduccionMock
+        servicioImpresionMock
       );
   }
 
@@ -136,13 +130,7 @@ public class ServicioReglaVencimientoTest {
       .estaActiva(true)
       .nombre("Cocina")
       .build();
-    Producto producto = Producto
-      .builder()
-      .id(1L)
-      .nombre("Dona")
-      .estaActivo(true)
-      .cantidad(10)
-      .build();
+    Producto producto = Producto.builder().id(1L).nombre("Dona").estaActivo(true).build();
 
     when(repositorioReglaVencimientoMock.obtenerReglaVencimientoPorId(2L)).thenReturn(regla);
 

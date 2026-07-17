@@ -1,5 +1,7 @@
 package com.tallerwebi.dominio.entity;
 
+import com.tallerwebi.dominio.entity.enums.TipoProducto;
+import com.tallerwebi.dominio.entity.enums.UnidadDeMedida;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -22,11 +24,17 @@ public class Producto {
 
   private Boolean estaActivo;
 
-  @Column(nullable = false)
-  private Integer cantidad = 0;
+  @Enumerated(EnumType.STRING)
+  private UnidadDeMedida unidadDeMedida;
+
+  @Enumerated(EnumType.STRING)
+  private TipoProducto tipoProducto;
 
   @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<Timer> timers;
+
+  @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<Lote> lotes;
 
   @ManyToMany
   @JoinTable(
@@ -38,4 +46,17 @@ public class Producto {
 
   @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private Set<ReglaVencimiento> reglas = new TreeSet<>();
+
+  @Override
+  public boolean equals(Object object) {
+    if (this == object) return true;
+    if (!(object instanceof Producto)) return false;
+    Producto producto = (Producto) object;
+    return id != null && id.equals(producto.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return getClass().hashCode();
+  }
 }

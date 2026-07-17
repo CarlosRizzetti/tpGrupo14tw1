@@ -105,6 +105,7 @@ const buscarCliente = async (documento) => {
       infoClienteEl.innerHTML = "<span class=\"text-amber-600\">Sin cliente registrado. Se cobra como anónimo.</span>";
     }
   } catch (err) {
+    console.error(err);
     infoClienteEl.innerHTML = "<span class=\"text-slate-400\">No se pudo verificar el cliente.</span>";
   }
 };
@@ -130,9 +131,9 @@ const confirmarCobro = async () => {
       btnCobrar.textContent = "Confirmar cobro";
       return;
     }
-    // Volvemos a la caja para el próximo pedido
     window.location.href = "/cajero";
   } catch (err) {
+    console.error(err);
     alert("Error de red al cobrar. Reintentá.");
     btnCobrar.disabled = false;
     btnCobrar.textContent = "Confirmar cobro";

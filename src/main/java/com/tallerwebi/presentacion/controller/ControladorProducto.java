@@ -6,6 +6,7 @@ import com.tallerwebi.dominio.entity.ReglaVencimiento;
 import com.tallerwebi.dominio.entity.Usuario;
 import com.tallerwebi.dominio.excepcion.SinStockSuficienteException;
 import com.tallerwebi.dominio.interfaces.ServicioCategoria;
+import com.tallerwebi.dominio.interfaces.ServicioLote;
 import com.tallerwebi.dominio.interfaces.ServicioProducto;
 import com.tallerwebi.dominio.interfaces.ServicioReglaVencimiento;
 import com.tallerwebi.dominio.interfaces.ServicioUsuario;
@@ -13,8 +14,10 @@ import com.tallerwebi.dominio.utils.AuthenticationUtils;
 import com.tallerwebi.presentacion.dto.CategoriaDto;
 import com.tallerwebi.presentacion.dto.ProductoDto;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -33,18 +36,21 @@ public class ControladorProducto {
   private final ServicioReglaVencimiento servicioReglaVencimiento;
   private static final String CATEGORIA = "categoria";
   private final ServicioUsuario servicioUsuario;
+  private final ServicioLote servicioLote;
 
   @Autowired
   public ControladorProducto(
     ServicioProducto servicioProducto,
     ServicioCategoria servicioCategoria,
     ServicioReglaVencimiento servicioReglaVencimiento,
-    ServicioUsuario servicioUsuario
+    ServicioUsuario servicioUsuario,
+    ServicioLote servicioLote
   ) {
     this.servicioProducto = servicioProducto;
     this.servicioCategoria = servicioCategoria;
     this.servicioReglaVencimiento = servicioReglaVencimiento;
     this.servicioUsuario = servicioUsuario;
+    this.servicioLote = servicioLote;
   }
 
   // GET — mostrar el formulario
@@ -86,36 +92,15 @@ public class ControladorProducto {
     @RequestParam(name = "categoriaId", required = false) Long categoriaId
   ) {
     ModelMap modelo = new ModelMap();
-    modelo.put("productos", servicioProducto.listarProductos(categoriaId));
+    List<Producto> productos = servicioProducto.listarProductos(categoriaId);
+    Map<Long, Integer> stockPorProducto = productos
+      .stream()
+      .collect(Collectors.toMap(Producto::getId, servicioLote::stockDisponibleDe));
+    modelo.put("productos", productos);
+    modelo.put("stockPorProducto", stockPorProducto);
     modelo.put("categorias", servicioCategoria.obtenerLasCategoriasParaElMenu());
     modelo.put("categoriaSeleccionada", categoriaId);
     return new ModelAndView("funcionalidadesAdmin/producto/gestion", modelo);
-  }
-
-  @RequestMapping(value = "/admin/productos/{id}/agregar-stock", method = RequestMethod.POST)
-  public String agregarStock(
-    @PathVariable Long id,
-    @RequestParam("cantidad") Integer cantidad,
-    @RequestParam(name = "categoriaId", required = false) Long categoriaId
-  ) {
-    servicioProducto.agregarStock(id, cantidad);
-    if (categoriaId != null) {
-      return "redirect:/admin/productos?categoriaId=" + categoriaId;
-    }
-    return "redirect:/admin/productos";
-  }
-
-  @RequestMapping(value = "/admin/productos/{id}/quitar-stock", method = RequestMethod.POST)
-  public String quitarStock(
-    @PathVariable Long id,
-    @RequestParam("cantidad") Integer cantidad,
-    @RequestParam(name = "categoriaId", required = false) Long categoriaId
-  ) {
-    servicioProducto.quitarStock(id, cantidad);
-    if (categoriaId != null) {
-      return "redirect:/admin/productos?categoriaId=" + categoriaId;
-    }
-    return "redirect:/admin/productos";
   }
 
   @RequestMapping(path = "/category/{id}/products", method = RequestMethod.GET)
@@ -126,6 +111,22 @@ public class ControladorProducto {
   ) {
     if (authentication == null || !authentication.isAuthenticated()) {
       return new ModelAndView("redirect:/login");
+    }
+
+    String email = authentication.getName();
+    boolean isAdmin = authentication
+      .getAuthorities()
+      .stream()
+      .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+    boolean tienePermiso = servicioCategoria
+      .obtenerCategoriasPorUsuario(email)
+      .stream()
+      .anyMatch(c -> c.getId().equals(id));
+
+    if (!isAdmin && !tienePermiso) {
+      CategoriaDto categoria = servicioCategoria.obtenerCategoriaPorId(id);
+      session.setAttribute(CATEGORIA, categoria);
+      return new ModelAndView("redirect:/dashboard");
     }
 
     ModelMap modelo = new ModelMap();
@@ -149,14 +150,11 @@ public class ControladorProducto {
     HttpSession session,
     Authentication authentication
   ) {
-    if (authentication == null || !authentication.isAuthenticated()) {
-      return new ModelAndView("redirect:/login");
-    }
-
     ModelMap modelo = new ModelMap();
     Producto producto = servicioProducto.obtenerProductoConReglas(id);
     Set<ReglaVencimiento> reglas = producto.getReglas();
     CategoriaDto categoriaDto = (CategoriaDto) session.getAttribute(CATEGORIA);
+    Integer stockDisponible = servicioLote.stockDisponibleDe(producto);
 
     boolean isAdmin = authentication
       .getAuthorities()
@@ -173,6 +171,7 @@ public class ControladorProducto {
     modelo.put("producto", producto);
     modelo.put("reglas", reglas);
     modelo.put(CATEGORIA, categoriaDto);
+    modelo.put("stockDisponible", stockDisponible);
 
     return new ModelAndView("listadoDeProductosYReglas/producto-vencimiento", modelo);
   }

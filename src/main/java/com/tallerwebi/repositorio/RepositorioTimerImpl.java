@@ -49,7 +49,7 @@ public class RepositorioTimerImpl implements RepositorioTimer {
 
   @Override
   public List<Timer> obtenerTodosLosTimers() {
-    String hql = "FROM Timer t ORDER BY t.cicloVida.fechaCreacion";
+    String hql = "FROM Timer t ORDER BY t.cicloVida.fechaCreacion DESC";
     return sessionFactory.getCurrentSession().createQuery(hql, Timer.class).list();
   }
 
