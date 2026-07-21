@@ -145,7 +145,6 @@ src/main/resources/
 
 ## 📸 Capturas
 
-<!-- Agregar capturas de: dashboard de caja, pantalla de cobro, comandas de cocina, gestión de timers -->
 *(Próximamente)*
 
 ---
@@ -155,6 +154,8 @@ src/main/resources/
 Proyecto desarrollado en equipo para Taller Web I (UNLaM).
 
 - **Tahiel Recchia** — [LinkedIn](https://www.linkedin.com/in/tahiel-recchia/) · [GitHub](https://github.com/Tahiel-Recchia)
+- **Santi Gismondi** — [GitHub](https://github.com/santigismondi)
+- **Carlos Rizzetti** — [GitHub](https://github.com/CarlosRizzetti)
 Proyecto desarrollado en equipo para Taller Web I (UNLaM).
 
 - **Tahiel Recchia** — [LinkedIn](https://www.linkedin.com/in/tahiel-recchia/) · [GitHub](https://github.com/Tahiel-Recchia)
